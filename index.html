@@ -297,7 +297,7 @@
       </div>
       <div class="audio-time" id="riddle-time"></div>
     </div>
-    <audio id="riddle-audio" preload="auto"><source id="riddle-source" src="" type="video/mp4"/></audio>
+    <audio id="riddle-audio"></audio>
   </div>
 
   <!-- תיבת קוד רגילה -->
@@ -371,7 +371,7 @@ const PAGES = {
   // --- פתיחה ---
   opening: {
     title: "המירוץ העולמי - מתחילים!",
-    desc: "המירוץ העולמי יוצא לדרך בעונה חדשה ומפתיעה והפעם – אתם המתחרים!\n\nמוכנים?\nצפו בסרטון והתחילו לשחק!",
+    desc: "המירוץ העולמי יוצא לדרך בעונה חדשה ומפתיעה והפעם – אתם המתחרים!\n\nשימו לב! בתחתית כל עמוד תוכלו להפעיל נגן מוסיקה ולקבל את מוסיקת הרקע שתכניס אתכם לאווירת המשחק.\n\nמוכנים? צפו בסרטון והתחילו לשחק!",
     youtube: "FlTe_-Wxf6k",
     code: "3682",
     next: "london",
@@ -381,7 +381,7 @@ const PAGES = {
   // --- מעטפה 2: לונדון ---
   london: {
     title: "ברוכים הבאים לאנגליה!",
-    desc: "כל הכבוד! הגעתם ליעד הראשון שלכם במירוץ.\n\nפתחו את המעטפה השנייה\n\nאנו ממליצים לכם להפעיל את הנגן כדי להתחבר לאווירה!\n\nצפו בסרטון והזינו למטה את קוד הרכבת התחתית",
+    desc: "כל הכבוד! הגעתם ליעד הראשון שלכם במירוץ.\n\nפתחו את המעטפה השנייה.\n\nאנו ממליצים לכם להפעיל את הנגן כדי להתחבר לאווירה!\n\nצפו בסרטון והזינו למטה את קוד הרכבת התחתית.",
     youtube: "tOnHapIZFi4",
     code: "bond",
     next: "crossroads",
@@ -390,8 +390,8 @@ const PAGES = {
 
   // --- מעטפה 3: צומת ---
   crossroads: {
-    title: "כל הכבוד! הגעתם ליעד!",
-    desc: "במשימת צומת עליכם לבחור אחת מ-2 משימות.\n\nפתחו את המעטפה השלישית ובחרו:\n\\"חבל על הזמן\\" או \\"זמן להופעה\\"",
+    title: "הגעתם לצומת!",
+    desc: "פתחו את המעטפה השלישית.\n\nעכשיו עליכם לבחור — לאיזה נתיב תלכו?",
     youtube: null,
     type: "crossroads",
     choiceA: "time-first",   // חבל על הזמן
@@ -401,7 +401,7 @@ const PAGES = {
   // --- בחירה A ראשונה: חבל על הזמן ---
   "time-first": {
     title: "חבל על הזמן",
-    desc: "במשימת הצומת בחרתם ב\\"חבל על הזמן\\".\nבהצלחה!",
+    desc: "בחרתם בנתיב חבל על הזמן!\n\nצפו בסרטון והזינו את הקוד כדי להמשיך.",
     youtube: "GE6oODAEQ-U",
     code: "435",
     next: "show-second",
@@ -412,8 +412,7 @@ const PAGES = {
   "show-first": {
     title: "זמן להופעה",
     audio: "show-audio.mp4",
-    piano: true,
-    desc: "במשימת הצומת בחרתם\nב\\"זמן להופעה\\" בהצלחה!",
+    desc: "בחרתם בנתיב זמן להופעה!\n\nצפו בסרטון והזינו את הקוד כדי להמשיך.",
     youtube: "mnIEuzaG238",
     code: "4731",
     next: "time-second",
@@ -422,10 +421,9 @@ const PAGES = {
 
   // --- בחירה A שנייה (מי שהלך ל-time-first מגיע לכאן) ---
   "show-second": {
-    title: "סיבוב פרסה!",
+    title: "זמן להופעה — סיבוב שני",
     audio: "show-audio.mp4",
-    piano: true,
-    desc: "כנראה שהמתחרים האחרים רואים בכם איום – קיבלתם סיבוב פרסה!\n\nכעת עליכם לבצע את משימת הצומת השנייה –\n\\"זמן להופעה\\"! בהצלחה!",
+    desc: "עכשיו הגיע תורו של הנתיב השני!\n\nצפו בסרטון והזינו את הקוד כדי להמשיך.",
     youtube: "mnIEuzaG238",
     code: "4731",
     next: "boarding",
@@ -434,8 +432,8 @@ const PAGES = {
 
   // --- בחירה B שנייה (מי שהלך ל-show-first מגיע לכאן) ---
   "time-second": {
-    title: "סיבוב פרסה!",
-    desc: "כנראה שאתם מהווים איום על המשתתפים האחרים, משום שקיבלתם סיבוב פרסה!\n\nכעת עליכם לבצע גם את משימת הצומת השנייה –\n\\"חבל על הזמן\\"!",
+    title: "חבל על הזמן — סיבוב שני",
+    desc: "עכשיו הגיע תורו של הנתיב השני!\n\nצפו בסרטון והזינו את הקוד כדי להמשיך.",
     youtube: "GE6oODAEQ-U",
     code: "435",
     next: "boarding",
@@ -444,8 +442,8 @@ const PAGES = {
 
   // --- מעטפה 4: תיק ---
   boarding: {
-    title: "כל הכבוד!",
-    desc: "עברתם את שני הצדדים של הצומת, וכעת אתם יכולים לקבל את המעטפה עם הרמז הבא!\n\nפתחו את המעטפה הרביעית, והזינו כאן את קוד הטיסה ליעד הבא שלכם",
+    title: "מעטפה 4 — תיק", // ← החליפו בכותרת האמיתית
+    desc: "[ טקסט מעטפה 4 — החליפו בתוכן האמיתי ]",
     youtube: null,
     code: "386",
     next: "zoo",
@@ -454,8 +452,8 @@ const PAGES = {
 
   // --- מעטפה 5: גן חיות ---
   zoo: {
-    title: "כל הכבוד!",
-    desc: "פיתחו את המעטפה החמישית!\n\nעל מנת לקבל את הרמז ליעד הבא, הזינו כאן את קוד משימת גן החיות",
+    title: "מעטפה 5 — גן חיות", // ← החליפו
+    desc: "[ טקסט מעטפה 5 — החליפו בתוכן האמיתי ]",
     youtube: "SkKxiszzO9E",
     code: "5441",
     next: "museum",
@@ -464,8 +462,8 @@ const PAGES = {
 
   // --- מעטפה 6: מוזיאון ---
   museum: {
-    title: "כל הכבוד!",
-    desc: "פיתחו את המעטפה השישית, והזינו למטה את קוד הפורטרטים",
+    title: "מעטפה 6 — מוזיאון", // ← החליפו
+    desc: "[ טקסט מעטפה 6 — החליפו בתוכן האמיתי ]",
     youtube: "xqGth1DhDd4",
     code: "235",
     next: "tajmahal",
@@ -474,8 +472,8 @@ const PAGES = {
 
   // --- מעטפה 7: טאג' מהאל ---
   tajmahal: {
-    title: "כל הכבוד צוות!",
-    desc: "ממתינה לכם משימה נוספת כאן במוזיאון לאמנות. פיתחו את המעטפה השביעית.\n\nאם עמדתם במשימה, הזינו כאן את שם המדינה הבאה עליכם להגיע",
+    title: "מעטפה 7 — טאג' מהאל", // ← החליפו
+    desc: "[ טקסט מעטפה 7 — החליפו בתוכן האמיתי ]",
     youtube: null,
     code: "הודו",
     next: "airport",
@@ -484,8 +482,8 @@ const PAGES = {
 
   // --- מעטפה 8: הילוכים ---
   airport: {
-    title: "כל הכבוד צוות!",
-    desc: "היעד הבא שלכם הוא דרמסאלה, הודו!\n\nאך תחילה, הסיעו את עצמכם אל שדה התעופה, ופיתחו את המעטפה השמינית",
+    title: "מעטפה 8 — הילוכים", // ← החליפו
+    desc: "[ טקסט מעטפה 8 — החליפו בתוכן האמיתי ]",
     youtube: "PwEocvwT9vo",
     code: "3254",
     next: "guru",
@@ -494,8 +492,8 @@ const PAGES = {
 
   // --- מעטפה 9: גורו ---
   guru: {
-    title: "כל הכבוד!",
-    desc: "ניחשתם נכון! ברוכים הבאים\nלדראמסלה, הודו.\n\nפיתחו את המעטפה התשיעית, והזינו כאן את קוד הגורו",
+    title: "מעטפה 9 — גורו", // ← החליפו
+    desc: "[ טקסט מעטפה 9 — החליפו בתוכן האמיתי ]",
     youtube: null,
     code: "41",
     next: "market",
@@ -504,8 +502,8 @@ const PAGES = {
 
   // --- מעטפה 10: שוק ---
   market: {
-    title: "כל הכבוד!",
-    desc: "פיתחו את המעטפה העשירית",
+    title: "מעטפה 10 — שוק", // ← החליפו
+    desc: "[ טקסט מעטפה 10 — החליפו בתוכן האמיתי ]",
     youtube: "wef_7pKbPMg",
     code: "385",
     next: "truefalse",
@@ -516,7 +514,7 @@ const PAGES = {
   truefalse: {
     title: "מעטפה 11 — נכון או לא נכון?",
     desc: "[ טקסט מעטפה 11 — החליפו בתוכן האמיתי ]",
-    youtube: null,
+    youtube: null, // ← הוסיפו ID אם יש סרטון
     type: "truefalse",
     // התשובות הנכונות: true = נכון, false = לא נכון
     // הסדר: נכון–לא נכון–נכון–נכון–נכון–לא נכון–נכון–לא נכון
@@ -535,9 +533,9 @@ const PAGES = {
 
   // --- סיום ---
   finish: {
-    title: "כל הכבוד צוות!",
-    desc: "עברתם את כל המדינות, והצלחתם בכל המשימות!\n\nהגיע הזמן לטוס חזרה לישראל! הצוות הראשון שיחצה את קו הגמר יזכה במיליון!\n\nפיתחו את המעטפה האחרונה, שם תחכה לכם משימת הסיום!",
-    youtube: null,
+    title: "🎉 כל הכבוד!",
+    desc: "",
+    youtube: null, // ← הוסיפו ID לסרטון סיום אם יש
     type: "finish"
   },
 
@@ -545,7 +543,7 @@ const PAGES = {
   yoga: {
     title: "יוגה עם הגורו",
     desc: "[ טקסט עמוד יוגה — החליפו בתוכן האמיתי ]",
-    youtube: null,
+    youtube: null, // ← הוסיפו ID של סרטון היוגה
     type: "info"
   }
 };
@@ -589,7 +587,7 @@ function loadPage(id) {
   // אודיו חידה
   const ar = document.getElementById('audio-riddle');
   if (page.audio) {
-    var aud = document.getElementById('riddle-audio'); var src = document.getElementById('riddle-source'); src.src = page.audio; aud.load();
+    document.getElementById('riddle-audio').src = page.audio;
     ar.style.display = 'flex';
     riddlePlaying = false;
     document.getElementById('riddle-play-btn').innerHTML = '&#9654;';
@@ -598,9 +596,6 @@ function loadPage(id) {
   } else {
     ar.style.display = 'none';
   }
-
-  // פסנתר
-  document.getElementById('piano-section').style.display = page.piano ? '' : 'none';
 
   // הסתר הכל
   document.getElementById('code-box').style.display       = 'none';
