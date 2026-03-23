@@ -6,7 +6,7 @@
   <title>המירוץ העולמי - פאזלס חדרי בריחה</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
+ 
     body {
       min-height: 100vh;
       background: #080800;
@@ -15,16 +15,16 @@
       color: #fff;
       overflow-x: hidden;
     }
-
+ 
     #stars { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
     .star { position: absolute; border-radius: 50%; animation: twinkle ease-in-out infinite; }
-
+ 
     #app {
       position: relative; z-index: 1;
       max-width: 740px; margin: 0 auto;
       padding: 44px 20px 100px;
     }
-
+ 
     /* ===== כותרת ===== */
     .page-header {
       text-align: center; margin-bottom: 36px;
@@ -56,7 +56,7 @@
       line-height: 2.1; white-space: pre-wrap;
       max-width: 560px; margin: 0 auto;
     }
-
+ 
     /* ===== יוטיוב ===== */
     .youtube-wrap {
       position: relative; padding-bottom: 56.25%; height: 0;
@@ -65,7 +65,7 @@
       margin-bottom: 28px;
     }
     .youtube-wrap iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: none; }
-
+ 
     /* ===== תיבת קוד ===== */
     .code-box {
       background: rgba(20,8,0,0.72);
@@ -127,7 +127,7 @@
       border-radius: 8px; padding: 10px 20px;
       color: rgba(255,160,140,0.95); font-size: 14px;
     }
-
+ 
     /* ===== צומת — כפתורי בחירה ===== */
     .crossroads-wrap { margin-top: 10px; text-align: center; padding: 28px 16px 32px; background: rgba(20,8,0,0.72); border: 1.5px solid rgba(255,120,0,0.4); border-radius: 14px; position: relative; overflow: hidden; }
     .crossroads-wrap::before { content: ''; position: absolute; top: 0; left: 15%; right: 15%; height: 2px; background: linear-gradient(90deg, transparent, rgba(255,160,0,0.8), rgba(0,210,190,0.5), transparent); }
@@ -148,7 +148,7 @@
     .choice-img { width: 100%; height: 220px; object-fit: cover; display: block; }
     .choice-lbl { display: block; width: 100%; background: linear-gradient(180deg, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.7) 100%); color: #fff; font-size: 22px; font-weight: 800; padding: 16px 20px 20px; text-shadow: 0 2px 8px rgba(0,0,0,0.9); letter-spacing: 0.5px; }
     .choice-btn .choice-icon { display: none; }
-
+ 
     /* ===== נכון/לא נכון ===== */
     .tf-wrap { margin-top: 10px; }
     .tf-title {
@@ -193,13 +193,13 @@
       border: 1px solid rgba(220,80,80,0.35);
       border-radius: 8px; padding: 10px;
     }
-
+ 
     /* ===== עמוד סיום ===== */
     .finish-wrap { text-align: center; padding: 20px; }
     .finish-trophy { font-size: 70px; margin-bottom: 20px; }
     .finish-title { color: #b8dcff; font-size: 28px; font-weight: 800; margin-bottom: 12px; }
     .finish-sub { color: rgba(180,220,255,0.65); font-size: 17px; line-height: 1.8; }
-
+ 
     /* ===== חלון הצלחה ===== */
     #success-overlay {
       display: none; position: fixed; inset: 0; z-index: 200;
@@ -234,7 +234,7 @@
       text-shadow: 0 1px 3px rgba(0,0,0,0.4);
     }
     #continue-btn:active { transform: translateY(5px); box-shadow: 0 1px 0 #002a27; border-bottom-width: 1px; }
-
+ 
     /* ===== נגן אודיו ===== */
     .audio-riddle {
       background: rgba(40,80,140,0.18);
@@ -257,7 +257,7 @@
     .audio-progress-bar { height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; cursor: pointer; position: relative; }
     .audio-progress-fill { position: absolute; left: 0; top: 0; height: 100%; background: #5aaeee; border-radius: 2px; transition: width 0.1s; width: 0%; }
     .audio-time { font-size: 11px; color: rgba(255,255,255,0.3); margin-top: 4px; text-align: left; }
-
+ 
     /* ===== אנימציות ===== */
     @keyframes shake {
       0%,100%{transform:translateX(0)} 20%{transform:translateX(-10px)} 40%{transform:translateX(10px)} 60%{transform:translateX(-6px)} 80%{transform:translateX(6px)}
@@ -271,9 +271,9 @@
   </style>
 </head>
 <body>
-
+ 
 <div id="stars"></div>
-
+ 
 <div id="app">
   <div class="page-header">
     <div class="site-label">פאזלס חדרי בריחה</div>
@@ -281,12 +281,12 @@
     <div class="title-divider"></div>
     <p class="page-desc" id="page-desc"></p>
   </div>
-
+ 
   <div class="youtube-wrap" id="youtube-wrap">
     <iframe id="youtube-iframe" allowfullscreen
       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
   </div>
-
+ 
   <!-- נגן אודיו -->
   <div class="audio-riddle" id="audio-riddle" style="display:none">
     <button class="audio-play-btn" id="riddle-play-btn" onclick="toggleRiddle()">▶</button>
@@ -297,9 +297,9 @@
       </div>
       <div class="audio-time" id="riddle-time"></div>
     </div>
-    <audio id="riddle-audio"></audio>
+    <audio id="riddle-audio" preload="auto"><source id="riddle-source" src="" type="video/mp4"/></audio>
   </div>
-
+ 
   <!-- תיבת קוד רגילה -->
   <div class="code-box" id="code-box">
     <div class="code-section-label"><hr/><span>🔐 הזנת קוד</span><hr/></div>
@@ -319,7 +319,7 @@
     </div>
     <div class="error-msg" id="error-msg">✗ קוד שגוי — נסו שוב!</div>
   </div>
-
+ 
   <!-- צומת — שתי בחירות -->
   <div class="crossroads-wrap" id="crossroads-box" style="display:none">
     <div class="crossroads-title">בחרו את הנתיב שלכם:</div>
@@ -334,7 +334,7 @@
       </button>
     </div>
   </div>
-
+ 
   <!-- נכון / לא נכון (עמוד 11) -->
   <div class="code-box tf-wrap" id="tf-box" style="display:none">
     <div class="code-section-label"><hr/><span>✓✗ נכון או לא נכון</span><hr/></div>
@@ -343,7 +343,7 @@
     <button class="tf-submit" onclick="submitTF()">אישור «</button>
     <div class="tf-error" id="tf-error">✗ תשובה שגויה — בדקו שוב!</div>
   </div>
-
+ 
   <!-- סיום -->
   <div class="finish-wrap" id="finish-box" style="display:none">
     <div class="finish-trophy">🏆</div>
@@ -351,7 +351,7 @@
     <div class="finish-sub">אתם מדהימים — השלמתם את המירוץ העולמי בהצלחה!</div>
   </div>
 </div>
-
+ 
 <!-- חלון הצלחה -->
 <div id="success-overlay">
   <div class="success-card">
@@ -361,13 +361,13 @@
     <button id="continue-btn" onclick="doContinue()">המשך «</button>
   </div>
 </div>
-
+ 
 <script>
 // ================================================================
 //  מבנה המשחק המלא
 // ================================================================
 const PAGES = {
-
+ 
   // --- פתיחה ---
   opening: {
     title: "המירוץ העולמי - מתחילים!",
@@ -377,7 +377,7 @@ const PAGES = {
     next: "london",
     type: "code"
   },
-
+ 
   // --- מעטפה 2: לונדון ---
   london: {
     title: "ברוכים הבאים לאנגליה!",
@@ -387,7 +387,7 @@ const PAGES = {
     next: "crossroads",
     type: "code"
   },
-
+ 
   // --- מעטפה 3: צומת ---
   crossroads: {
     title: "הגעתם לצומת!",
@@ -397,7 +397,7 @@ const PAGES = {
     choiceA: "time-first",   // חבל על הזמן
     choiceB: "show-first"    // זמן להופעה
   },
-
+ 
   // --- בחירה A ראשונה: חבל על הזמן ---
   "time-first": {
     title: "חבל על הזמן",
@@ -407,29 +407,31 @@ const PAGES = {
     next: "show-second",
     type: "code"
   },
-
+ 
   // --- בחירה B ראשונה: זמן להופעה ---
   "show-first": {
     title: "זמן להופעה",
     audio: "show-audio.mp4",
+    piano: true,
     desc: "בחרתם בנתיב זמן להופעה!\n\nצפו בסרטון והזינו את הקוד כדי להמשיך.",
     youtube: "mnIEuzaG238",
     code: "4731",
     next: "time-second",
     type: "code"
   },
-
+ 
   // --- בחירה A שנייה (מי שהלך ל-time-first מגיע לכאן) ---
   "show-second": {
     title: "זמן להופעה — סיבוב שני",
     audio: "show-audio.mp4",
+    piano: true,
     desc: "עכשיו הגיע תורו של הנתיב השני!\n\nצפו בסרטון והזינו את הקוד כדי להמשיך.",
     youtube: "mnIEuzaG238",
     code: "4731",
     next: "boarding",
     type: "code"
   },
-
+ 
   // --- בחירה B שנייה (מי שהלך ל-show-first מגיע לכאן) ---
   "time-second": {
     title: "חבל על הזמן — סיבוב שני",
@@ -439,7 +441,7 @@ const PAGES = {
     next: "boarding",
     type: "code"
   },
-
+ 
   // --- מעטפה 4: תיק ---
   boarding: {
     title: "מעטפה 4 — תיק", // ← החליפו בכותרת האמיתית
@@ -449,7 +451,7 @@ const PAGES = {
     next: "zoo",
     type: "code"
   },
-
+ 
   // --- מעטפה 5: גן חיות ---
   zoo: {
     title: "מעטפה 5 — גן חיות", // ← החליפו
@@ -459,7 +461,7 @@ const PAGES = {
     next: "museum",
     type: "code"
   },
-
+ 
   // --- מעטפה 6: מוזיאון ---
   museum: {
     title: "מעטפה 6 — מוזיאון", // ← החליפו
@@ -469,7 +471,7 @@ const PAGES = {
     next: "tajmahal",
     type: "code"
   },
-
+ 
   // --- מעטפה 7: טאג' מהאל ---
   tajmahal: {
     title: "מעטפה 7 — טאג' מהאל", // ← החליפו
@@ -479,7 +481,7 @@ const PAGES = {
     next: "airport",
     type: "code"
   },
-
+ 
   // --- מעטפה 8: הילוכים ---
   airport: {
     title: "מעטפה 8 — הילוכים", // ← החליפו
@@ -489,7 +491,7 @@ const PAGES = {
     next: "guru",
     type: "code"
   },
-
+ 
   // --- מעטפה 9: גורו ---
   guru: {
     title: "מעטפה 9 — גורו", // ← החליפו
@@ -499,7 +501,7 @@ const PAGES = {
     next: "market",
     type: "code"
   },
-
+ 
   // --- מעטפה 10: שוק ---
   market: {
     title: "מעטפה 10 — שוק", // ← החליפו
@@ -509,7 +511,7 @@ const PAGES = {
     next: "truefalse",
     type: "code"
   },
-
+ 
   // --- מעטפה 11: נכון/לא נכון (סיום) ---
   truefalse: {
     title: "מעטפה 11 — נכון או לא נכון?",
@@ -530,7 +532,7 @@ const PAGES = {
     ],
     next: "finish"
   },
-
+ 
   // --- סיום ---
   finish: {
     title: "🎉 כל הכבוד!",
@@ -538,7 +540,7 @@ const PAGES = {
     youtube: null, // ← הוסיפו ID לסרטון סיום אם יש
     type: "finish"
   },
-
+ 
   // --- עמוד יוגה (נפרד, ללא קוד) ---
   yoga: {
     title: "יוגה עם הגורו",
@@ -547,32 +549,32 @@ const PAGES = {
     type: "info"
   }
 };
-
+ 
 // ================================================================
 //  לוגיקת ניווט
 // ================================================================
 let currentPage = null;
 let pendingNext  = null;
 let riddlePlaying = false;
-
+ 
 function getPageId() {
   const p = new URLSearchParams(location.search).get('page');
   return p && PAGES[p] ? p : 'opening';
 }
-
+ 
 function loadPage(id) {
   currentPage = id;
   const page  = PAGES[id];
   if (!page) return;
-
+ 
   // עדכן URL ללא reload
   const url = id === 'opening' ? location.pathname : `${location.pathname}?page=${id}`;
   history.pushState({ page: id }, '', url);
-
+ 
   document.title = page.title + ' — פאזלס חדרי בריחה';
   document.getElementById('page-title').textContent = page.title;
   document.getElementById('page-desc').textContent  = page.desc;
-
+ 
   // יוטיוב
   const yw = document.getElementById('youtube-wrap');
   if (page.youtube) {
@@ -583,11 +585,11 @@ function loadPage(id) {
     document.getElementById('youtube-iframe').src = '';
     yw.style.display = 'none';
   }
-
+ 
   // אודיו חידה
   const ar = document.getElementById('audio-riddle');
   if (page.audio) {
-    document.getElementById('riddle-audio').src = page.audio;
+    var aud = document.getElementById('riddle-audio'); var src = document.getElementById('riddle-source'); src.src = page.audio; aud.load();
     ar.style.display = 'flex';
     riddlePlaying = false;
     document.getElementById('riddle-play-btn').innerHTML = '&#9654;';
@@ -596,13 +598,16 @@ function loadPage(id) {
   } else {
     ar.style.display = 'none';
   }
-
+ 
+  // פסנתר
+  document.getElementById('piano-section').style.display = page.piano ? '' : 'none';
+ 
   // הסתר הכל
   document.getElementById('code-box').style.display       = 'none';
   document.getElementById('crossroads-box').style.display = 'none';
   document.getElementById('tf-box').style.display         = 'none';
   document.getElementById('finish-box').style.display     = 'none';
-
+ 
   if (page.type === 'code') {
     document.getElementById('code-box').style.display = '';
     document.getElementById('code-input').value = '';
@@ -617,10 +622,10 @@ function loadPage(id) {
     document.getElementById('finish-box').style.display = '';
   }
   // info = רק טקסט + סרטון, ללא קוד
-
+ 
   window.scrollTo(0, 0);
 }
-
+ 
 // ===== צלילים =====
 const AudioCtx = window.AudioContext || window.webkitAudioContext;
 let _ac = null;
@@ -634,7 +639,7 @@ function playError() {
 function playSuccess() {
   try { const c=getAC(); [523,659,784,1047].forEach((f,i)=>{ const o=c.createOscillator(),g=c.createGain(); o.connect(g); g.connect(c.destination); o.frequency.value=f; g.gain.setValueAtTime(0.13,c.currentTime+i*0.1); g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+i*0.1+0.22); o.start(c.currentTime+i*0.1); o.stop(c.currentTime+i*0.1+0.22); }); } catch(e) {}
 }
-
+ 
 function submitCode() {
   playClick();
   const page = PAGES[currentPage];
@@ -654,29 +659,29 @@ function submitCode() {
     setTimeout(() => inp.classList.remove('shaking'), 600);
   }
 }
-
+ 
 function clearError() {
   document.getElementById('code-input').classList.remove('error');
   document.getElementById('error-msg').style.display = 'none';
 }
-
+ 
 function goChoice(choice) {
   const page = PAGES[currentPage];
   loadPage(choice === 'A' ? page.choiceA : page.choiceB);
 }
-
+ 
 function showSuccess() {
   document.getElementById('success-overlay').classList.add('show');
 }
-
+ 
 function doContinue() {
   document.getElementById('success-overlay').classList.remove('show');
   if (pendingNext) loadPage(pendingNext);
 }
-
+ 
 // ===== נכון / לא נכון =====
 let tfAnswers = [];
-
+ 
 function buildTF(questions) {
   tfAnswers = new Array(questions.length).fill(null);
   const container = document.getElementById('tf-questions');
@@ -695,14 +700,14 @@ function buildTF(questions) {
   });
   document.getElementById('tf-error').style.display = 'none';
 }
-
+ 
 function selectTF(idx, val, btn) {
   tfAnswers[idx] = val;
   const row = btn.closest('.tf-row');
   row.querySelectorAll('.tf-btn').forEach(b => b.classList.remove('selected'));
   btn.classList.add('selected');
 }
-
+ 
 function submitTF() {
   const page = PAGES[currentPage];
   if (tfAnswers.some(a => a === null)) {
@@ -719,7 +724,7 @@ function submitTF() {
     document.getElementById('tf-error').textContent = '✗ תשובה שגויה — בדקו שוב!';
   }
 }
-
+ 
 // ===== אודיו חידה =====
 function toggleRiddle() {
   const a = document.getElementById('riddle-audio');
@@ -745,7 +750,7 @@ document.getElementById('riddle-audio').onended = () => {
   document.getElementById('riddle-play-btn').textContent = '▶';
   riddlePlaying = false;
 };
-
+ 
 // ===== כוכבים =====
 (function() {
   const c = document.getElementById('stars');
@@ -760,15 +765,16 @@ document.getElementById('riddle-audio').onended = () => {
     c.appendChild(d);
   }
 })();
-
+ 
 // ===== ניווט דרך כפתור חזרה =====
 window.onpopstate = e => {
   const id = (e.state && e.state.page) ? e.state.page : 'opening';
   loadPage(id);
 };
-
+ 
 // ===== אתחול =====
 loadPage(getPageId());
 </script>
 </body>
 </html>
+ 
