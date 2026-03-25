@@ -300,6 +300,11 @@
     <audio id="riddle-audio"></audio>
   </div>
 
+  <!-- פסנתר — מוצג רק בעמודי זמן להופעה -->
+  <div id="piano-section" style="display:none; margin-bottom:24px; border-radius:12px; overflow:hidden; border:1.5px solid rgba(255,140,0,0.3);">
+    <iframe src="https://mczak.com/code/piano/" title="פסנתר אינטראקטיבי" style="width:100%;height:220px;border:none;display:block;"></iframe>
+  </div>
+
   <!-- תיבת קוד רגילה -->
   <div class="code-box" id="code-box">
     <div class="code-section-label"><hr/><span>🔐 הזנת קוד</span><hr/></div>
@@ -412,6 +417,7 @@ const PAGES = {
   "show-first": {
     title: "זמן להופעה",
     audio: "show-audio.mp4",
+    piano: true,
     desc: "במשימת הצומת בחרתם\nב'זמן להופעה' בהצלחה!",
     youtube: "mnIEuzaG238",
     code: "4731",
@@ -423,6 +429,7 @@ const PAGES = {
   "show-second": {
     title: "סיבוב פרסה!",
     audio: "show-audio.mp4",
+    piano: true,
     desc: "כנראה שהמתחרים האחרים רואים בכם איום – קיבלתם סיבוב פרסה! כעת עליכם לבצע את משימת הצומת השנייה – 'זמן להופעה'! בהצלחה!",
     youtube: "mnIEuzaG238",
     code: "4731",
@@ -575,6 +582,9 @@ function loadPage(id) {
   } else {
     ar.style.display = 'none';
   }
+
+  // פסנתר
+  document.getElementById('piano-section').style.display = page.piano ? '' : 'none';
 
   // הסתר הכל
   document.getElementById('code-box').style.display       = 'none';
