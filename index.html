@@ -234,43 +234,56 @@
     }
     #continue-btn:active { transform: translateY(5px); box-shadow: 0 1px 0 #002a27; border-bottom-width: 1px; }
 
-    /* ===== נגן אודיו ===== */
+    /* ===== נגן אודיו מעודכן ===== */
     .audio-riddle {
-      background: rgba(40,80,140,0.18);
-      border: 1px solid rgba(80,150,220,0.3);
-      border-radius: 10px; padding: 16px 20px;
+      background: linear-gradient(145deg, rgba(40,80,140,0.4), rgba(15,35,70,0.6));
+      border: 1px solid rgba(80,150,220,0.5);
+      border-radius: 12px; 
+      padding: 18px 20px;
       margin-bottom: 24px;
-      display: flex; align-items: center; gap: 14px;
+      display: flex; align-items: center; gap: 16px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.5), inset 0 2px 5px rgba(255,255,255,0.1);
     }
     .audio-play-btn {
-      width: 42px; height: 42px; border-radius: 50%;
-      background: rgba(60,130,220,0.15);
-      border: 1px solid rgba(100,170,240,0.5);
-      color: #7ec8f5; cursor: pointer; font-size: 18px;
+      width: 46px; height: 46px; border-radius: 50%;
+      background: linear-gradient(180deg, rgba(60,130,220,0.5), rgba(30,80,160,0.7));
+      border: 1px solid rgba(100,170,240,0.6);
+      color: #fff; cursor: pointer; font-size: 18px;
       display: flex; align-items: center; justify-content: center;
-      transition: all 0.2s; flex-shrink: 0;
+      transition: all 0.15s; flex-shrink: 0;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.4), inset 0 2px 4px rgba(255,255,255,0.2);
+      text-shadow: 0 1px 2px rgba(0,0,0,0.5);
     }
-    .audio-play-btn:hover { background: rgba(60,130,220,0.3); }
+    .audio-play-btn:hover { 
+      background: linear-gradient(180deg, rgba(80,150,240,0.6), rgba(40,100,180,0.8)); 
+      transform: scale(1.05); 
+    }
+    .audio-play-btn:active { 
+      transform: scale(0.95); 
+      box-shadow: 0 2px 5px rgba(0,0,0,0.4); 
+    }
     .audio-track { flex: 1; }
-    .audio-label { font-size: 13px; color: rgba(140,200,255,0.85); margin-bottom: 6px; }
+    .audio-label { font-size: 13px; color: rgba(140,200,255,0.85); margin-bottom: 6px; font-weight: 600; }
     .audio-progress-bar { 
-      height: 8px; /* הוגדל קצת בשביל שיהיה נוח לגרור */
+      height: 8px; 
       background: rgba(255,255,255,0.1); 
       border-radius: 4px; 
       position: relative; 
-      cursor: pointer; /* מראה שאפשר ללחוץ */
+      cursor: pointer; 
+      box-shadow: inset 0 1px 2px rgba(0,0,0,0.3);
     }
     .audio-progress-fill { 
       position: absolute; 
-      right: 0; /* נגזרת של עבודה מימין לשמאל RTL */
+      right: 0; 
       top: 0; 
       height: 100%; 
       background: #5aaeee; 
       border-radius: 4px; 
       width: 0%; 
-      pointer-events: none; /* כדי לא להפריע לגרירה */
+      pointer-events: none; 
+      box-shadow: 0 0 5px rgba(90,174,238,0.5);
     }
-    .audio-time { font-size: 11px; color: rgba(255,255,255,0.3); margin-top: 4px; text-align: left; }
+    .audio-time { font-size: 11px; color: rgba(255,255,255,0.4); margin-top: 5px; text-align: left; }
 
     /* ===== אנימציות ===== */
     @keyframes shake {
@@ -281,7 +294,7 @@
     @keyframes popIn { 0%{transform:scale(.75);opacity:0} 100%{transform:scale(1);opacity:1} }
     @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-5px)} }
 
-    /* ===== עיצוב תיבת הפסנתר המרכזית ===== */
+    /* ===== עיצוב תיבת הפסנתר המרכזית וכפתור תווים ===== */
     .piano-chassis {
       background: linear-gradient(145deg, #2a0a00, #110000);
       border: 2px solid #5a2a00;
@@ -300,6 +313,25 @@
       margin-bottom: -2px;
       position: relative;
       z-index: 3;
+    }
+    .piano-hint-badge {
+      display: inline-block;
+      margin-top: 22px;
+      padding: 8px 20px;
+      background: linear-gradient(180deg, #ffb74d 0%, #f57c00 100%);
+      color: #3e2000;
+      font-size: 15px;
+      font-weight: 800;
+      border-radius: 25px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.6), inset 0 2px 2px rgba(255,255,255,0.4);
+      text-shadow: 0 1px 0 rgba(255,255,255,0.3);
+      border: 1px solid #c85a00;
+      animation: floatBadge 2.5s ease-in-out infinite;
+      cursor: pointer;
+    }
+    @keyframes floatBadge {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-4px); }
     }
   </style>
 </head>
@@ -336,7 +368,9 @@
       <div class="piano-felt"></div>
       <div id="piano-keys" style="display:flex; position:relative; height:130px; justify-content:center; user-select:none;"></div>
     </div>
-    <div style="margin-top:14px; font-size:13px; color:rgba(255,200,100,0.7); text-shadow: 0 1px 2px rgba(0,0,0,0.8);">לחצו על המקשים לנגינה</div>
+    <div>
+      <div class="piano-hint-badge">לחצו על התווים לנגינה</div>
+    </div>
   </div>
 
   <div class="code-box" id="code-box">
@@ -759,7 +793,8 @@ function toggleRiddle() {
     timeDisplay.textContent = `0:${String(secs).padStart(2, '0')} / 0:15`;
 
     RIDDLE_NOTES.forEach((freq, index) => {
-      if (!notesPlayed[index] && riddleElapsed >= index * noteInterval) {
+      // תיקון הבאג: גדול מ- ולא גדול/שווה כדי שגרירה לאפס תאפס גם את התו הראשון
+      if (!notesPlayed[index] && riddleElapsed > index * noteInterval) {
         notesPlayed[index] = true;
         // שולחים fromRiddle = true כדי למנוע את החיווי הוויזואלי (השחקן לא יראה את הקלידים זזים)
         playPianoNote(freq, null, null, true); 
@@ -786,7 +821,8 @@ function handleSeek(e) {
   riddleStartTime = Date.now() - riddleElapsed;
   
   // בודק מחדש אילו תווים היו אמורים להתנגן עד לנקודה הזו
-  notesPlayed = RIDDLE_NOTES.map((freq, i) => riddleElapsed >= i * 3750);
+  // תיקון: משתמש ב- > כדי שהתווים יעודכנו נכון גם באפס המוחלט
+  notesPlayed = RIDDLE_NOTES.map((freq, i) => riddleElapsed > i * 3750);
   
   document.getElementById('riddle-fill').style.width = (p * 100) + '%';
   const secs = Math.floor(riddleElapsed / 1000);
