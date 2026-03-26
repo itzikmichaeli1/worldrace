@@ -253,8 +253,23 @@
     .audio-play-btn:hover { background: rgba(60,130,220,0.3); }
     .audio-track { flex: 1; }
     .audio-label { font-size: 13px; color: rgba(140,200,255,0.85); margin-bottom: 6px; }
-    .audio-progress-bar { height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; position: relative; }
-    .audio-progress-fill { position: absolute; left: 0; top: 0; height: 100%; background: #5aaeee; border-radius: 2px; width: 0%; }
+    .audio-progress-bar { 
+      height: 8px; /* הוגדל קצת בשביל שיהיה נוח לגרור */
+      background: rgba(255,255,255,0.1); 
+      border-radius: 4px; 
+      position: relative; 
+      cursor: pointer; /* מראה שאפשר ללחוץ */
+    }
+    .audio-progress-fill { 
+      position: absolute; 
+      right: 0; /* נגזרת של עבודה מימין לשמאל RTL */
+      top: 0; 
+      height: 100%; 
+      background: #5aaeee; 
+      border-radius: 4px; 
+      width: 0%; 
+      pointer-events: none; /* כדי לא להפריע לגרירה */
+    }
     .audio-time { font-size: 11px; color: rgba(255,255,255,0.3); margin-top: 4px; text-align: left; }
 
     /* ===== אנימציות ===== */
@@ -309,7 +324,7 @@
     <button class="audio-play-btn" id="riddle-play-btn" onclick="toggleRiddle()">▶</button>
     <div class="audio-track">
       <div class="audio-label">חידת שמיעה — הקשיבו לתווים</div>
-      <div class="audio-progress-bar">
+      <div class="audio-progress-bar" id="riddle-progress-bar">
         <div class="audio-progress-fill" id="riddle-fill"></div>
       </div>
       <div class="audio-time" id="riddle-time">0:00 / 0:15</div>
@@ -689,12 +704,13 @@ function submitTF() {
   }
 }
 
-// ===== אודיו חידה (תמיכה בהשהיה וניגון מאותו מקור סאונד של הפסנתר עם חיווי ויזואלי) =====
+// ===== אודיו חידה (תמיכה בהשהיה וניגון מאותו מקור סאונד של הפסנתר ללא חיווי ויזואלי) =====
 let riddlePlaying = false;
 let riddleInterval = null;
 let riddleElapsed = 0; 
 let riddleStartTime = 0;
 let notesPlayed = [false, false, false, false];
+const RIDDLE_NOTES = [123.47, 130.81, 174.61, 146.83]; // סי(B2), דו(C3), פה(F3), רה(D3) - אוקטבה אחת למטה
 
 function toggleRiddle() {
   const btn = document.getElementById('riddle-play-btn');
@@ -704,8 +720,6 @@ function toggleRiddle() {
   if (getAC().state === 'suspended') getAC().resume();
 
   const duration = 15000; 
-  // תדרים חדשים: הורדה של אוקטבה אחת. סי(B2), דו(C3), פה(F3), רה(D3)
-  const notes = [123.47, 130.81, 174.61, 146.83]; 
   const noteInterval = 3750;
 
   if (riddlePlaying) {
@@ -744,15 +758,53 @@ function toggleRiddle() {
     const secs = Math.floor(riddleElapsed / 1000);
     timeDisplay.textContent = `0:${String(secs).padStart(2, '0')} / 0:15`;
 
-    notes.forEach((freq, index) => {
+    RIDDLE_NOTES.forEach((freq, index) => {
       if (!notesPlayed[index] && riddleElapsed >= index * noteInterval) {
         notesPlayed[index] = true;
-        // שולחים null לאלמנט, והפונקציה עצמה תחפש את האלמנט ותוריד אותו וויזואלית
-        playPianoNote(freq, null, null); 
+        // שולחים fromRiddle = true כדי למנוע את החיווי הוויזואלי (השחקן לא יראה את הקלידים זזים)
+        playPianoNote(freq, null, null, true); 
       }
     });
   }, 50);
 }
+
+// מנגנון הגרירה (Scrubbing) לפס השמע
+const pBar = document.getElementById('riddle-progress-bar');
+let isDraggingBar = false;
+
+function handleSeek(e) {
+  const rect = pBar.getBoundingClientRect();
+  let clientX = e.clientX;
+  if(e.touches && e.touches.length > 0) clientX = e.touches[0].clientX;
+  if(clientX === undefined) return;
+  
+  // מכיוון שהאתר ב-RTL, צד ימין הוא 0 ושמאל הוא 100%
+  let p = (rect.right - clientX) / rect.width;
+  p = Math.max(0, Math.min(1, p));
+  
+  riddleElapsed = p * 15000;
+  riddleStartTime = Date.now() - riddleElapsed;
+  
+  // בודק מחדש אילו תווים היו אמורים להתנגן עד לנקודה הזו
+  notesPlayed = RIDDLE_NOTES.map((freq, i) => riddleElapsed >= i * 3750);
+  
+  document.getElementById('riddle-fill').style.width = (p * 100) + '%';
+  const secs = Math.floor(riddleElapsed / 1000);
+  const timeDisplay = document.getElementById('riddle-time');
+  
+  if (riddlePlaying) {
+    timeDisplay.textContent = `0:${String(secs).padStart(2, '0')} / 0:15`;
+  } else {
+    timeDisplay.textContent = `0:${String(secs).padStart(2, '0')} / 0:15 (מושהה)`;
+  }
+}
+
+pBar.addEventListener('mousedown', e => { isDraggingBar = true; handleSeek(e); });
+window.addEventListener('mousemove', e => { if(isDraggingBar) handleSeek(e); });
+window.addEventListener('mouseup', () => { isDraggingBar = false; });
+pBar.addEventListener('touchstart', e => { isDraggingBar = true; handleSeek(e); }, {passive:true});
+window.addEventListener('touchmove', e => { if(isDraggingBar) handleSeek(e); }, {passive:true});
+window.addEventListener('touchend', () => { isDraggingBar = false; });
 
 // ===== כוכבים =====
 (function() {
@@ -771,8 +823,9 @@ function toggleRiddle() {
 
 // ===== פסנתר 3D וסאונד אחיד =====
 (function(){
-  // הוספת E2 (מי) והסרת E4, F4 משורת הקלידים
+  // הפסנתר מתחיל מהתו C2 (דו) ככה שיש שני תווים שחורים מצד שמאל, בדיוק כמו בפסנתר אמיתי
   const NOTES = [
+    {n:'C2', f:65.41,  b:false}, {n:'C#2',f:69.30,  b:true}, {n:'D2', f:73.42,  b:false}, {n:'D#2',f:77.78,  b:true}, 
     {n:'E2', f:82.41,  b:false}, {n:'F2', f:87.31,  b:false}, {n:'F#2',f:92.50,  b:true}, {n:'G2', f:98.00,  b:false}, 
     {n:'G#2',f:103.83, b:true}, {n:'A2', f:110.00, b:false}, {n:'A#2',f:116.54, b:true}, {n:'B2', f:123.47, b:false}, 
     {n:'C3', f:130.81, b:false}, {n:'C#3',f:138.59, b:true}, {n:'D3', f:146.83, b:false}, {n:'D#3',f:155.56, b:true}, 
@@ -788,7 +841,7 @@ function toggleRiddle() {
   const ww = 42;
   const bw = 26;
   const totalW = ww * whites.length;
-  // תוספת קטנה לרוחב הקונטיינר כדי שהמראה יהיה אחיד ומושלם
+  // התאמת הקונטיינר לרוחב החדש (הוספנו קלידים לכן צריך טיפה יותר מקום)
   container.style.width = (totalW + 10) + 'px';
   container.style.height = '140px';
   container.style.position = 'relative';
@@ -797,7 +850,6 @@ function toggleRiddle() {
 
   whites.forEach((note, i) => {
     const key = document.createElement('div');
-    // הוספנו dataset של תדר והאם שחור כדי למצוא אותו בזמן שהחידה מנגנת
     key.className = 'piano-key-visual';
     key.dataset.freq = note.f;
     key.dataset.isBlack = 'false';
@@ -834,7 +886,8 @@ function toggleRiddle() {
   });
 })();
 
-function playPianoNote(freq, keyEl, isBlack) {
+// הוספנו משתנה fromRiddle כדי למנוע את החיווי הוויזואלי כשזה מתנגן מהחידה
+function playPianoNote(freq, keyEl, isBlack, fromRiddle = false) {
   try {
     const ctx = getAC();
     const now = ctx.currentTime;
@@ -881,13 +934,14 @@ function playPianoNote(freq, keyEl, isBlack) {
     [o1,o2,o3].forEach(o => { o.start(now); o.stop(now + dur); });
   } catch(e) {}
 
-  // אם הפונקציה נקראה מהחידה האוטומטית ולא בלחיצת עכבר - מוצאים את הקליד הרלוונטי במסך
+  // אם האודיו הגיע מהחידה - אל תעשה שום אנימציה, שינחשו לבד
+  if (fromRiddle) return;
+
   if(!keyEl) {
     keyEl = document.querySelector(`.piano-key-visual[data-freq="${freq}"]`);
     if(keyEl) isBlack = keyEl.dataset.isBlack === 'true';
   }
 
-  // אנימציה
   if(!keyEl) return;
 
   if(isBlack){
