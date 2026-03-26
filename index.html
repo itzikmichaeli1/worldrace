@@ -285,15 +285,6 @@
     }
     .audio-time { font-size: 11px; color: rgba(255,255,255,0.4); margin-top: 5px; text-align: left; }
 
-    /* ===== אנימציות ===== */
-    @keyframes shake {
-      0%,100%{transform:translateX(0)} 20%{transform:translateX(-10px)} 40%{transform:translateX(10px)} 60%{transform:translateX(-6px)} 80%{transform:translateX(6px)}
-    }
-    .shaking { animation: shake 0.55s ease; }
-    @keyframes twinkle { 0%,100%{opacity:.25;transform:scale(1)} 50%{opacity:1;transform:scale(1.5)} }
-    @keyframes popIn { 0%{transform:scale(.75);opacity:0} 100%{transform:scale(1);opacity:1} }
-    @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-5px)} }
-
     /* ===== עיצוב תיבת הפסנתר המרכזית וכפתור תווים ===== */
     .piano-chassis {
       background: linear-gradient(145deg, #2a0a00, #110000);
@@ -333,6 +324,74 @@
       0%, 100% { transform: translateY(0); }
       50% { transform: translateY(-4px); }
     }
+
+    /* ===== מערכת רמזים (חדש) ===== */
+    #floating-hint-btn {
+      position: fixed; bottom: 20px; left: 20px; z-index: 100;
+      width: 56px; height: 56px; border-radius: 50%;
+      background: linear-gradient(135deg, #ffda44, #ff9500);
+      border: 2px solid #fff; box-shadow: 0 4px 15px rgba(255,150,0,0.5);
+      font-size: 26px; cursor: pointer; display: none; 
+      transition: transform 0.2s, box-shadow 0.2s;
+      align-items: center; justify-content: center;
+    }
+    #floating-hint-btn:hover { transform: scale(1.1); box-shadow: 0 6px 20px rgba(255,150,0,0.7); }
+
+    #hints-overlay {
+      display: none; position: fixed; inset: 0; z-index: 200;
+      background: rgba(0,0,0,0.85); align-items: center; justify-content: center;
+    }
+    #hints-overlay.show { display: flex; animation: fadeIn 0.25s ease-out; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    .hints-card {
+      background: #160a00; border: 1px solid #ff9500; border-radius: 12px;
+      padding: 28px 24px; width: 90%; max-width: 420px; position: relative;
+      color: #fff; text-align: right; box-shadow: 0 15px 30px rgba(0,0,0,0.8);
+    }
+    .close-hints-btn {
+      position: absolute; top: 12px; left: 12px; background: transparent;
+      border: none; color: #aaa; font-size: 24px; cursor: pointer; transition: 0.2s;
+    }
+    .close-hints-btn:hover { color: #fff; transform: scale(1.1); }
+    .hints-title { text-align: center; color: #ffcc00; margin-bottom: 24px; font-weight: 800; font-size: 22px; }
+    
+    .hint-item { margin-bottom: 14px; }
+    .hint-btn {
+      width: 100%; background: linear-gradient(180deg, #2a1500, #1a0a00);
+      border: 1px solid #ff9500; color: #ffe8c0;
+      padding: 14px; border-radius: 8px; cursor: pointer; font-size: 16px; font-family: inherit; font-weight: bold;
+      transition: 0.2s; text-align: right; box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+    }
+    .hint-btn:hover { background: linear-gradient(180deg, #3a2000, #2a1500); transform: translateY(-2px); }
+    .hint-btn.solution-btn { border-color: #ff4444; color: #ffaaaa; background: linear-gradient(180deg, #3a0a0a, #1a0000); }
+    .hint-btn.solution-btn:hover { background: linear-gradient(180deg, #4a1010, #2a0000); }
+    
+    .hint-confirm {
+      display: none; background: #221100; padding: 16px; border-radius: 8px;
+      text-align: center; border: 1px dashed #ff9500; margin-top: 8px;
+    }
+    .hint-confirm.solution-confirm { border-color: #ff4444; background: #2a0000; }
+    .hint-confirm p { margin-bottom: 14px; font-size: 15px; color: #eee; }
+    .hint-confirm.solution-confirm p { color: #ffaaaa; font-weight: bold; }
+    
+    .hint-confirm-btns { display: flex; gap: 10px; justify-content: center; }
+    .hint-confirm-btns button {
+      padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-family: inherit; font-weight: bold; font-size: 14px; transition: 0.2s;
+    }
+    .btn-yes { background: #ff9500; color: #000; }
+    .btn-yes:hover { background: #ffa500; }
+    .solution-confirm .btn-yes { background: #ff4444; color: #fff; }
+    .solution-confirm .btn-yes:hover { background: #ff6666; }
+    .btn-no { background: #555; color: #fff; }
+    .btn-no:hover { background: #666; }
+    
+    .hint-text {
+      display: none; background: rgba(255,255,255,0.05); padding: 16px;
+      border-radius: 8px; font-size: 15px; line-height: 1.6;
+      border-right: 4px solid #ff9500; color: #eee; white-space: pre-wrap; margin-top: 8px;
+    }
+    .hint-text.solution-text { border-right-color: #ff4444; font-weight: bold; color: #ffcccc; }
   </style>
 </head>
 <body>
@@ -421,6 +480,17 @@
   </div>
 </div>
 
+<button id="floating-hint-btn" onclick="openHintsModal()">💡</button>
+
+<div id="hints-overlay">
+  <div class="hints-card">
+    <button class="close-hints-btn" onclick="closeHintsModal()">✖</button>
+    <h2 class="hints-title">צריכים עזרה?</h2>
+    <div id="hints-container">
+      </div>
+  </div>
+</div>
+
 <div id="success-overlay">
   <div class="success-card">
     <div class="success-icon">✓</div>
@@ -441,7 +511,12 @@ const PAGES = {
     youtube: "FlTe_-Wxf6k",
     code: "3682",
     next: "london",
-    type: "code"
+    type: "code",
+    hints: [
+      "במעטפה 13 ספחים של כרטיסי טיסה המייצגים 13 מקומות ספציפיים במטוס. סימון מושבים אלה על גבי דיאגרמת המטוס ודאי יסייע להגיע לפתרון. הקוד הוא בן ארבע ספרות.",
+      "נסו לצבוע את המושבים המופיעים בספחי הטיסה ולאחר מכן להסתכל על הצורה שנוצרת מהמושבים שנשארים ריקים."
+    ],
+    solution: "המושבים הנותרים במטוס לאחר צביעת המושבים שבספחי הטיסה יוצרים ספרות. קוד הטיסה הנוצר הוא 3682. הזינו קוד זה באתר."
   },
   london: {
     title: "ברוכים הבאים לאנגליה!",
@@ -597,6 +672,14 @@ function loadPage(id) {
     yw.style.display = 'none';
   }
 
+  // הצגת/הסתרת כפתור הרמזים בהתאם למידע בעמוד הנוכחי
+  const hintBtn = document.getElementById('floating-hint-btn');
+  if (page.hints || page.solution) {
+    hintBtn.style.display = 'flex';
+  } else {
+    hintBtn.style.display = 'none';
+  }
+
   // אתחול ומחיקת אודיו חידה במידה ועברנו עמוד
   const ar = document.getElementById('audio-riddle');
   if (page.synthRiddle) {
@@ -636,6 +719,71 @@ function loadPage(id) {
   }
   
   window.scrollTo(0, 0);
+}
+
+// ===== מערכת רמזים דינמית =====
+function openHintsModal() {
+  const page = PAGES[currentPage];
+  if (!page || (!page.hints && !page.solution)) return;
+  
+  const container = document.getElementById('hints-container');
+  container.innerHTML = '';
+  
+  if (page.hints) {
+    page.hints.forEach((hintText, index) => {
+      container.appendChild(createHintElement(`רמז ${index + 1}`, hintText, false));
+    });
+  }
+  if (page.solution) {
+    container.appendChild(createHintElement(`פיתרון`, page.solution, true));
+  }
+  
+  document.getElementById('hints-overlay').classList.add('show');
+}
+
+function closeHintsModal() {
+  document.getElementById('hints-overlay').classList.remove('show');
+}
+
+function createHintElement(title, text, isSolution) {
+  const div = document.createElement('div');
+  div.className = 'hint-item';
+  
+  const btnClass = isSolution ? 'hint-btn solution-btn' : 'hint-btn';
+  const icon = isSolution ? '🗝️' : '🔒';
+  const confirmClass = isSolution ? 'hint-confirm solution-confirm' : 'hint-confirm';
+  const confirmText = isSolution ? 'זהירות! לחיצה כאן תגלה לכם את התשובה המלאה. בטוחים?' : 'בטוחים שאתם רוצים עזרה?';
+  const textClass = isSolution ? 'hint-text solution-text' : 'hint-text';
+
+  div.innerHTML = `
+    <button class="${btnClass}" onclick="showHintConfirm(this)">${icon} ${title}</button>
+    <div class="${confirmClass}">
+      <p>${confirmText}</p>
+      <div class="hint-confirm-btns">
+        <button class="btn-yes" onclick="revealHint(this)">כן, גלו לי</button>
+        <button class="btn-no" onclick="cancelHint(this)">לא, אמשיך לנסות</button>
+      </div>
+    </div>
+    <div class="${textClass}">${text}</div>
+  `;
+  return div;
+}
+
+function showHintConfirm(btn) {
+  btn.style.display = 'none';
+  btn.nextElementSibling.style.display = 'block';
+}
+
+function cancelHint(btn) {
+  const confirmDiv = btn.closest('.hint-confirm');
+  confirmDiv.style.display = 'none';
+  confirmDiv.previousElementSibling.style.display = 'block';
+}
+
+function revealHint(btn) {
+  const confirmDiv = btn.closest('.hint-confirm');
+  confirmDiv.style.display = 'none';
+  confirmDiv.nextElementSibling.style.display = 'block';
 }
 
 // ===== צלילי מערכת =====
@@ -793,10 +941,10 @@ function toggleRiddle() {
     timeDisplay.textContent = `0:${String(secs).padStart(2, '0')} / 0:15`;
 
     RIDDLE_NOTES.forEach((freq, index) => {
-      // תיקון הבאג: גדול מ- ולא גדול/שווה כדי שגרירה לאפס תאפס גם את התו הראשון
+      // גדול מ- ולא שווה, כדי שגרירה לאפס תאפס גם את התו הראשון ותשמיע אותו
       if (!notesPlayed[index] && riddleElapsed > index * noteInterval) {
         notesPlayed[index] = true;
-        // שולחים fromRiddle = true כדי למנוע את החיווי הוויזואלי (השחקן לא יראה את הקלידים זזים)
+        // שולחים fromRiddle = true כדי למנוע את החיווי הוויזואלי
         playPianoNote(freq, null, null, true); 
       }
     });
@@ -820,8 +968,7 @@ function handleSeek(e) {
   riddleElapsed = p * 15000;
   riddleStartTime = Date.now() - riddleElapsed;
   
-  // בודק מחדש אילו תווים היו אמורים להתנגן עד לנקודה הזו
-  // תיקון: משתמש ב- > כדי שהתווים יעודכנו נכון גם באפס המוחלט
+  // בודק מחדש אילו תווים היו אמורים להתנגן עד לנקודה הזו, גדול מ- כדי שהתחלה באפס תאפס
   notesPlayed = RIDDLE_NOTES.map((freq, i) => riddleElapsed > i * 3750);
   
   document.getElementById('riddle-fill').style.width = (p * 100) + '%';
@@ -859,7 +1006,7 @@ window.addEventListener('touchend', () => { isDraggingBar = false; });
 
 // ===== פסנתר 3D וסאונד אחיד =====
 (function(){
-  // הפסנתר מתחיל מהתו C2 (דו) ככה שיש שני תווים שחורים מצד שמאל, בדיוק כמו בפסנתר אמיתי
+  // הפסנתר מתחיל מהתו C2 (דו)
   const NOTES = [
     {n:'C2', f:65.41,  b:false}, {n:'C#2',f:69.30,  b:true}, {n:'D2', f:73.42,  b:false}, {n:'D#2',f:77.78,  b:true}, 
     {n:'E2', f:82.41,  b:false}, {n:'F2', f:87.31,  b:false}, {n:'F#2',f:92.50,  b:true}, {n:'G2', f:98.00,  b:false}, 
@@ -877,7 +1024,6 @@ window.addEventListener('touchend', () => { isDraggingBar = false; });
   const ww = 42;
   const bw = 26;
   const totalW = ww * whites.length;
-  // התאמת הקונטיינר לרוחב החדש (הוספנו קלידים לכן צריך טיפה יותר מקום)
   container.style.width = (totalW + 10) + 'px';
   container.style.height = '140px';
   container.style.position = 'relative';
@@ -922,7 +1068,6 @@ window.addEventListener('touchend', () => { isDraggingBar = false; });
   });
 })();
 
-// הוספנו משתנה fromRiddle כדי למנוע את החיווי הוויזואלי כשזה מתנגן מהחידה
 function playPianoNote(freq, keyEl, isBlack, fromRiddle = false) {
   try {
     const ctx = getAC();
@@ -970,7 +1115,6 @@ function playPianoNote(freq, keyEl, isBlack, fromRiddle = false) {
     [o1,o2,o3].forEach(o => { o.start(now); o.stop(now + dur); });
   } catch(e) {}
 
-  // אם האודיו הגיע מהחידה - אל תעשה שום אנימציה, שינחשו לבד
   if (fromRiddle) return;
 
   if(!keyEl) {
