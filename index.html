@@ -265,6 +265,27 @@
     @keyframes twinkle { 0%,100%{opacity:.25;transform:scale(1)} 50%{opacity:1;transform:scale(1.5)} }
     @keyframes popIn { 0%{transform:scale(.75);opacity:0} 100%{transform:scale(1);opacity:1} }
     @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-5px)} }
+
+    /* ===== עיצוב תיבת הפסנתר המרכזית ===== */
+    .piano-chassis {
+      background: linear-gradient(145deg, #2a0a00, #110000);
+      border: 2px solid #5a2a00;
+      border-radius: 10px;
+      padding: 20px 15px;
+      box-shadow: 0 15px 30px rgba(0,0,0,0.6), inset 0 5px 15px rgba(0,0,0,0.8);
+      display: inline-block;
+      position: relative;
+    }
+    .piano-felt {
+      width: 100%;
+      height: 8px;
+      background: #a00;
+      border-radius: 4px 4px 0 0;
+      box-shadow: inset 0 -3px 5px rgba(0,0,0,0.5);
+      margin-bottom: -2px;
+      position: relative;
+      z-index: 3;
+    }
   </style>
 </head>
 <body>
@@ -295,11 +316,12 @@
     </div>
   </div>
 
-  <div id="piano-section" style="display:none; margin-bottom:24px;">
-    <div style="background:rgba(20,8,0,0.8); border:1.5px solid rgba(255,140,0,0.4); border-radius:12px; padding:20px 16px 16px; text-align:center;">
+  <div id="piano-section" style="display:none; margin-bottom:24px; text-align:center;">
+    <div class="piano-chassis">
+      <div class="piano-felt"></div>
       <div id="piano-keys" style="display:flex; position:relative; height:130px; justify-content:center; user-select:none;"></div>
-      <div style="margin-top:14px; font-size:12px; color:rgba(255,200,100,0.5);">לחצו על המקשים לנגינה</div>
     </div>
+    <div style="margin-top:14px; font-size:13px; color:rgba(255,200,100,0.7); text-shadow: 0 1px 2px rgba(0,0,0,0.8);">לחצו על המקשים לנגינה</div>
   </div>
 
   <div class="code-box" id="code-box">
@@ -667,7 +689,7 @@ function submitTF() {
   }
 }
 
-// ===== אודיו חידה (תמיכה בהשהיה וניגון מאותו מקור סאונד של הפסנתר) =====
+// ===== אודיו חידה (תמיכה בהשהיה וניגון מאותו מקור סאונד של הפסנתר עם חיווי ויזואלי) =====
 let riddlePlaying = false;
 let riddleInterval = null;
 let riddleElapsed = 0; 
@@ -682,7 +704,8 @@ function toggleRiddle() {
   if (getAC().state === 'suspended') getAC().resume();
 
   const duration = 15000; 
-  const notes = [246.94, 261.63, 349.23, 293.66]; // סי, דו, פה, רה
+  // תדרים חדשים: הורדה של אוקטבה אחת. סי(B2), דו(C3), פה(F3), רה(D3)
+  const notes = [123.47, 130.81, 174.61, 146.83]; 
   const noteInterval = 3750;
 
   if (riddlePlaying) {
@@ -724,6 +747,7 @@ function toggleRiddle() {
     notes.forEach((freq, index) => {
       if (!notesPlayed[index] && riddleElapsed >= index * noteInterval) {
         notesPlayed[index] = true;
+        // שולחים null לאלמנט, והפונקציה עצמה תחפש את האלמנט ותוריד אותו וויזואלית
         playPianoNote(freq, null, null); 
       }
     });
@@ -747,14 +771,14 @@ function toggleRiddle() {
 
 // ===== פסנתר 3D וסאונד אחיד =====
 (function(){
+  // הוספת E2 (מי) והסרת E4, F4 משורת הקלידים
   const NOTES = [
-    {n:'F2', f:87.31,  b:false}, {n:'F#2',f:92.50,  b:true}, {n:'G2', f:98.00,  b:false}, {n:'G#2',f:103.83, b:true},
-    {n:'A2', f:110.00, b:false}, {n:'A#2',f:116.54, b:true}, {n:'B2', f:123.47, b:false}, {n:'C3', f:130.81, b:false},
-    {n:'C#3',f:138.59, b:true}, {n:'D3', f:146.83, b:false}, {n:'D#3',f:155.56, b:true}, {n:'E3', f:164.81, b:false},
-    {n:'F3', f:174.61, b:false}, {n:'F#3',f:185.00, b:true}, {n:'G3', f:196.00, b:false}, {n:'G#3',f:207.65, b:true},
-    {n:'A3', f:220.00, b:false}, {n:'A#3',f:233.08, b:true}, {n:'B3', f:246.94, b:false}, {n:'C4', f:261.63, b:false},
-    {n:'C#4',f:277.18, b:true}, {n:'D4', f:293.66, b:false}, {n:'D#4',f:311.13, b:true}, {n:'E4', f:329.63, b:false},
-    {n:'F4', f:349.23, b:false}
+    {n:'E2', f:82.41,  b:false}, {n:'F2', f:87.31,  b:false}, {n:'F#2',f:92.50,  b:true}, {n:'G2', f:98.00,  b:false}, 
+    {n:'G#2',f:103.83, b:true}, {n:'A2', f:110.00, b:false}, {n:'A#2',f:116.54, b:true}, {n:'B2', f:123.47, b:false}, 
+    {n:'C3', f:130.81, b:false}, {n:'C#3',f:138.59, b:true}, {n:'D3', f:146.83, b:false}, {n:'D#3',f:155.56, b:true}, 
+    {n:'E3', f:164.81, b:false}, {n:'F3', f:174.61, b:false}, {n:'F#3',f:185.00, b:true}, {n:'G3', f:196.00, b:false}, 
+    {n:'G#3',f:207.65, b:true}, {n:'A3', f:220.00, b:false}, {n:'A#3',f:233.08, b:true}, {n:'B3', f:246.94, b:false}, 
+    {n:'C4', f:261.63, b:false}, {n:'C#4',f:277.18, b:true}, {n:'D4', f:293.66, b:false}
   ];
 
   const container = document.getElementById('piano-keys');
@@ -764,7 +788,8 @@ function toggleRiddle() {
   const ww = 42;
   const bw = 26;
   const totalW = ww * whites.length;
-  container.style.width = totalW + 'px';
+  // תוספת קטנה לרוחב הקונטיינר כדי שהמראה יהיה אחיד ומושלם
+  container.style.width = (totalW + 10) + 'px';
   container.style.height = '140px';
   container.style.position = 'relative';
   container.style.margin = '0 auto';
@@ -772,8 +797,12 @@ function toggleRiddle() {
 
   whites.forEach((note, i) => {
     const key = document.createElement('div');
+    // הוספנו dataset של תדר והאם שחור כדי למצוא אותו בזמן שהחידה מנגנת
+    key.className = 'piano-key-visual';
+    key.dataset.freq = note.f;
+    key.dataset.isBlack = 'false';
     key.style.cssText = [
-      'position:absolute', 'left:' + (i * ww) + 'px', 'top:0', 'width:' + (ww - 2) + 'px', 'height:130px',
+      'position:absolute', 'left:' + (i * ww + 5) + 'px', 'top:0', 'width:' + (ww - 2) + 'px', 'height:130px',
       'background:linear-gradient(to bottom, #ffffff 0%, #f0f0f0 100%)', 'border:1px solid #999', 'border-radius:0 0 5px 5px',
       'cursor:pointer', 'z-index:1', 'box-sizing:border-box',
       'box-shadow:inset 0 1px 0 #fff, inset 0 -5px 0 #c0c0c0, 0 5px 6px rgba(0,0,0,0.3)',
@@ -788,7 +817,10 @@ function toggleRiddle() {
   NOTES.forEach((note) => {
     if(!note.b){ wi++; return; }
     const key = document.createElement('div');
-    const leftPos = (wi - 1) * ww + Math.round(ww * 0.64);
+    key.className = 'piano-key-visual';
+    key.dataset.freq = note.f;
+    key.dataset.isBlack = 'true';
+    const leftPos = (wi - 1) * ww + Math.round(ww * 0.64) + 5;
     key.style.cssText = [
       'position:absolute', 'left:' + leftPos + 'px', 'top:0', 'width:' + bw + 'px', 'height:82px',
       'background:linear-gradient(to bottom, #333333 0%, #000000 100%)', 'border:1px solid #000', 'border-radius:0 0 4px 4px',
@@ -849,6 +881,13 @@ function playPianoNote(freq, keyEl, isBlack) {
     [o1,o2,o3].forEach(o => { o.start(now); o.stop(now + dur); });
   } catch(e) {}
 
+  // אם הפונקציה נקראה מהחידה האוטומטית ולא בלחיצת עכבר - מוצאים את הקליד הרלוונטי במסך
+  if(!keyEl) {
+    keyEl = document.querySelector(`.piano-key-visual[data-freq="${freq}"]`);
+    if(keyEl) isBlack = keyEl.dataset.isBlack === 'true';
+  }
+
+  // אנימציה
   if(!keyEl) return;
 
   if(isBlack){
