@@ -303,7 +303,7 @@
   <!-- פסנתר מובנה -->
   <div id="piano-section" style="display:none; margin-bottom:24px;">
     <div style="background:rgba(20,8,0,0.8); border:1.5px solid rgba(255,140,0,0.4); border-radius:12px; padding:20px 16px 16px; text-align:center;">
-      <div style="font-size:13px; letter-spacing:3px; color:rgba(0,200,190,0.7); margin-bottom:14px;">🎹 פסנתר — C3 עד B4</div>
+
       <div id="piano-keys" style="display:flex; position:relative; height:130px; justify-content:center; user-select:none;"></div>
       <div style="margin-top:14px; font-size:12px; color:rgba(255,200,100,0.5);">לחצו על המקשים לנגינה</div>
     </div>
@@ -759,6 +759,10 @@ document.getElementById('riddle-audio').onended = () => {
 (function(){
   // המבנה: A2,B2 | C3..B3 (אוקטבה מרכזית) | C4,D4
   const NOTES = [
+    {n:'F2', f:87.31,  b:false},
+    {n:'F#2',f:92.50,  b:true},
+    {n:'G2', f:98.00,  b:false},
+    {n:'G#2',f:103.83, b:true},
     {n:'A2', f:110.00, b:false},
     {n:'A#2',f:116.54, b:true},
     {n:'B2', f:123.47, b:false},
@@ -776,7 +780,10 @@ document.getElementById('riddle-audio').onended = () => {
     {n:'B3', f:246.94, b:false},
     {n:'C4', f:261.63, b:false},
     {n:'C#4',f:277.18, b:true},
-    {n:'D4', f:293.66, b:false}
+    {n:'D4', f:293.66, b:false},
+    {n:'D#4',f:311.13, b:true},
+    {n:'E4', f:329.63, b:false},
+    {n:'F4', f:349.23, b:false}
   ];
 
   const container = document.getElementById('piano-keys');
@@ -844,44 +851,74 @@ document.getElementById('riddle-audio').onended = () => {
 function playPianoNote(freq, keyEl, isBlack) {
   try {
     const ctx = getAC();
-    // Piano-like sound: multiple oscillators + envelope
-    const masterGain = ctx.createGain();
-    masterGain.connect(ctx.destination);
-    masterGain.gain.setValueAtTime(0, ctx.currentTime);
-    masterGain.gain.linearRampToValueAtTime(0.45, ctx.currentTime + 0.005);
-    masterGain.gain.exponentialRampToValueAtTime(0.25, ctx.currentTime + 0.1);
-    masterGain.gain.exponentialRampToValueAtTime(0.12, ctx.currentTime + 0.6);
-    masterGain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 2.2);
+    const now = ctx.currentTime;
+    const dur = 3.0;
 
-    // Fundamental
+    // Master output with compressor for natural dynamics
+    const comp = ctx.createDynamicsCompressor();
+    comp.threshold.value = -18;
+    comp.knee.value = 8;
+    comp.ratio.value = 3;
+    comp.attack.value = 0.002;
+    comp.release.value = 0.2;
+    comp.connect(ctx.destination);
+
+    const master = ctx.createGain();
+    master.connect(comp);
+
+    // Piano envelope: very fast attack, then two-stage decay
+    master.gain.setValueAtTime(0, now);
+    master.gain.linearRampToValueAtTime(0.6, now + 0.003);   // hard attack
+    master.gain.exponentialRampToValueAtTime(0.35, now + 0.05); // initial decay
+    master.gain.exponentialRampToValueAtTime(0.18, now + 0.3);  // sustain
+    master.gain.exponentialRampToValueAtTime(0.08, now + 1.2);  // slow release
+    master.gain.exponentialRampToValueAtTime(0.001, now + dur); // tail
+
+    // Fundamental — triangle for warmth
     const o1 = ctx.createOscillator();
     o1.type = 'triangle';
     o1.frequency.value = freq;
-    const g1 = ctx.createGain(); g1.gain.value = 1.0;
-    o1.connect(g1); g1.connect(masterGain);
+    const g1 = ctx.createGain(); g1.gain.value = 0.9;
+    o1.connect(g1); g1.connect(master);
 
-    // 2nd harmonic
+    // 2nd partial — decays faster (hammer effect)
     const o2 = ctx.createOscillator();
     o2.type = 'sine';
     o2.frequency.value = freq * 2;
-    const g2 = ctx.createGain(); g2.gain.value = 0.4;
-    o2.connect(g2); g2.connect(masterGain);
+    const g2 = ctx.createGain();
+    g2.gain.setValueAtTime(0.45, now);
+    g2.gain.exponentialRampToValueAtTime(0.15, now + 0.3);
+    g2.gain.exponentialRampToValueAtTime(0.001, now + 1.0);
+    o2.connect(g2); g2.connect(master);
 
-    // 3rd harmonic
+    // 3rd partial
     const o3 = ctx.createOscillator();
     o3.type = 'sine';
     o3.frequency.value = freq * 3;
-    const g3 = ctx.createGain(); g3.gain.value = 0.15;
-    o3.connect(g3); g3.connect(masterGain);
+    const g3 = ctx.createGain();
+    g3.gain.setValueAtTime(0.2, now);
+    g3.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+    o3.connect(g3); g3.connect(master);
 
-    // 4th harmonic (brightness)
+    // 4th partial — bright attack click
     const o4 = ctx.createOscillator();
     o4.type = 'sine';
     o4.frequency.value = freq * 4;
-    const g4 = ctx.createGain(); g4.gain.value = 0.05;
-    o4.connect(g4); g4.connect(masterGain);
+    const g4 = ctx.createGain();
+    g4.gain.setValueAtTime(0.12, now);
+    g4.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+    o4.connect(g4); g4.connect(master);
 
-    [o1,o2,o3,o4].forEach(o => { o.start(ctx.currentTime); o.stop(ctx.currentTime + 2.2); });
+    // Slight inharmonicity (piano strings are slightly inharmonic)
+    const o5 = ctx.createOscillator();
+    o5.type = 'sine';
+    o5.frequency.value = freq * 2.002; // tiny detune on 2nd
+    const g5 = ctx.createGain();
+    g5.gain.setValueAtTime(0.1, now);
+    g5.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
+    o5.connect(g5); g5.connect(master);
+
+    [o1,o2,o3,o4,o5].forEach(o => { o.start(now); o.stop(now + dur); });
   } catch(e) {}
 
   // אנימציה
