@@ -300,9 +300,13 @@
     <audio id="riddle-audio"></audio>
   </div>
 
-  <!-- פסנתר — מוצג רק בעמודי זמן להופעה -->
-  <div id="piano-section" style="display:none; margin-bottom:24px; border-radius:12px; overflow:hidden; border:1.5px solid rgba(255,140,0,0.3);">
-    <iframe src="https://mczak.com/code/piano/" title="פסנתר אינטראקטיבי" style="width:100%;height:220px;border:none;display:block;"></iframe>
+  <!-- פסנתר מובנה -->
+  <div id="piano-section" style="display:none; margin-bottom:24px;">
+    <div style="background:rgba(20,8,0,0.8); border:1.5px solid rgba(255,140,0,0.4); border-radius:12px; padding:20px 16px 16px; text-align:center;">
+      <div style="font-size:13px; letter-spacing:3px; color:rgba(0,200,190,0.7); margin-bottom:14px;">🎹 פסנתר — C3 עד B4</div>
+      <div id="piano-keys" style="display:flex; position:relative; height:130px; justify-content:center; user-select:none;"></div>
+      <div style="margin-top:14px; font-size:12px; color:rgba(255,200,100,0.5);">לחצו על המקשים לנגינה</div>
+    </div>
   </div>
 
   <!-- תיבת קוד רגילה -->
@@ -749,6 +753,133 @@ document.getElementById('riddle-audio').onended = () => {
     c.appendChild(d);
   }
 })();
+
+
+// ===== פסנתר =====
+(function(){
+  const NOTES = [
+    {n:'C3',f:130.81,b:false},{n:'C#3',f:138.59,b:true},
+    {n:'D3',f:146.83,b:false},{n:'D#3',f:155.56,b:true},
+    {n:'E3',f:164.81,b:false},
+    {n:'F3',f:174.61,b:false},{n:'F#3',f:185.00,b:true},
+    {n:'G3',f:196.00,b:false},{n:'G#3',f:207.65,b:true},
+    {n:'A3',f:220.00,b:false},{n:'A#3',f:233.08,b:true},
+    {n:'B3',f:246.94,b:false},
+    {n:'C4',f:261.63,b:false},{n:'C#4',f:277.18,b:true},
+    {n:'D4',f:293.66,b:false},{n:'D#4',f:311.13,b:true},
+    {n:'E4',f:329.63,b:false},
+    {n:'F4',f:349.23,b:false},{n:'F#4',f:369.99,b:true},
+    {n:'G4',f:392.00,b:false},{n:'G#4',f:415.30,b:true},
+    {n:'A4',f:440.00,b:false},{n:'A#4',f:466.16,b:true},
+    {n:'B4',f:493.88,b:false}
+  ];
+  const whites = NOTES.filter(n=>!n.b);
+  const container = document.getElementById('piano-keys');
+  if(!container) return;
+  const ww = Math.min(36, Math.floor((window.innerWidth - 80) / whites.length));
+  const bw = Math.round(ww * 0.6);
+  const totalW = ww * whites.length;
+  container.style.width = totalW + 'px';
+  container.style.position = 'relative';
+
+  // צייר מקשים לבנים
+  whites.forEach((note, i) => {
+    const key = document.createElement('div');
+    key.style.cssText = [
+      'position:absolute',
+      'left:' + (i * ww) + 'px',
+      'top:0',
+      'width:' + (ww-2) + 'px',
+      'height:120px',
+      'background:linear-gradient(180deg,#f5f0e8 0%,#fff 40%)',
+      'border:1px solid #888',
+      'border-radius:0 0 5px 5px',
+      'cursor:pointer',
+      'z-index:1',
+      'display:flex',
+      'align-items:flex-end',
+      'justify-content:center',
+      'padding-bottom:5px',
+      'font-size:9px',
+      'color:#666',
+      'font-family:monospace',
+      'transition:background 0.05s',
+      'box-sizing:border-box'
+    ].join(';');
+    key.textContent = note.n;
+    key.dataset.freq = note.f;
+    key.dataset.name = note.n;
+    key.addEventListener('mousedown', () => playPianoNote(note.f, key, false));
+    key.addEventListener('touchstart', e => { e.preventDefault(); playPianoNote(note.f, key, false); });
+    container.appendChild(key);
+  });
+
+  // צייר מקשים שחורים
+  let wi = 0;
+  NOTES.forEach((note, i) => {
+    if(!note.b){ wi++; return; }
+    const key = document.createElement('div');
+    const leftPos = (wi - 1) * ww + Math.round(ww * 0.65);
+    key.style.cssText = [
+      'position:absolute',
+      'left:' + leftPos + 'px',
+      'top:0',
+      'width:' + bw + 'px',
+      'height:76px',
+      'background:linear-gradient(180deg,#222 0%,#000 100%)',
+      'border:1px solid #000',
+      'border-radius:0 0 4px 4px',
+      'cursor:pointer',
+      'z-index:2',
+      'display:flex',
+      'align-items:flex-end',
+      'justify-content:center',
+      'padding-bottom:4px',
+      'font-size:8px',
+      'color:rgba(255,255,255,0.5)',
+      'font-family:monospace',
+      'transition:background 0.05s',
+      'box-sizing:border-box'
+    ].join(';');
+    key.textContent = note.n.replace('#','♯');
+    key.dataset.freq = note.f;
+    key.dataset.name = note.n;
+    key.addEventListener('mousedown', () => playPianoNote(note.f, key, true));
+    key.addEventListener('touchstart', e => { e.preventDefault(); playPianoNote(note.f, key, true); });
+    container.appendChild(key);
+  });
+})();
+
+function playPianoNote(freq, keyEl, isBlack) {
+  try {
+    const c = getAC();
+    const osc = c.createOscillator();
+    const gain = c.createGain();
+    const osc2 = c.createOscillator();
+    const gain2 = c.createGain();
+    osc.type = 'triangle';
+    osc.frequency.value = freq;
+    osc2.type = 'sine';
+    osc2.frequency.value = freq * 2;
+    gain.gain.setValueAtTime(0.4, c.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 1.5);
+    gain2.gain.setValueAtTime(0.15, c.currentTime);
+    gain2.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.8);
+    osc.connect(gain); gain.connect(c.destination);
+    osc2.connect(gain2); gain2.connect(c.destination);
+    osc.start(); osc.stop(c.currentTime + 1.5);
+    osc2.start(); osc2.stop(c.currentTime + 0.8);
+  } catch(e) {}
+  // אנימציה
+  const orig = isBlack
+    ? 'linear-gradient(180deg,#222 0%,#000 100%)'
+    : 'linear-gradient(180deg,#f5f0e8 0%,#fff 40%)';
+  const pressed = isBlack
+    ? 'linear-gradient(180deg,#444 0%,#222 100%)'
+    : 'linear-gradient(180deg,#ffe0a0 0%,#ffd070 40%)';
+  keyEl.style.background = pressed;
+  setTimeout(() => { keyEl.style.background = orig; }, 180);
+}
 
 // ===== ניווט דרך כפתור חזרה =====
 window.onpopstate = e => {
