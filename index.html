@@ -162,36 +162,6 @@
     .choice-img { width: 100%; height: 220px; object-fit: cover; display: block; }
     .choice-lbl { display: block; width: 100%; background: linear-gradient(180deg, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.7) 100%); color: #fff; font-size: 22px; font-weight: 800; padding: 16px 20px 20px; text-shadow: 0 2px 8px rgba(0,0,0,0.9); letter-spacing: 0.5px; }
 
-    /* ===== נכון/לא נכון ===== */
-    .tf-wrap { margin-top: 10px; }
-    .tf-title { text-align: center; font-size: 15px; color: rgba(190,225,255,0.85); margin-bottom: 20px; font-weight: 500; padding: 0 12px; line-height: 1.6;}
-    .tf-questions { display: flex; flex-direction: column; gap: 12px; }
-    .tf-row {
-      display: flex; align-items: center; gap: 12px; background: rgba(15,35,80,0.5);
-      border: 1px solid rgba(60,120,200,0.25); border-radius: 10px; padding: 14px 18px;
-    }
-    .tf-row-num { font-size: 13px; color: rgba(120,180,255,0.5); min-width: 24px; }
-    .tf-row-label { flex: 1; font-size: 15px; color: rgba(200,225,255,0.8); }
-    .tf-btn-group { display: flex; gap: 8px; }
-    .tf-btn {
-      padding: 8px 18px; border-radius: 7px; font-size: 14px; font-weight: 600; cursor: pointer;
-      font-family: inherit; border: 1.5px solid; transition: all 0.2s; touch-action: manipulation;
-    }
-    .tf-btn.correct-btn { border-color: rgba(60,180,100,0.5); background: rgba(20,80,40,0.3); color: #7de8a0; }
-    .tf-btn.correct-btn.selected, .tf-btn.correct-btn:hover { background: rgba(30,120,60,0.6); border-color: rgba(80,220,130,0.8); }
-    .tf-btn.wrong-btn { border-color: rgba(200,80,80,0.5); background: rgba(80,20,20,0.3); color: #f08080; }
-    .tf-btn.wrong-btn.selected, .tf-btn.wrong-btn:hover { background: rgba(140,30,30,0.6); border-color: rgba(240,100,100,0.8); }
-    .tf-submit {
-      margin-top: 20px; width: 100%; background: linear-gradient(135deg, rgba(30,90,200,0.7), rgba(50,130,230,0.5));
-      border: 1.5px solid rgba(80,160,240,0.7); border-radius: 10px; color: #c8e8ff; padding: 15px; font-size: 16px;
-      cursor: pointer; font-family: inherit; font-weight: 700; transition: all 0.2s; touch-action: manipulation;
-    }
-    .tf-submit:hover { opacity: 0.85; }
-    .tf-error {
-      display: none; margin-top: 14px; text-align: center; color: rgba(255,150,150,0.9); font-size: 14px;
-      background: rgba(180,30,30,0.2); border: 1px solid rgba(220,80,80,0.35); border-radius: 8px; padding: 10px;
-    }
-
     /* ===== עמוד סיום וקונפטי ===== */
     .finish-wrap { text-align: center; padding: 20px; }
     .finish-trophy { font-size: 80px; margin-bottom: 20px; animation: popIn 1s cubic-bezier(0.34,1.56,0.64,1); }
@@ -421,14 +391,6 @@
     </div>
   </div>
 
-  <div class="code-box tf-wrap" id="tf-box" style="display:none">
-    <div class="code-section-label"><hr/><span>✓✗ נכון או לא נכון</span><hr/></div>
-    <p class="tf-title">סמנו נכון או לא נכון לכל משפט, ואז לחצו על אישור</p>
-    <div class="tf-questions" id="tf-questions"></div>
-    <button class="tf-submit" onclick="submitTF()">אישור «</button>
-    <div class="tf-error" id="tf-error">✗ תשובה שגויה — בדקו שוב!</div>
-  </div>
-
   <div class="finish-wrap" id="finish-box" style="display:none">
     <div class="finish-trophy">🏆</div>
     <div class="finish-title" id="finish-title-text">כל הכבוד! סיימתם את המירוץ!</div>
@@ -602,35 +564,24 @@ const PAGES = {
     step: 12, bg: "radial-gradient(ellipse at 25% 15%, #220511 0%, #110208 40%, #0a0105 100%)",
     title: "כל הכבוד!",
     desc: "פיתחו את המעטפה העשירית",
-    youtube: "wef_7pKbPMg", code: "385", next: "finish_task", type: "code",
+    youtube: "wef_7pKbPMg", code: "385", next: "finish", type: "code",
     hints: [
       "גזרו את פס ההאטה על פי הסימון. האם ראיתם מקום למשולש כזה על משהו שכבר קראתם בעבר?\nחזרו אל המחסום!",
       "הניחו את פס ההאטה במקום המתאים במחסום והחליפו בין האותיות בעזרת המיפוי.\nהשתמשו במה שקבלתם על מפת השוק. האם נחשפות לכם ספרות?\nשימו לב לסדר הספרות בכיוון החץ."
     ],
     solution: "אם תניחו את פס ההאטה במקום המתאים במחסום (מתחת למילים \"אסור גם המחזות\") ותחליפו את האותיות על פי הסימון, יתקבל המשפט \"גזרו את המחסום\". המחסום הגזור מתאים בדיוק בתוך העיגולים המסומנים במפת השוק, ויוצר ספרות על גבי המפה: 385. הזינו קוד זה באתר."
   },
-  finish_task: {
-    step: 13, bg: "radial-gradient(ellipse at 25% 15%, #00112a 0%, #000815 40%, #00040a 100%)",
-    title: "משימת הסיום!",
-    desc: "עברתם את כל המדינות, והצלחתם בכל המשימות! הגיע הזמן לטוס חזרה לישראל! הצוות הראשון שיחצה את קו הגמר יזכה במיליון! פיתחו את המעטפה האחרונה, שם תחכה לכם משימת הסיום!\n\nענו על השאלות שמופיעות בדף:",
-    youtube: "_3-OT6sc12Y", type: "truefalse", next: "victory",
-    questions: [
-      { label: "שאלה 1", answer: true }, { label: "שאלה 2", answer: false },
-      { label: "שאלה 3", answer: true }, { label: "שאלה 4", answer: true },
-      { label: "שאלה 5", answer: true }, { label: "שאלה 6", answer: false },
-      { label: "שאלה 7", answer: true }, { label: "שאלה 8", answer: false }
-    ],
+  finish: {
+    step: 13, bg: "radial-gradient(ellipse at 25% 15%, #2a2200 0%, #151100 40%, #0a0800 100%)",
+    title: "כל הכבוד צוות!",
+    desc: "עברתם את כל המדינות, והצלחתם בכל המשימות! הגיע הזמן לטוס חזרה לישראל! הצוות הראשון שיחצה את קו הגמר יזכה במיליון! פיתחו את המעטפה האחרונה, שם תחכה לכם משימת הסיום!",
+    youtube: "_3-OT6sc12Y",
+    type: "finish",
     hints: [
       "פתרו את השאלות העולמיות. העזרו בגוגל או נסו לנחש.\nשימו לב שכל תשובה (נכון או לא נכון) נותנת סמל. העזרו במקרא הסמלים על מנת לקבל משפט.",
       "אם תענו נכון על כל השאלות תקבלו סמלים שירכיבו משפט שיגיד מה לעשות עם הפנס האולטרה סגול. האירו במקום המתאים והפתרון יחשף."
     ],
     solution: "התשובות לשאלות הן: נכון, לא נכון, נכון, נכון, נכון, לא נכון, נכון, לא נכון.\nהמשפט המתקבל הוא \"הרימו את הדופן הימנית הפנימית של קופסת המשחק\".\nאם תבדקו במקום זה, תמצאו את המפתח לקופסא האחרונה במשחק."
-  },
-  victory: {
-    step: 14, bg: "radial-gradient(ellipse at 25% 15%, #2a2200 0%, #151100 40%, #0a0800 100%)",
-    title: "כל הכבוד צוות!",
-    desc: "הגעתם לקו הסיום! פתחתם את הקופסה האחרונה וסיימתם את המירוץ העולמי בהצלחה. אתם האלופים!",
-    youtube: null, type: "finish"
   }
 };
 
@@ -671,9 +622,9 @@ function loadPage(id) {
   document.getElementById('page-title').textContent = page.title;
   document.getElementById('page-desc').textContent  = page.desc;
 
-  // מד התקדמות מחושב לפי step (14 שלבים סך הכל)
+  // מד התקדמות מחושב לפי step (13 שלבים סך הכל)
   const step = page.step || 1;
-  document.getElementById('global-progress-fill').style.width = ((step / 14) * 100) + '%';
+  document.getElementById('global-progress-fill').style.width = ((step / 13) * 100) + '%';
   
   // רקע דינמי
   document.body.style.backgroundImage = page.bg || "radial-gradient(ellipse at 25% 15%, #1a0800 0%, #080e00 40%, #001a18 100%)";
@@ -722,7 +673,6 @@ function loadPage(id) {
 
   document.getElementById('code-box').style.display       = 'none';
   document.getElementById('crossroads-box').style.display = 'none';
-  document.getElementById('tf-box').style.display         = 'none';
   document.getElementById('finish-box').style.display     = 'none';
 
   if (page.type === 'code') {
@@ -732,9 +682,6 @@ function loadPage(id) {
     document.getElementById('code-input').classList.remove('error');
   } else if (page.type === 'crossroads') {
     document.getElementById('crossroads-box').style.display = '';
-  } else if (page.type === 'truefalse') {
-    buildTF(page.questions);
-    document.getElementById('tf-box').style.display = '';
   } else if (page.type === 'finish') {
     document.getElementById('finish-box').style.display = '';
     playVictoryEffects();
@@ -894,57 +841,6 @@ function showSuccess() {
 function doContinue() {
   document.getElementById('success-overlay').classList.remove('show');
   if (pendingNext) loadPage(pendingNext);
-}
-
-// ===== נכון / לא נכון =====
-let tfAnswers = [];
-
-function buildTF(questions) {
-  tfAnswers = new Array(questions.length).fill(null);
-  const container = document.getElementById('tf-questions');
-  container.innerHTML = '';
-  questions.forEach((q, i) => {
-    const row = document.createElement('div');
-    row.className = 'tf-row';
-    row.innerHTML = `
-      <div class="tf-row-num">${i + 1}</div>
-      <div class="tf-row-label">${q.label}</div>
-      <div class="tf-btn-group">
-        <button class="tf-btn correct-btn" onclick="selectTF(${i}, true, this)">✓ נכון</button>
-        <button class="tf-btn wrong-btn"   onclick="selectTF(${i}, false, this)">✗ לא נכון</button>
-      </div>`;
-    container.appendChild(row);
-  });
-  document.getElementById('tf-error').style.display = 'none';
-}
-
-function selectTF(idx, val, btn) {
-  if (navigator.vibrate) navigator.vibrate(10);
-  tfAnswers[idx] = val;
-  const row = btn.closest('.tf-row');
-  row.querySelectorAll('.tf-btn').forEach(b => b.classList.remove('selected'));
-  btn.classList.add('selected');
-}
-
-function submitTF() {
-  playClick();
-  const page = PAGES[currentPage];
-  if (tfAnswers.some(a => a === null)) {
-    playError();
-    document.getElementById('tf-error').style.display = 'block';
-    document.getElementById('tf-error').textContent = '✗ ענו על כל המשפטים לפני האישור!';
-    return;
-  }
-  const correct = page.questions.every((q, i) => q.answer === tfAnswers[i]);
-  if (correct) {
-    playSuccess();
-    pendingNext = page.next;
-    showSuccess();
-  } else {
-    playError();
-    document.getElementById('tf-error').style.display = 'block';
-    document.getElementById('tf-error').textContent = '✗ תשובה שגויה — בדקו שוב!';
-  }
 }
 
 // ===== אודיו חידה (תמיכה בהשהיה וניגון מאותו מקור סאונד של הפסנתר ללא חיווי ויזואלי) =====
