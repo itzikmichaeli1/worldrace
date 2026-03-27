@@ -68,7 +68,17 @@
       100% { opacity: 1; transform: translateY(0); }
     }
 
-    /* ===== כפתורים צפים (רמזים, נגישות) ===== */
+    /* ===== כפתורים צפים (רמזים, נגישות, סאונד) ===== */
+    #mute-btn {
+      position: fixed; top: 15px; left: 15px; z-index: 1000;
+      width: 44px; height: 44px; border-radius: 50%;
+      background: rgba(20,10,0,0.8); border: 1px solid #ff9500;
+      color: #fff; font-size: 20px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.5); transition: 0.2s;
+    }
+    #mute-btn:hover { transform: scale(1.1); }
+
     #floating-hint-btn {
       position: fixed; bottom: 20px; left: 20px; z-index: 100;
       width: 56px; height: 56px; border-radius: 50%;
@@ -391,7 +401,7 @@
           onblur="document.getElementById('glow-ring').classList.remove('focused')"
         />
       </div>
-      <div class="code-hint">↑ הקלידו כאן</div>
+      <div class="code-hint">↑</div>
       <button class="submit-btn" onclick="submitCode()">המשך לשלב הבא «</button>
     </div>
     <div class="error-msg" id="error-msg">✗ קוד שגוי — נסו שוב!</div>
@@ -409,14 +419,6 @@
         <span class="choice-lbl">זמן להופעה</span>
       </button>
     </div>
-  </div>
-
-  <div class="code-box tf-wrap" id="tf-box" style="display:none">
-    <div class="code-section-label"><hr/><span>✓✗ נכון או לא נכון</span><hr/></div>
-    <p class="tf-title">סמנו נכון או לא נכון לכל משפט, ואז לחצו על אישור</p>
-    <div class="tf-questions" id="tf-questions"></div>
-    <button class="tf-submit" onclick="submitTF()">אישור «</button>
-    <div class="tf-error" id="tf-error">✗ תשובה שגויה — בדקו שוב!</div>
   </div>
 
   <div class="finish-wrap" id="finish-box" style="display:none">
@@ -647,12 +649,11 @@ const PAGES = {
 };
 
 // ================================================================
-//  לוגיקת ניווט: אין יותר שמירה אוטומטית (Auto-Save) שמפריעה!
+//  לוגיקת ניווט: קריאה מ-URL בלבד (ללא Auto-Save)
 // ================================================================
 let currentPage = null;
 let pendingNext  = null;
 
-// קוראים את הכתובת בלבד, בלי Local Storage של העמוד.
 function getPageId() {
   const urlParams = new URLSearchParams(location.search);
   const p = urlParams.get('page');
@@ -841,7 +842,7 @@ function revealHint(btn) {
   confirmDiv.nextElementSibling.style.display = 'block';
 }
 
-// ===== צלילי מערכת וחותמת מציאותית =====
+// ===== צלילי מערכת וחותמת משופרת (מנוע סאונד מותאם) =====
 const AudioCtx = window.AudioContext || window.webkitAudioContext;
 let _ac = null;
 function getAC() { if (!_ac) _ac = new AudioCtx(); return _ac; }
@@ -855,28 +856,35 @@ function playError() {
   try { const c=getAC(); [220,180].forEach((f,i)=>{ const o=c.createOscillator(),g=c.createGain(); o.type='sawtooth'; o.connect(g); g.connect(c.destination); o.frequency.value=f; g.gain.setValueAtTime(0.18,c.currentTime+i*0.13); g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+i*0.13+0.15); o.start(c.currentTime+i*0.13); o.stop(c.currentTime+i*0.13+0.16); }); } catch(e) {}
 }
 
-// סאונד חותמת עמוק עם רעש חיכוך קצר (כמו דיו שפוגע בדף)
+// סאונד חותמת עוצמתי עם "בום" מהיר והדהוד ארוך (Reverb / Decay)
 function playStampSound() {
-  if (navigator.vibrate) navigator.vibrate([40, 60]); 
+  if (navigator.vibrate) navigator.vibrate([60, 100]); 
   try { 
     const ctx = getAC();
     const now = ctx.currentTime;
 
-    // 1. תדר באס לבום
+    // 1. תדר באס לבום עם הדהוד (Decay) של 3 שניות שזולג לעמוד הבא
     const osc = ctx.createOscillator();
     const oscGain = ctx.createGain();
     osc.type = 'sine';
-    osc.frequency.setValueAtTime(150, now);
-    osc.frequency.exponentialRampToValueAtTime(30, now + 0.15); 
+    
+    // מכת הבאס נוחתת מתדר בינוני לתדר סאב-באס נמוך מאוד
+    osc.frequency.setValueAtTime(200, now);
+    osc.frequency.exponentialRampToValueAtTime(20, now + 0.3); 
+    
     osc.connect(oscGain);
     oscGain.connect(ctx.destination);
-    oscGain.gain.setValueAtTime(1, now);
-    oscGain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
-    osc.start(now);
-    osc.stop(now + 0.25);
+    
+    // עיצוב העוצמה (Attack, Punch, long Decay)
+    oscGain.gain.setValueAtTime(0, now);
+    oscGain.gain.linearRampToValueAtTime(1.5, now + 0.02); // מכה חזקה וקצרה
+    oscGain.gain.exponentialRampToValueAtTime(0.001, now + 3.0); // הדהוד ארוך שימשיך לעמוד הבא
 
-    // 2. רעש לבן לחיכוך הנייר
-    const bufferSize = ctx.sampleRate * 0.2; 
+    osc.start(now);
+    osc.stop(now + 3.5);
+
+    // 2. רעש לבן המדמה את הפגיעה של החותמת והחיכוך בדף
+    const bufferSize = ctx.sampleRate * 0.5; // חצי שנייה של רעש
     const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
     const data = buffer.getChannelData(0);
     for (let i = 0; i < bufferSize; i++) {
@@ -887,18 +895,19 @@ function playStampSound() {
     
     const bandpass = ctx.createBiquadFilter();
     bandpass.type = 'bandpass';
-    bandpass.frequency.value = 1000;
+    bandpass.frequency.value = 800; // תדר שמדמה שפשוף של נייר עבה
 
     const noiseGain = ctx.createGain();
-    noiseGain.gain.setValueAtTime(0.8, now);
-    noiseGain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+    noiseGain.gain.setValueAtTime(0, now);
+    noiseGain.gain.linearRampToValueAtTime(1.2, now + 0.02); // מכה חזקה
+    noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.4); // דעיכה קצת יותר ארוכה לפגיעה הפיזית
 
     noise.connect(bandpass);
     bandpass.connect(noiseGain);
     noiseGain.connect(ctx.destination);
     
     noise.start(now);
-    noise.stop(now + 0.2);
+    noise.stop(now + 0.5);
   } catch(e){}
 }
 
@@ -941,7 +950,7 @@ function submitCode() {
         box.classList.remove('stamp-approved');
         pendingNext = page.next;
         loadPage(pendingNext); 
-      }, 900); // ממתין 0.9 שניות - מספיק לראות ולשמוע את הבום, אבל מהיר
+      }, 900); // ממתין 0.9 שניות - מספיק לראות את האנימציה לפני שהעמוד מתחלף והסאונד ממשיך
     } else {
       pendingNext = page.next;
       loadPage(pendingNext);
@@ -967,15 +976,6 @@ function clearError() {
 function goChoice(choice) {
   const page = PAGES[currentPage];
   loadPage(choice === 'A' ? page.choiceA : page.choiceB);
-}
-
-function showSuccess() {
-  document.getElementById('success-overlay').classList.add('show');
-}
-
-function doContinue() {
-  document.getElementById('success-overlay').classList.remove('show');
-  if (pendingNext) loadPage(pendingNext);
 }
 
 // ===== אודיו חידה =====
