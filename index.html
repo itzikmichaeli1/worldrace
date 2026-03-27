@@ -2,27 +2,49 @@
 <html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
   <title>המירוץ העולמי - פאזלס חדרי בריחה</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
       min-height: 100vh;
-      background: #080800;
+      background-color: #080800;
+      /* הרקע הדינמי ידרס על ידי ה-JS, אבל זה הדיפולט */
       background-image: radial-gradient(ellipse at 25% 15%, #1a0800 0%, #080e00 40%, #001a18 100%);
+      background-attachment: fixed;
+      transition: background-image 1.5s ease;
       font-family: 'Segoe UI', 'Arial Hebrew', Arial, sans-serif;
       color: #fff;
       overflow-x: hidden;
+      touch-action: manipulation;
     }
 
     #stars { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
     .star { position: absolute; border-radius: 50%; animation: twinkle ease-in-out infinite; }
 
+    /* פס התקדמות גלובלי */
+    #global-progress-wrap {
+      position: fixed; top: 0; left: 0; right: 0; height: 5px;
+      background: rgba(255,255,255,0.1); z-index: 1000;
+    }
+    #global-progress-fill {
+      height: 100%; width: 0%;
+      background: linear-gradient(90deg, #ff9500, #00c8be);
+      transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
     #app {
       position: relative; z-index: 1;
       max-width: 740px; margin: 0 auto;
       padding: 44px 20px 100px;
+    }
+
+    /* אנימציית מעבר עמודים */
+    .fade-transition { animation: fadePage 0.5s ease-out forwards; }
+    @keyframes fadePage {
+      0% { opacity: 0; transform: translateY(15px); }
+      100% { opacity: 1; transform: translateY(0); }
     }
 
     /* ===== כותרת ===== */
@@ -33,6 +55,7 @@
       border-radius: 16px;
       border: 1px solid rgba(255,140,0,0.3);
       position: relative; overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     }
     .page-header::before {
       content: ''; position: absolute; top: 0; left: 20%; right: 20%; height: 2px;
@@ -63,6 +86,7 @@
       border-radius: 12px; overflow: hidden;
       border: 2px solid rgba(255,140,0,0.45);
       margin-bottom: 28px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.6);
     }
     .youtube-wrap iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: none; }
 
@@ -104,15 +128,12 @@
     .code-hint { font-size: 13px; color: rgba(0,200,190,0.6); animation: bounce 1.5s ease-in-out infinite; }
     .submit-btn {
       background: linear-gradient(180deg, #ff9500 0%, #d96000 60%, #a84000 100%);
-      border: none;
-      border-bottom: 5px solid #6a2800;
-      border-radius: 10px;
-      color: #fff; padding: 14px 40px; font-size: 16px;
-      cursor: pointer;
+      border: none; border-bottom: 5px solid #6a2800; border-radius: 10px;
+      color: #fff; padding: 14px 40px; font-size: 16px; cursor: pointer;
       font-family: inherit; font-weight: 800; letter-spacing: 1px; width: 260px;
       text-shadow: 0 1px 3px rgba(0,0,0,0.4);
       box-shadow: 0 6px 0 #6a2800, 0 8px 16px rgba(0,0,0,0.35);
-      transition: all 0.12s;
+      transition: all 0.12s; touch-action: manipulation;
     }
     .submit-btn:hover { filter: brightness(1.1); }
     .submit-btn:active {
@@ -121,27 +142,20 @@
       border-bottom-width: 1px;
     }
     .error-msg {
-      display: none; margin-top: 16px;
-      background: rgba(180,20,0,0.25);
-      border: 1px solid rgba(255,80,50,0.45);
-      border-radius: 8px; padding: 10px 20px;
+      display: none; margin-top: 16px; background: rgba(180,20,0,0.25);
+      border: 1px solid rgba(255,80,50,0.45); border-radius: 8px; padding: 10px 20px;
       color: rgba(255,160,140,0.95); font-size: 14px;
     }
 
     /* ===== צומת — כפתורי בחירה ===== */
     .crossroads-wrap { margin-top: 10px; text-align: center; padding: 28px 16px 32px; background: rgba(20,8,0,0.72); border: 1.5px solid rgba(255,120,0,0.4); border-radius: 14px; position: relative; overflow: hidden; }
     .crossroads-wrap::before { content: ''; position: absolute; top: 0; left: 15%; right: 15%; height: 2px; background: linear-gradient(90deg, transparent, rgba(255,160,0,0.8), rgba(0,210,190,0.5), transparent); }
-    .crossroads-title {
-      text-align: center; font-size: 17px;
-      color: rgba(255,220,150,0.9); margin-bottom: 24px; font-weight: 700;
-    }
+    .crossroads-title { text-align: center; font-size: 17px; color: rgba(255,220,150,0.9); margin-bottom: 24px; font-weight: 700; }
     .choice-btns { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; }
     .choice-btn {
-      flex: 1; min-width: 260px; max-width: 340px;
-      border-radius: 16px; border: none; overflow: hidden;
-      cursor: pointer; font-family: inherit;
-      transition: all 0.15s; padding: 0;
-      box-shadow: 0 8px 0 rgba(0,0,0,0.55), 0 10px 24px rgba(0,0,0,0.4);
+      flex: 1; min-width: 260px; max-width: 340px; border-radius: 16px; border: none; overflow: hidden;
+      cursor: pointer; font-family: inherit; transition: all 0.15s; padding: 0;
+      box-shadow: 0 8px 0 rgba(0,0,0,0.55), 0 10px 24px rgba(0,0,0,0.4); touch-action: manipulation;
     }
     .choice-btn:hover { transform: translateY(-5px); box-shadow: 0 13px 0 rgba(0,0,0,0.55), 0 16px 28px rgba(0,0,0,0.4); filter: brightness(1.08); }
     .choice-btn:active { transform: translateY(6px); box-shadow: 0 2px 0 rgba(0,0,0,0.5); }
@@ -150,200 +164,124 @@
 
     /* ===== נכון/לא נכון ===== */
     .tf-wrap { margin-top: 10px; }
-    .tf-title {
-      text-align: center; font-size: 15px;
-      color: rgba(190,225,255,0.85); margin-bottom: 20px; font-weight: 500;
-      padding: 0 12px;
-    }
+    .tf-title { text-align: center; font-size: 15px; color: rgba(190,225,255,0.85); margin-bottom: 20px; font-weight: 500; padding: 0 12px; line-height: 1.6;}
     .tf-questions { display: flex; flex-direction: column; gap: 12px; }
     .tf-row {
-      display: flex; align-items: center; gap: 12px;
-      background: rgba(15,35,80,0.5);
-      border: 1px solid rgba(60,120,200,0.25);
-      border-radius: 10px; padding: 14px 18px;
+      display: flex; align-items: center; gap: 12px; background: rgba(15,35,80,0.5);
+      border: 1px solid rgba(60,120,200,0.25); border-radius: 10px; padding: 14px 18px;
     }
     .tf-row-num { font-size: 13px; color: rgba(120,180,255,0.5); min-width: 24px; }
     .tf-row-label { flex: 1; font-size: 15px; color: rgba(200,225,255,0.8); }
     .tf-btn-group { display: flex; gap: 8px; }
     .tf-btn {
-      padding: 8px 18px; border-radius: 7px; font-size: 14px;
-      font-weight: 600; cursor: pointer; font-family: inherit;
-      border: 1.5px solid; transition: all 0.2s;
+      padding: 8px 18px; border-radius: 7px; font-size: 14px; font-weight: 600; cursor: pointer;
+      font-family: inherit; border: 1.5px solid; transition: all 0.2s; touch-action: manipulation;
     }
     .tf-btn.correct-btn { border-color: rgba(60,180,100,0.5); background: rgba(20,80,40,0.3); color: #7de8a0; }
-    .tf-btn.correct-btn.selected,
-    .tf-btn.correct-btn:hover { background: rgba(30,120,60,0.6); border-color: rgba(80,220,130,0.8); }
+    .tf-btn.correct-btn.selected, .tf-btn.correct-btn:hover { background: rgba(30,120,60,0.6); border-color: rgba(80,220,130,0.8); }
     .tf-btn.wrong-btn { border-color: rgba(200,80,80,0.5); background: rgba(80,20,20,0.3); color: #f08080; }
-    .tf-btn.wrong-btn.selected,
-    .tf-btn.wrong-btn:hover { background: rgba(140,30,30,0.6); border-color: rgba(240,100,100,0.8); }
+    .tf-btn.wrong-btn.selected, .tf-btn.wrong-btn:hover { background: rgba(140,30,30,0.6); border-color: rgba(240,100,100,0.8); }
     .tf-submit {
-      margin-top: 20px; width: 100%;
-      background: linear-gradient(135deg, rgba(30,90,200,0.7), rgba(50,130,230,0.5));
-      border: 1.5px solid rgba(80,160,240,0.7); border-radius: 10px;
-      color: #c8e8ff; padding: 15px; font-size: 16px;
-      cursor: pointer; font-family: inherit; font-weight: 700;
-      transition: all 0.2s;
+      margin-top: 20px; width: 100%; background: linear-gradient(135deg, rgba(30,90,200,0.7), rgba(50,130,230,0.5));
+      border: 1.5px solid rgba(80,160,240,0.7); border-radius: 10px; color: #c8e8ff; padding: 15px; font-size: 16px;
+      cursor: pointer; font-family: inherit; font-weight: 700; transition: all 0.2s; touch-action: manipulation;
     }
     .tf-submit:hover { opacity: 0.85; }
     .tf-error {
-      display: none; margin-top: 14px; text-align: center;
-      color: rgba(255,150,150,0.9); font-size: 14px;
-      background: rgba(180,30,30,0.2);
-      border: 1px solid rgba(220,80,80,0.35);
-      border-radius: 8px; padding: 10px;
+      display: none; margin-top: 14px; text-align: center; color: rgba(255,150,150,0.9); font-size: 14px;
+      background: rgba(180,30,30,0.2); border: 1px solid rgba(220,80,80,0.35); border-radius: 8px; padding: 10px;
     }
 
-    /* ===== עמוד סיום ===== */
+    /* ===== עמוד סיום וקונפטי ===== */
     .finish-wrap { text-align: center; padding: 20px; }
-    .finish-trophy { font-size: 70px; margin-bottom: 20px; }
-    .finish-title { color: #b8dcff; font-size: 28px; font-weight: 800; margin-bottom: 12px; }
-    .finish-sub { color: rgba(180,220,255,0.65); font-size: 17px; line-height: 1.8; }
+    .finish-trophy { font-size: 80px; margin-bottom: 20px; animation: popIn 1s cubic-bezier(0.34,1.56,0.64,1); }
+    .finish-title { color: #ffeb99; font-size: 32px; font-weight: 800; margin-bottom: 12px; text-shadow: 0 2px 10px rgba(255, 200, 0, 0.5);}
+    .finish-sub { color: rgba(255,240,200,0.85); font-size: 18px; line-height: 1.8; }
+    
+    .confetti {
+      position: fixed; width: 10px; height: 10px; top: -20px; z-index: 9999;
+      animation: confettiFall 4s linear forwards; pointer-events: none;
+    }
+    @keyframes confettiFall {
+      0% { top: -10px; transform: rotate(0deg) scale(1); }
+      100% { top: 100vh; transform: rotate(720deg) scale(0.5); }
+    }
 
     /* ===== חלון הצלחה ===== */
     #success-overlay {
       display: none; position: fixed; inset: 0; z-index: 200;
-      background: rgba(2,6,20,0.88);
-      align-items: center; justify-content: center;
+      background: rgba(2,6,20,0.88); align-items: center; justify-content: center;
     }
     #success-overlay.show { display: flex; }
     .success-card {
-      background: rgba(15,6,0,0.98);
-      border: 1px solid rgba(255,160,0,0.6);
-      border-radius: 16px; padding: 48px 56px;
-      text-align: center; max-width: 380px;
-      animation: popIn 0.45s cubic-bezier(0.34,1.56,0.64,1);
+      background: rgba(15,6,0,0.98); border: 1px solid rgba(255,160,0,0.6); border-radius: 16px; padding: 48px 56px;
+      text-align: center; max-width: 380px; animation: popIn 0.45s cubic-bezier(0.34,1.56,0.64,1);
     }
     .success-icon {
-      width: 70px; height: 70px; border-radius: 50%;
-      background: rgba(255,140,0,0.15);
-      border: 2px solid rgba(255,180,0,0.7);
-      display: flex; align-items: center; justify-content: center;
-      margin: 0 auto 20px; font-size: 32px; color: #5aaeee;
+      width: 70px; height: 70px; border-radius: 50%; background: rgba(255,140,0,0.15); border: 2px solid rgba(255,180,0,0.7);
+      display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 32px; color: #5aaeee;
     }
     .success-title { color: #ffe0a0; font-size: 24px; margin-bottom: 10px; font-weight: 700; }
     .success-sub { color: rgba(255,220,160,0.65); font-size: 15px; margin-bottom: 32px; }
     #continue-btn {
       background: linear-gradient(180deg, #00c8be 0%, #008a82 60%, #005a55 100%);
-      border: none; border-bottom: 5px solid #002a27;
-      border-radius: 10px; color: #fff;
-      padding: 14px 40px; font-size: 17px;
-      cursor: pointer; font-family: inherit; font-weight: 800;
-      transition: all 0.12s; width: 100%;
-      box-shadow: 0 6px 0 #002a27, 0 8px 16px rgba(0,0,0,0.4);
-      text-shadow: 0 1px 3px rgba(0,0,0,0.4);
+      border: none; border-bottom: 5px solid #002a27; border-radius: 10px; color: #fff;
+      padding: 14px 40px; font-size: 17px; cursor: pointer; font-family: inherit; font-weight: 800;
+      transition: all 0.12s; width: 100%; box-shadow: 0 6px 0 #002a27, 0 8px 16px rgba(0,0,0,0.4); text-shadow: 0 1px 3px rgba(0,0,0,0.4);
+      touch-action: manipulation;
     }
     #continue-btn:active { transform: translateY(5px); box-shadow: 0 1px 0 #002a27; border-bottom-width: 1px; }
 
-    /* ===== נגן אודיו מעודכן ===== */
+    /* ===== נגן אודיו ===== */
     .audio-riddle {
       background: linear-gradient(145deg, rgba(40,80,140,0.4), rgba(15,35,70,0.6));
-      border: 1px solid rgba(80,150,220,0.5);
-      border-radius: 12px; 
-      padding: 18px 20px;
-      margin-bottom: 24px;
-      display: flex; align-items: center; gap: 16px;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.5), inset 0 2px 5px rgba(255,255,255,0.1);
+      border: 1px solid rgba(80,150,220,0.5); border-radius: 12px; padding: 18px 20px; margin-bottom: 24px;
+      display: flex; align-items: center; gap: 16px; box-shadow: 0 8px 20px rgba(0,0,0,0.5), inset 0 2px 5px rgba(255,255,255,0.1);
     }
     .audio-play-btn {
       width: 46px; height: 46px; border-radius: 50%;
       background: linear-gradient(180deg, rgba(60,130,220,0.5), rgba(30,80,160,0.7));
-      border: 1px solid rgba(100,170,240,0.6);
-      color: #fff; cursor: pointer; font-size: 18px;
-      display: flex; align-items: center; justify-content: center;
-      transition: all 0.15s; flex-shrink: 0;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.4), inset 0 2px 4px rgba(255,255,255,0.2);
-      text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+      border: 1px solid rgba(100,170,240,0.6); color: #fff; cursor: pointer; font-size: 18px;
+      display: flex; align-items: center; justify-content: center; transition: all 0.15s; flex-shrink: 0;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.4), inset 0 2px 4px rgba(255,255,255,0.2); text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+      touch-action: manipulation;
     }
-    .audio-play-btn:hover { 
-      background: linear-gradient(180deg, rgba(80,150,240,0.6), rgba(40,100,180,0.8)); 
-      transform: scale(1.05); 
-    }
-    .audio-play-btn:active { 
-      transform: scale(0.95); 
-      box-shadow: 0 2px 5px rgba(0,0,0,0.4); 
-    }
+    .audio-play-btn:hover { background: linear-gradient(180deg, rgba(80,150,240,0.6), rgba(40,100,180,0.8)); transform: scale(1.05); }
+    .audio-play-btn:active { transform: scale(0.95); box-shadow: 0 2px 5px rgba(0,0,0,0.4); }
     .audio-track { flex: 1; }
     .audio-label { font-size: 13px; color: rgba(140,200,255,0.85); margin-bottom: 6px; font-weight: 600; }
     .audio-progress-bar { 
-      height: 8px; 
-      background: rgba(255,255,255,0.1); 
-      border-radius: 4px; 
-      position: relative; 
-      cursor: pointer; 
-      box-shadow: inset 0 1px 2px rgba(0,0,0,0.3);
+      height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; position: relative; cursor: pointer; 
+      box-shadow: inset 0 1px 2px rgba(0,0,0,0.3); touch-action: manipulation;
     }
     .audio-progress-fill { 
-      position: absolute; 
-      right: 0; 
-      top: 0; 
-      height: 100%; 
-      background: #5aaeee; 
-      border-radius: 4px; 
-      width: 0%; 
-      pointer-events: none; 
-      box-shadow: 0 0 5px rgba(90,174,238,0.5);
+      position: absolute; right: 0; top: 0; height: 100%; background: #5aaeee; border-radius: 4px; width: 0%; 
+      pointer-events: none; box-shadow: 0 0 5px rgba(90,174,238,0.5);
     }
     .audio-time { font-size: 11px; color: rgba(255,255,255,0.4); margin-top: 5px; text-align: left; }
 
-    /* ===== עיצוב תיבת הפסנתר המרכזית וכפתור תווים ===== */
-    .rotate-device-msg {
-      font-size: 14px;
-      color: #ff9500;
-      margin-bottom: 10px;
-      text-align: center;
-      display: none;
-    }
-    @media (max-width: 600px) {
-      .rotate-device-msg {
-        display: block;
-      }
-    }
-    .piano-scroll-wrapper {
-      width: 100%;
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
-      padding: 10px 0;
-      direction: ltr; /* תמיד משמאל לימין בשביל הפסנתר */
-    }
+    /* ===== אנימציות עזר ===== */
+    @keyframes shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-10px)} 40%{transform:translateX(10px)} 60%{transform:translateX(-6px)} 80%{transform:translateX(6px)} }
+    .shaking { animation: shake 0.55s ease; }
+    @keyframes twinkle { 0%,100%{opacity:.25;transform:scale(1)} 50%{opacity:1;transform:scale(1.5)} }
+    @keyframes popIn { 0%{transform:scale(.75);opacity:0} 100%{transform:scale(1);opacity:1} }
+    @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-5px)} }
+
+    /* ===== פסנתר ===== */
+    .rotate-device-msg { font-size: 14px; color: #ff9500; margin-bottom: 10px; text-align: center; display: none; }
+    @media (max-width: 600px) { .rotate-device-msg { display: block; } }
+    .piano-scroll-wrapper { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; padding: 10px 0; direction: ltr; }
     .piano-chassis {
-      background: linear-gradient(145deg, #2a0a00, #110000);
-      border: 2px solid #5a2a00;
-      border-radius: 10px;
-      padding: 20px 15px;
-      box-shadow: 0 15px 30px rgba(0,0,0,0.6), inset 0 5px 15px rgba(0,0,0,0.8);
-      margin: 0 auto;
-      display: block;
-      width: max-content;
-      position: relative;
+      background: linear-gradient(145deg, #2a0a00, #110000); border: 2px solid #5a2a00; border-radius: 10px;
+      padding: 20px 15px; box-shadow: 0 15px 30px rgba(0,0,0,0.6), inset 0 5px 15px rgba(0,0,0,0.8);
+      margin: 0 auto; display: block; width: max-content; position: relative; touch-action: manipulation;
     }
-    .piano-felt {
-      width: 100%;
-      height: 8px;
-      background: #a00;
-      border-radius: 4px 4px 0 0;
-      box-shadow: inset 0 -3px 5px rgba(0,0,0,0.5);
-      margin-bottom: -2px;
-      position: relative;
-      z-index: 3;
-    }
+    .piano-felt { width: 100%; height: 8px; background: #a00; border-radius: 4px 4px 0 0; box-shadow: inset 0 -3px 5px rgba(0,0,0,0.5); margin-bottom: -2px; position: relative; z-index: 3; }
     .piano-hint-badge {
-      display: inline-block;
-      margin-top: 22px;
-      padding: 8px 20px;
-      background: linear-gradient(180deg, #ffb74d 0%, #f57c00 100%);
-      color: #3e2000;
-      font-size: 15px;
-      font-weight: 800;
-      border-radius: 25px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.6), inset 0 2px 2px rgba(255,255,255,0.4);
-      text-shadow: 0 1px 0 rgba(255,255,255,0.3);
-      border: 1px solid #c85a00;
-      animation: floatBadge 2.5s ease-in-out infinite;
-      cursor: default;
-    }
-    @keyframes floatBadge {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-4px); }
+      display: inline-block; margin-top: 22px; padding: 8px 20px; background: linear-gradient(180deg, #ffb74d 0%, #f57c00 100%);
+      color: #3e2000; font-size: 15px; font-weight: 800; border-radius: 25px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.6), inset 0 2px 2px rgba(255,255,255,0.4); text-shadow: 0 1px 0 rgba(255,255,255,0.3);
+      border: 1px solid #c85a00; animation: floatBadge 2.5s ease-in-out infinite; cursor: default;
     }
 
     /* ===== מערכת רמזים ===== */
@@ -353,11 +291,9 @@
       background: linear-gradient(135deg, #ffda44, #ff9500);
       border: 2px solid #fff; box-shadow: 0 4px 15px rgba(255,150,0,0.5);
       font-size: 26px; cursor: pointer; display: none; 
-      transition: transform 0.2s, box-shadow 0.2s;
-      align-items: center; justify-content: center;
+      transition: transform 0.2s, box-shadow 0.2s; align-items: center; justify-content: center; touch-action: manipulation;
     }
     #floating-hint-btn:hover { transform: scale(1.1); box-shadow: 0 6px 20px rgba(255,150,0,0.7); }
-
     #hints-overlay {
       display: none; position: fixed; inset: 0; z-index: 200;
       background: rgba(0,0,0,0.85); align-items: center; justify-content: center;
@@ -368,12 +304,10 @@
     .hints-card {
       background: #160a00; border: 1px solid #ff9500; border-radius: 12px;
       padding: 28px 24px; width: 90%; max-width: 420px; position: relative;
-      color: #fff; text-align: right; box-shadow: 0 15px 30px rgba(0,0,0,0.8);
-      max-height: 90vh; overflow-y: auto;
+      color: #fff; text-align: right; box-shadow: 0 15px 30px rgba(0,0,0,0.8); max-height: 90vh; overflow-y: auto;
     }
     .close-hints-btn {
-      position: absolute; top: 12px; left: 12px; background: transparent;
-      border: none; color: #aaa; font-size: 24px; cursor: pointer; transition: 0.2s;
+      position: absolute; top: 12px; left: 12px; background: transparent; border: none; color: #aaa; font-size: 24px; cursor: pointer; transition: 0.2s; touch-action: manipulation;
     }
     .close-hints-btn:hover { color: #fff; transform: scale(1.1); }
     .hints-title { text-align: center; color: #ffcc00; margin-bottom: 24px; font-weight: 800; font-size: 22px; }
@@ -381,26 +315,20 @@
     .hint-item { margin-bottom: 14px; }
     .hint-btn {
       width: 100%; background: linear-gradient(180deg, #2a1500, #1a0a00);
-      border: 1px solid #ff9500; color: #ffe8c0;
-      padding: 14px; border-radius: 8px; cursor: pointer; font-size: 16px; font-family: inherit; font-weight: bold;
-      transition: 0.2s; text-align: right; box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+      border: 1px solid #ff9500; color: #ffe8c0; padding: 14px; border-radius: 8px; cursor: pointer; font-size: 16px; font-family: inherit; font-weight: bold;
+      transition: 0.2s; text-align: right; box-shadow: 0 4px 6px rgba(0,0,0,0.3); touch-action: manipulation;
     }
     .hint-btn:hover { background: linear-gradient(180deg, #3a2000, #2a1500); transform: translateY(-2px); }
     .hint-btn.solution-btn { border-color: #ff4444; color: #ffaaaa; background: linear-gradient(180deg, #3a0a0a, #1a0000); }
     .hint-btn.solution-btn:hover { background: linear-gradient(180deg, #4a1010, #2a0000); }
     
-    .hint-confirm {
-      display: none; background: #221100; padding: 16px; border-radius: 8px;
-      text-align: center; border: 1px dashed #ff9500; margin-top: 8px;
-    }
+    .hint-confirm { display: none; background: #221100; padding: 16px; border-radius: 8px; text-align: center; border: 1px dashed #ff9500; margin-top: 8px; }
     .hint-confirm.solution-confirm { border-color: #ff4444; background: #2a0000; }
     .hint-confirm p { margin-bottom: 14px; font-size: 15px; color: #eee; }
     .hint-confirm.solution-confirm p { color: #ffaaaa; font-weight: bold; }
     
     .hint-confirm-btns { display: flex; gap: 10px; justify-content: center; }
-    .hint-confirm-btns button {
-      padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-family: inherit; font-weight: bold; font-size: 14px; transition: 0.2s;
-    }
+    .hint-confirm-btns button { padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-family: inherit; font-weight: bold; font-size: 14px; transition: 0.2s; touch-action: manipulation; }
     .btn-yes { background: #ff9500; color: #000; }
     .btn-yes:hover { background: #ffa500; }
     .solution-confirm .btn-yes { background: #ff4444; color: #fff; }
@@ -409,8 +337,7 @@
     .btn-no:hover { background: #666; }
     
     .hint-text {
-      display: none; background: rgba(255,255,255,0.05); padding: 16px;
-      border-radius: 8px; font-size: 15px; line-height: 1.6;
+      display: none; background: rgba(255,255,255,0.05); padding: 16px; border-radius: 8px; font-size: 15px; line-height: 1.6;
       border-right: 4px solid #ff9500; color: #eee; white-space: pre-wrap; margin-top: 8px;
     }
     .hint-text.solution-text { border-right-color: #ff4444; font-weight: bold; color: #ffcccc; }
@@ -418,9 +345,13 @@
 </head>
 <body>
 
+<div id="global-progress-wrap">
+  <div id="global-progress-fill"></div>
+</div>
+
 <div id="stars"></div>
 
-<div id="app">
+<div id="app" class="fade-transition">
   <div class="page-header">
     <div class="site-label">פאזלס חדרי בריחה</div>
     <h1 class="page-title" id="page-title"></h1>
@@ -511,8 +442,7 @@
   <div class="hints-card">
     <button class="close-hints-btn" onclick="closeHintsModal()">✖</button>
     <h2 class="hints-title">צריכים עזרה?</h2>
-    <div id="hints-container">
-      </div>
+    <div id="hints-container"></div>
   </div>
 </div>
 
@@ -527,16 +457,14 @@
 
 <script>
 // ================================================================
-//  מבנה המשחק המלא כולל כל הרמזים והפתרונות
+//  מבנה המשחק המלא כולל כל הרמזים, הרקעים, וסדר ההתקדמות
 // ================================================================
 const PAGES = {
   opening: {
+    step: 1, bg: "radial-gradient(ellipse at 25% 15%, #1a0800 0%, #080e00 40%, #001a18 100%)",
     title: "המירוץ העולמי - מתחילים!",
     desc: "המירוץ העולמי יוצא לדרך בעונה חדשה ומפתיעה והפעם – אתם המתחרים! שימו לב! מוכנים? צפו בסרטון והתחילו לשחק!",
-    youtube: "FlTe_-Wxf6k",
-    code: "3682",
-    next: "london",
-    type: "code",
+    youtube: "FlTe_-Wxf6k", code: "3682", next: "london", type: "code",
     hints: [
       "במעטפה 13 ספחים של כרטיסי טיסה המייצגים 13 מקומות ספציפיים במטוס. סימון מושבים אלה על גבי דיאגרמת המטוס ודאי יסייע להגיע לפתרון. הקוד הוא בן ארבע ספרות.",
       "נסו לצבוע את המושבים המופיעים בספחי הטיסה ולאחר מכן להסתכל על הצורה שנוצרת מהמושבים שנשארים ריקים."
@@ -544,12 +472,10 @@ const PAGES = {
     solution: "המושבים הנותרים במטוס לאחר צביעת המושבים שבספחי הטיסה יוצרים ספרות. קוד הטיסה הנוצר הוא 3682. הזינו קוד זה באתר."
   },
   london: {
+    step: 2, bg: "radial-gradient(ellipse at 25% 15%, #001122 0%, #08111a 40%, #000a11 100%)",
     title: "ברוכים הבאים לאנגליה!",
     desc: "כל הכבוד! הגעתם ליעד הראשון שלכם במירוץ.\n\nפתחו את המעטפה השנייה.\n\nצפו בסרטון והזינו למטה את קוד הרכבת התחתית.",
-    youtube: "tOnHapIZFi4",
-    code: "bond",
-    next: "crossroads",
-    type: "code",
+    youtube: "tOnHapIZFi4", code: "bond", next: "crossroads", type: "code",
     hints: [
       "שמות התחנות בסימן הדרך מחוקות, אך יש רק דרך אחת שבה ניתן לעבור במסלול המתואר. נסו להבין מה היא הדרך הזו, ולקבל קוד ממשהו שמודגש בשמות התחנות.",
       "על פי סימן הדרך, לתחנה האחרונה מגיעים באמצעות המסלול הצהוב. אם כן התחנה הזו יכולה להיות רק אחת משתי תחנות, אבל אחת מהן לא מתאימה למסלול המתואר בסימן הדרך. השתמשו בהגיון זה על מנת למצוא את כל המסלול.\nהקוד יהיה מורכב מהאות המודגשת בכל תחנה שאתם עוברים בה."
@@ -557,20 +483,16 @@ const PAGES = {
     solution: "הדרך היחידה לעבור במסלול המתואר היא להתחיל מ bond Street, להמשיך ל Oxford circus, משם ל cannon Street ואז ל old Street.\nהאות המודגשת בכל אחת מתחנות אלה יוצרת את הקוד BOND. הזינו קוד זה באתר."
   },
   crossroads: {
+    step: 3, bg: "radial-gradient(ellipse at 25% 15%, #1a001a 0%, #0d001a 40%, #050011 100%)",
     title: "כל הכבוד! הגעתם ליעד!",
     desc: "במשימת צומת עליכם לבחור אחת מ-2 משימות.\n\nפתחו את המעטפה השלישית ובחרו: 'חבל על הזמן' או 'זמן להופעה'",
-    youtube: null,
-    type: "crossroads",
-    choiceA: "time-first",
-    choiceB: "show-first"
+    youtube: null, type: "crossroads", choiceA: "time-first", choiceB: "show-first"
   },
   "time-first": {
+    step: 4, bg: "radial-gradient(ellipse at 25% 15%, #1a001a 0%, #0d001a 40%, #050011 100%)",
     title: "חבל על הזמן",
     desc: "במשימת הצומת בחרתם ב'חבל על הזמן'.\nבהצלחה!",
-    youtube: "GE6oODAEQ-U",
-    code: "435",
-    next: "show-second",
-    type: "code",
+    youtube: "GE6oODAEQ-U", code: "435", next: "show-second", type: "code",
     hints: [
       "מה השעה בכל אחת מהמדינות? העזרו בלוח עם שמות המדינות והשעות כדי לכוון כל שעון לשעה הנכונה.",
       "כיוון נכון של כל שעון לשעה המתאימה יצור ספרה שמורכבת מהמחוגים של כל שלישיית שעונים."
@@ -578,14 +500,10 @@ const PAGES = {
     solution: "אם תכוונו נכון את השעונים לשעות המתאימות, תקבלו את הקוד 435. הזינו קוד זה באתר."
   },
   "show-first": {
-    title: "זמן להופעה",
-    synthRiddle: true,
-    piano: true,
+    step: 4, bg: "radial-gradient(ellipse at 25% 15%, #1a001a 0%, #0d001a 40%, #050011 100%)",
+    title: "זמן להופעה", synthRiddle: true, piano: true,
     desc: "במשימת הצומת בחרתם\nב'זמן להופעה' בהצלחה!",
-    youtube: "mnIEuzaG238",
-    code: "4731",
-    next: "time-second",
-    type: "code",
+    youtube: "mnIEuzaG238", code: "4731", next: "time-second", type: "code",
     hints: [
       "האזינו לארבעת התווים. נסו לשחזר אותם על הפסנתר ותקבלו מיקום בתוך המטריצה של התמונות.\nשימו לב שהתמונות מייצגות שמות של להקות מפורסמות שהופיעו באולם.",
       "התו הראשון הוא התו שמיוצג בפסנתר על ידי C1.\nהמיקום C1 במטריצה הוא תמונה של המלכה, כלומר של QUEEN. להקת QUEEN היא מס' 4 ברשימת הלהקות. לכן הספרה הראשונה היא 4.\nכעת פתרו באופן דומה את שלושת התווים הנוספים."
@@ -593,14 +511,10 @@ const PAGES = {
     solution: "ארבעת התווים הם (משמאל לימין) C1 A2 A3 B2 המייצגים את קווין, הדלתות, האבנים המתגלגלות והביטלס, כלומר הקוד על פי רשימת הלהקות הוא 4731. הזינו קוד זה באתר."
   },
   "show-second": {
-    title: "סיבוב פרסה!",
-    synthRiddle: true,
-    piano: true,
+    step: 5, bg: "radial-gradient(ellipse at 25% 15%, #1a001a 0%, #0d001a 40%, #050011 100%)",
+    title: "סיבוב פרסה!", synthRiddle: true, piano: true,
     desc: "כנראה שהמתחרים האחרים רואים בכם איום – קיבלתם סיבוב פרסה! כעת עליכם לבצע את משימת הצומת השנייה – 'זמן להופעה'! בהצלחה!",
-    youtube: "mnIEuzaG238",
-    code: "4731",
-    next: "boarding",
-    type: "code",
+    youtube: "mnIEuzaG238", code: "4731", next: "boarding", type: "code",
     hints: [
       "האזינו לארבעת התווים. נסו לשחזר אותם על הפסנתר ותקבלו מיקום בתוך המטריצה של התמונות.\nשימו לב שהתמונות מייצגות שמות של להקות מפורסמות שהופיעו באולם.",
       "התו הראשון הוא התו שמיוצג בפסנתר על ידי C1.\nהמיקום C1 במטריצה הוא תמונה של המלכה, כלומר של QUEEN. להקת QUEEN היא מס' 4 ברשימת הלהקות. לכן הספרה הראשונה היא 4.\nכעת פתרו באופן דומה את שלושת התווים הנוספים."
@@ -608,12 +522,10 @@ const PAGES = {
     solution: "ארבעת התווים הם (משמאל לימין) C1 A2 A3 B2 המייצגים את קווין, הדלתות, האבנים המתגלגלות והביטלס, כלומר הקוד על פי רשימת הלהקות הוא 4731. הזינו קוד זה באתר."
   },
   "time-second": {
+    step: 5, bg: "radial-gradient(ellipse at 25% 15%, #1a001a 0%, #0d001a 40%, #050011 100%)",
     title: "סיבוב פרסה!",
     desc: "כנראה שאתם מהווים איום על המשתתפים האחרים, משום שקיבלתם סיבוב פרסה! כעת עליכם לבצע גם את משימת הצומת השנייה – 'חבל על הזמן'!",
-    youtube: "GE6oODAEQ-U",
-    code: "435",
-    next: "boarding",
-    type: "code",
+    youtube: "GE6oODAEQ-U", code: "435", next: "boarding", type: "code",
     hints: [
       "מה השעה בכל אחת מהמדינות? העזרו בלוח עם שמות המדינות והשעות כדי לכוון כל שעון לשעה הנכונה.",
       "כיוון נכון של כל שעון לשעה המתאימה יצור ספרה שמורכבת מהמחוגים של כל שלישיית שעונים."
@@ -621,12 +533,10 @@ const PAGES = {
     solution: "אם תכוונו נכון את השעונים לשעות המתאימות, תקבלו את הקוד 435. הזינו קוד זה באתר."
   },
   boarding: {
+    step: 6, bg: "radial-gradient(ellipse at 25% 15%, #001a22 0%, #000d1a 40%, #000511 100%)",
     title: "כל הכבוד!",
     desc: "עברתם את שני הצדדים של הצומת, וכעת אתם יכולים לקבל את המעטפה עם הרמז הבא! פתחו את המעטפה הרביעית, והזינו כאן את קוד הטיסה ליעד הבא שלכם",
-    youtube: null,
-    code: "386",
-    next: "zoo",
-    type: "code",
+    youtube: null, code: "386", next: "zoo", type: "code",
     hints: [
       "עקבו בקפידה אחר ההוראות. זכרו כי החפצים הם חד פעמיים, אז מותר לקפל ומותר להשתמש במספריים.",
       "לאחר קיפול התיק לפי ההוראות וגזירה החוצה של מה שהיה צריך לגזור, פתחו את התיק מחדש והסתכלו על החלק הקדמי שלו. האם נוצרו לכם ספרות?"
@@ -634,12 +544,10 @@ const PAGES = {
     solution: "קיפול וגזירה של התיק יוצר את הספרות 386. הזינו קוד זה באתר."
   },
   zoo: {
+    step: 7, bg: "radial-gradient(ellipse at 25% 15%, #002200 0%, #001100 40%, #000500 100%)",
     title: "כל הכבוד!",
     desc: "פיתחו את המעטפה החמישית! על מנת לקבל את הרמז ליעד הבא, הזינו כאן את קוד משימת גן החיות",
-    youtube: "SkKxiszzO9E",
-    code: "5441",
-    next: "museum",
-    type: "code",
+    youtube: "SkKxiszzO9E", code: "5441", next: "museum", type: "code",
     hints: [
       "על מנת למצוא את הקוד תצטרכו להצליב מידע בין כל האלמנטים.\nהתחילו בסימן הדרך עם החיה הראשונה ברשימה. האם היא מופיעה באחד הדגלים? המשיכו משם.",
       "התחילו מהסוס. הוא מופיע בדגל של מדינת פנסילבניה.\nהסתכלו במפה, מה המאכל הרשמי של מדינת פנסילבניה? ולסיום מה הספרה של מאכל זה ברשימת הקניות?\nהמשיכו באופן דומה עבור שאר החיות, על מנת לקבל קוד ארבע ספרות."
@@ -647,12 +555,10 @@ const PAGES = {
     solution: "הסוס מופיע בדגל פנסילבניה, שם המאכל הוא סטייק וגבינה. ברשימת הקניות 5\nהשקנאי מופיע בדגל לואיזיאנה, שם המאכל הוא גנבו. ברשימת הקניות 4\nהבאפלו מופיע בדגל ויומינג, שם המאכל הוא סטייק עוף צלוי. ברשימת הקניות 4\nהצבי מופיע בדגל מישיגן, שם המאכל הוא נקניק עוף. ברשימת הקניות 1\nהקוד אם כן הוא 5441. הזינו קוד זה באתר."
   },
   museum: {
+    step: 8, bg: "radial-gradient(ellipse at 25% 15%, #220a00 0%, #110500 40%, #0a0200 100%)",
     title: "כל הכבוד!",
     desc: "פיתחו את המעטפה השישית, והזינו למטה את קוד הפורטרטים",
-    youtube: "xqGth1DhDd4",
-    code: "235",
-    next: "tajmahal",
-    type: "code",
+    youtube: "xqGth1DhDd4", code: "235", next: "tajmahal", type: "code",
     hints: [
       "סדרו את הפורטרטים נכון בהתאם לאילוצים שבסימן הדרך.\nאחרי שכל הפורטרטים במקומם, שימו לב במה כדאי להתמקד. אולי ההסבר על היצירה יעזור.",
       "בצד שמאל ג'ורדי מעל ג'ים מעל ג'וליאני.\nהסתכלו על הצורה שנוצרת מהזרועות של שלושתם. יכול להיות שזו ספרה כלשהי?"
@@ -660,12 +566,10 @@ const PAGES = {
     solution: "לאחר סידור נכון של הפורטרטים הזרועות של כל אחד מהטורים יוצרות ספרה.\nיחד הן יוצרות את הספרות 235. הזינו קוד זה באתר."
   },
   tajmahal: {
+    step: 9, bg: "radial-gradient(ellipse at 25% 15%, #221100 0%, #110800 40%, #0a0500 100%)",
     title: "כל הכבוד צוות!",
     desc: "ממתינה לכם משימה נוספת כאן במוזיאון לאמנות. פיתחו את המעטפה השביעית. אם עמדתם במשימה, הזינו כאן את שם המדינה הבאה עליכם להגיע",
-    youtube: null,
-    code: "הודו",
-    next: "airport",
-    type: "code",
+    youtube: null, code: "הודו", next: "airport", type: "code",
     hints: [
       "בחרו חבר\\ת צוות שיקראו את מה שכתוב במשימה. לאחר מכן הכול תלוי רק במי שנבחר\\ה.\nמדובר באתרים מפורסמים סביב העולם. זהו שלושה מהם.",
       "במעטפה הקטנה מופיע היעד הבא, אם לא תזהו אותו נסו להעזר בגוגל, זה אחד מפלאי תבל."
@@ -673,12 +577,10 @@ const PAGES = {
     solution: "האתר שבתמונה הוא הטאג' מאהל שבהודו. הזינו את המילה הודו באתר."
   },
   airport: {
+    step: 10, bg: "radial-gradient(ellipse at 25% 15%, #000a22 0%, #000511 40%, #00020a 100%)",
     title: "כל הכבוד צוות!",
     desc: "היעד הבא שלכם הוא דרמסאלה, הודו! אך תחילה, הסיעו את עצמכם אל שדה התעופה, ופיתחו את המעטפה השמינית",
-    youtube: "PwEocvwT9vo",
-    code: "3254",
-    next: "guru",
-    type: "code",
+    youtube: "PwEocvwT9vo", code: "3254", next: "guru", type: "code",
     hints: [
       "האם יש קשר כלשהו בין התמונה של ההילוכים לבין הסמלים המוזרים?",
       "הסמלים תואמים לצורה של ההילוכים. שימו לב שבכל אחד מהסמלים חסר קו אחד של ההילוכים."
@@ -686,12 +588,10 @@ const PAGES = {
     solution: "הקווים החסרים מייצגים את הספרות 3254 על גבי ההילוכים. הזינו קוד זה באתר."
   },
   guru: {
+    step: 11, bg: "radial-gradient(ellipse at 25% 15%, #2a1100 0%, #150800 40%, #0a0400 100%)",
     title: "כל הכבוד!",
     desc: "ניחשתם נכון! ברוכים הבאים לדראמסלה, הודו.\n\nשימו לב! נראה שאחת הקבוצות המתחרות ניסתה לחבל לכם בהתקדמות והרסה את ה-QR קוד שבמעטפה. למזלכם, הפקת המירוץ שמה לב לזה ודאגה להעלות את המסר מהגורו ישירות לכאן.\n\nצפו בסרטון והזינו כאן את קוד הגורו:",
-    youtube: "jnxgqrVLbIg",
-    code: "41",
-    next: "market",
-    type: "code",
+    youtube: "jnxgqrVLbIg", code: "41", next: "market", type: "code",
     hints: [
       "צפו בסרטון של הגורו. צפיה בסבלנות היא חשובה, אל תנסו לדלג.",
       "השלט האחרון אומר לקרוא כל מילה רביעית בשלטים.\nאם תעשו זאת תקבלו את מה שצריך כדי למצוא את הקוד."
@@ -699,41 +599,61 @@ const PAGES = {
     solution: "אם תקראו את המילה הרביעית בכל שלט, תקבלו את המשפט \"הקוד הוא מספר השניות בסרטון ברגע שנגעתי בפנים בפעם הרביעית\".\nמספר השניות בסרטון בו הגורו נוגע בפנים שלו בפעם הרביעית הוא 41. הזינו קוד זה באתר."
   },
   market: {
+    step: 12, bg: "radial-gradient(ellipse at 25% 15%, #220511 0%, #110208 40%, #0a0105 100%)",
     title: "כל הכבוד!",
     desc: "פיתחו את המעטפה העשירית",
-    youtube: "wef_7pKbPMg",
-    code: "385",
-    next: "finish",
-    type: "code",
+    youtube: "wef_7pKbPMg", code: "385", next: "finish_task", type: "code",
     hints: [
       "גזרו את פס ההאטה על פי הסימון. האם ראיתם מקום למשולש כזה על משהו שכבר קראתם בעבר?\nחזרו אל המחסום!",
       "הניחו את פס ההאטה במקום המתאים במחסום והחליפו בין האותיות בעזרת המיפוי.\nהשתמשו במה שקבלתם על מפת השוק. האם נחשפות לכם ספרות?\nשימו לב לסדר הספרות בכיוון החץ."
     ],
     solution: "אם תניחו את פס ההאטה במקום המתאים במחסום (מתחת למילים \"אסור גם המחזות\") ותחליפו את האותיות על פי הסימון, יתקבל המשפט \"גזרו את המחסום\". המחסום הגזור מתאים בדיוק בתוך העיגולים המסומנים במפת השוק, ויוצר ספרות על גבי המפה: 385. הזינו קוד זה באתר."
   },
-  finish: {
-    title: "כל הכבוד צוות!",
-    desc: "עברתם את כל המדינות, והצלחתם בכל המשימות! הגיע הזמן לטוס חזרה לישראל! הצוות הראשון שיחצה את קו הגמר יזכה במיליון! פיתחו את המעטפה האחרונה, שם תחכה לכם משימת הסיום!",
-    youtube: "_3-OT6sc12Y",
-    type: "finish"
+  finish_task: {
+    step: 13, bg: "radial-gradient(ellipse at 25% 15%, #00112a 0%, #000815 40%, #00040a 100%)",
+    title: "משימת הסיום!",
+    desc: "עברתם את כל המדינות, והצלחתם בכל המשימות! הגיע הזמן לטוס חזרה לישראל! הצוות הראשון שיחצה את קו הגמר יזכה במיליון! פיתחו את המעטפה האחרונה, שם תחכה לכם משימת הסיום!\n\nענו על השאלות שמופיעות בדף:",
+    youtube: "_3-OT6sc12Y", type: "truefalse", next: "victory",
+    questions: [
+      { label: "שאלה 1", answer: true }, { label: "שאלה 2", answer: false },
+      { label: "שאלה 3", answer: true }, { label: "שאלה 4", answer: true },
+      { label: "שאלה 5", answer: true }, { label: "שאלה 6", answer: false },
+      { label: "שאלה 7", answer: true }, { label: "שאלה 8", answer: false }
+    ],
+    hints: [
+      "פתרו את השאלות העולמיות. העזרו בגוגל או נסו לנחש.\nשימו לב שכל תשובה (נכון או לא נכון) נותנת סמל. העזרו במקרא הסמלים על מנת לקבל משפט.",
+      "אם תענו נכון על כל השאלות תקבלו סמלים שירכיבו משפט שיגיד מה לעשות עם הפנס האולטרה סגול. האירו במקום המתאים והפתרון יחשף."
+    ],
+    solution: "התשובות לשאלות הן: נכון, לא נכון, נכון, נכון, נכון, לא נכון, נכון, לא נכון.\nהמשפט המתקבל הוא \"הרימו את הדופן הימנית הפנימית של קופסת המשחק\".\nאם תבדקו במקום זה, תמצאו את המפתח לקופסא האחרונה במשחק."
   },
-  yoga: {
-    title: "יוגה עם הגורו",
-    desc: "[ טקסט עמוד יוגה — החליפו בתוכן האמיתי ]",
-    youtube: null,
-    type: "info"
+  victory: {
+    step: 14, bg: "radial-gradient(ellipse at 25% 15%, #2a2200 0%, #151100 40%, #0a0800 100%)",
+    title: "כל הכבוד צוות!",
+    desc: "הגעתם לקו הסיום! פתחתם את הקופסה האחרונה וסיימתם את המירוץ העולמי בהצלחה. אתם האלופים!",
+    youtube: null, type: "finish"
   }
 };
 
 // ================================================================
-//  לוגיקת ניווט
+//  לוגיקת ניווט ושמירת התקדמות
 // ================================================================
 let currentPage = null;
 let pendingNext  = null;
 
 function getPageId() {
-  const p = new URLSearchParams(location.search).get('page');
-  return p && PAGES[p] ? p : 'opening';
+  const urlParams = new URLSearchParams(location.search);
+  const p = urlParams.get('page');
+  if (p && PAGES[p]) {
+    // אם המשתמש נכנס במפורש עם ?page=opening נאפס לו את השמירה
+    if (p === 'opening') localStorage.removeItem('puzzles_world_race_page');
+    return p;
+  }
+  
+  // קריאה מהזיכרון המקומי
+  const savedPage = localStorage.getItem('puzzles_world_race_page');
+  if (savedPage && PAGES[savedPage]) return savedPage;
+
+  return 'opening';
 }
 
 function loadPage(id) {
@@ -741,12 +661,28 @@ function loadPage(id) {
   const page  = PAGES[id];
   if (!page) return;
 
+  // שמירה לזיכרון הדפדפן
+  localStorage.setItem('puzzles_world_race_page', id);
+
   const url = id === 'opening' ? location.pathname : `${location.pathname}?page=${id}`;
   history.pushState({ page: id }, '', url);
 
   document.title = page.title + ' — פאזלס חדרי בריחה';
   document.getElementById('page-title').textContent = page.title;
   document.getElementById('page-desc').textContent  = page.desc;
+
+  // מד התקדמות מחושב לפי step (14 שלבים סך הכל)
+  const step = page.step || 1;
+  document.getElementById('global-progress-fill').style.width = ((step / 14) * 100) + '%';
+  
+  // רקע דינמי
+  document.body.style.backgroundImage = page.bg || "radial-gradient(ellipse at 25% 15%, #1a0800 0%, #080e00 40%, #001a18 100%)";
+
+  // טריגר לאנימציית מעבר (Fade In)
+  const appDiv = document.getElementById('app');
+  appDiv.classList.remove('fade-transition');
+  void appDiv.offsetWidth; // Reflow
+  appDiv.classList.add('fade-transition');
 
   const yw = document.getElementById('youtube-wrap');
   if (page.youtube) {
@@ -801,6 +737,7 @@ function loadPage(id) {
     document.getElementById('tf-box').style.display = '';
   } else if (page.type === 'finish') {
     document.getElementById('finish-box').style.display = '';
+    playVictoryEffects();
   }
   
   window.scrollTo(0, 0);
@@ -808,6 +745,7 @@ function loadPage(id) {
 
 // ===== מערכת רמזים דינמית =====
 function openHintsModal() {
+  if (navigator.vibrate) navigator.vibrate(15);
   const page = PAGES[currentPage];
   if (!page || (!page.hints && !page.solution)) return;
   
@@ -820,13 +758,14 @@ function openHintsModal() {
     });
   }
   if (page.solution) {
-    container.appendChild(createHintElement(`פיתרון`, page.solution, true));
+    container.appendChild(createHintElement(`פיתרון מפורט`, page.solution, true));
   }
   
   document.getElementById('hints-overlay').classList.add('show');
 }
 
 function closeHintsModal() {
+  if (navigator.vibrate) navigator.vibrate(10);
   document.getElementById('hints-overlay').classList.remove('show');
 }
 
@@ -855,35 +794,67 @@ function createHintElement(title, text, isSolution) {
 }
 
 function showHintConfirm(btn) {
+  if (navigator.vibrate) navigator.vibrate(15);
   btn.style.display = 'none';
   btn.nextElementSibling.style.display = 'block';
 }
 
 function cancelHint(btn) {
+  if (navigator.vibrate) navigator.vibrate(10);
   const confirmDiv = btn.closest('.hint-confirm');
   confirmDiv.style.display = 'none';
   confirmDiv.previousElementSibling.style.display = 'block';
 }
 
 function revealHint(btn) {
+  if (navigator.vibrate) navigator.vibrate(25);
   const confirmDiv = btn.closest('.hint-confirm');
   confirmDiv.style.display = 'none';
   confirmDiv.nextElementSibling.style.display = 'block';
 }
 
-// ===== צלילי מערכת =====
+// ===== צלילי מערכת (עם תמיכה בטריגר של חגיגת סיום) =====
 const AudioCtx = window.AudioContext || window.webkitAudioContext;
 let _ac = null;
 function getAC() { if (!_ac) _ac = new AudioCtx(); return _ac; }
 
 function playClick() {
+  if (navigator.vibrate) navigator.vibrate(15);
   try { const c=getAC(),o=c.createOscillator(),g=c.createGain(); o.connect(g); g.connect(c.destination); o.frequency.value=700; g.gain.setValueAtTime(0.1,c.currentTime); g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+0.07); o.start(); o.stop(c.currentTime+0.07); } catch(e) {}
 }
 function playError() {
+  if (navigator.vibrate) navigator.vibrate([50, 50, 50]);
   try { const c=getAC(); [220,180].forEach((f,i)=>{ const o=c.createOscillator(),g=c.createGain(); o.type='sawtooth'; o.connect(g); g.connect(c.destination); o.frequency.value=f; g.gain.setValueAtTime(0.18,c.currentTime+i*0.13); g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+i*0.13+0.15); o.start(c.currentTime+i*0.13); o.stop(c.currentTime+i*0.13+0.16); }); } catch(e) {}
 }
 function playSuccess() {
+  if (navigator.vibrate) navigator.vibrate(30);
   try { const c=getAC(); [523,659,784,1047].forEach((f,i)=>{ const o=c.createOscillator(),g=c.createGain(); o.connect(g); g.connect(c.destination); o.frequency.value=f; g.gain.setValueAtTime(0.13,c.currentTime+i*0.1); g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+i*0.1+0.22); o.start(c.currentTime+i*0.1); o.stop(c.currentTime+i*0.1+0.22); }); } catch(e) {}
+}
+
+function playVictoryEffects() {
+  if (navigator.vibrate) navigator.vibrate([100, 50, 100, 50, 200]);
+  // קונפטי
+  for(let i=0; i<80; i++){
+      let conf = document.createElement('div');
+      conf.className = 'confetti';
+      conf.style.left = Math.random() * 100 + 'vw';
+      conf.style.backgroundColor = ['#ff9500', '#00c8be', '#ffcc00', '#ff4444', '#ffffff'][Math.floor(Math.random()*5)];
+      conf.style.animationDelay = (Math.random() * 2) + 's';
+      document.body.appendChild(conf);
+      setTimeout(()=>conf.remove(), 4500);
+  }
+  // סאונד מיוחד לניצחון
+  try {
+    const c = getAC();
+    [523.25, 659.25, 783.99, 1046.50, 1318.51].forEach((f, i) => {
+      const o = c.createOscillator(), g = c.createGain();
+      o.connect(g); g.connect(c.destination);
+      o.frequency.value = f;
+      g.gain.setValueAtTime(0.15, c.currentTime + i*0.12);
+      g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + i*0.12 + 0.6);
+      o.start(c.currentTime + i*0.12); o.stop(c.currentTime + i*0.12 + 0.6);
+    });
+  } catch(e){}
 }
 
 function submitCode() {
@@ -948,6 +919,7 @@ function buildTF(questions) {
 }
 
 function selectTF(idx, val, btn) {
+  if (navigator.vibrate) navigator.vibrate(10);
   tfAnswers[idx] = val;
   const row = btn.closest('.tf-row');
   row.querySelectorAll('.tf-btn').forEach(b => b.classList.remove('selected'));
@@ -955,17 +927,21 @@ function selectTF(idx, val, btn) {
 }
 
 function submitTF() {
+  playClick();
   const page = PAGES[currentPage];
   if (tfAnswers.some(a => a === null)) {
+    playError();
     document.getElementById('tf-error').style.display = 'block';
     document.getElementById('tf-error').textContent = '✗ ענו על כל המשפטים לפני האישור!';
     return;
   }
   const correct = page.questions.every((q, i) => q.answer === tfAnswers[i]);
   if (correct) {
+    playSuccess();
     pendingNext = page.next;
     showSuccess();
   } else {
+    playError();
     document.getElementById('tf-error').style.display = 'block';
     document.getElementById('tf-error').textContent = '✗ תשובה שגויה — בדקו שוב!';
   }
@@ -977,9 +953,11 @@ let riddleInterval = null;
 let riddleElapsed = 0; 
 let riddleStartTime = 0;
 let notesPlayed = [false, false, false, false];
-const RIDDLE_NOTES = [123.47, 130.81, 174.61, 146.83]; // סי(B2), דו(C3), פה(F3), רה(D3) - אוקטבה אחת למטה
+// התווים לפי הרמז המעודכן: C, A, A, B. תדרים תואמים: C2, A2, A3, B2.
+const RIDDLE_NOTES = [65.41, 110.00, 220.00, 123.47]; 
 
 function toggleRiddle() {
+  if (navigator.vibrate) navigator.vibrate(15);
   const btn = document.getElementById('riddle-play-btn');
   const fill = document.getElementById('riddle-fill');
   const timeDisplay = document.getElementById('riddle-time');
@@ -990,7 +968,6 @@ function toggleRiddle() {
   const noteInterval = 3750;
 
   if (riddlePlaying) {
-    // השהיה
     riddlePlaying = false;
     clearInterval(riddleInterval);
     btn.innerHTML = '&#9654;'; 
@@ -999,7 +976,6 @@ function toggleRiddle() {
     return;
   }
 
-  // הפעלה / המשך מאיפה שעצר
   riddlePlaying = true;
   btn.innerHTML = '&#10086;'; 
   timeDisplay.textContent = 'מנגן... נא להקשיב היטב';
@@ -1028,14 +1004,12 @@ function toggleRiddle() {
     RIDDLE_NOTES.forEach((freq, index) => {
       if (!notesPlayed[index] && riddleElapsed > index * noteInterval) {
         notesPlayed[index] = true;
-        // שולחים fromRiddle = true כדי למנוע את החיווי הוויזואלי
         playPianoNote(freq, null, null, true); 
       }
     });
   }, 50);
 }
 
-// מנגנון הגרירה (Scrubbing) לפס השמע
 const pBar = document.getElementById('riddle-progress-bar');
 let isDraggingBar = false;
 
@@ -1045,7 +1019,6 @@ function handleSeek(e) {
   if(e.touches && e.touches.length > 0) clientX = e.touches[0].clientX;
   if(clientX === undefined) return;
   
-  // מכיוון שהאתר ב-RTL, צד ימין הוא 0 ושמאל הוא 100%
   let p = (rect.right - clientX) / rect.width;
   p = Math.max(0, Math.min(1, p));
   
@@ -1089,7 +1062,6 @@ window.addEventListener('touchend', () => { isDraggingBar = false; });
 
 // ===== פסנתר 3D וסאונד אחיד =====
 (function(){
-  // הפסנתר מתחיל מהתו C2 (דו) ככה שיש שני תווים שחורים מצד שמאל, בדיוק כמו בפסנתר אמיתי
   const NOTES = [
     {n:'C2', f:65.41,  b:false}, {n:'C#2',f:69.30,  b:true}, {n:'D2', f:73.42,  b:false}, {n:'D#2',f:77.78,  b:true}, 
     {n:'E2', f:82.41,  b:false}, {n:'F2', f:87.31,  b:false}, {n:'F#2',f:92.50,  b:true}, {n:'G2', f:98.00,  b:false}, 
@@ -1123,10 +1095,11 @@ window.addEventListener('touchend', () => { isDraggingBar = false; });
       'background:linear-gradient(to bottom, #ffffff 0%, #f0f0f0 100%)', 'border:1px solid #999', 'border-radius:0 0 5px 5px',
       'cursor:pointer', 'z-index:1', 'box-sizing:border-box',
       'box-shadow:inset 0 1px 0 #fff, inset 0 -5px 0 #c0c0c0, 0 5px 6px rgba(0,0,0,0.3)',
-      'transition: transform 0.05s, box-shadow 0.05s, background 0.05s', 'transform-origin: top'
+      'transition: transform 0.05s, box-shadow 0.05s, background 0.05s', 'transform-origin: top',
+      'touch-action: manipulation'
     ].join(';');
     key.addEventListener('mousedown', () => playPianoNote(note.f, key, false));
-    key.addEventListener('touchstart', e => { e.preventDefault(); playPianoNote(note.f, key, false); });
+    key.addEventListener('touchstart', e => { e.preventDefault(); playPianoNote(note.f, key, false); }, {passive:false});
     container.appendChild(key);
   });
 
@@ -1143,15 +1116,17 @@ window.addEventListener('touchend', () => { isDraggingBar = false; });
       'background:linear-gradient(to bottom, #333333 0%, #000000 100%)', 'border:1px solid #000', 'border-radius:0 0 4px 4px',
       'cursor:pointer', 'z-index:2', 'box-sizing:border-box',
       'box-shadow:inset 0 1px 0 #555, inset 0 -6px 0 #111, 3px 6px 8px rgba(0,0,0,0.7)',
-      'transition: transform 0.05s, box-shadow 0.05s', 'transform-origin: top'
+      'transition: transform 0.05s, box-shadow 0.05s', 'transform-origin: top',
+      'touch-action: manipulation'
     ].join(';');
     key.addEventListener('mousedown', () => playPianoNote(note.f, key, true));
-    key.addEventListener('touchstart', e => { e.preventDefault(); playPianoNote(note.f, key, true); });
+    key.addEventListener('touchstart', e => { e.preventDefault(); playPianoNote(note.f, key, true); }, {passive:false});
     container.appendChild(key);
   });
 })();
 
 function playPianoNote(freq, keyEl, isBlack, fromRiddle = false) {
+  if (!fromRiddle && navigator.vibrate) navigator.vibrate(15);
   try {
     const ctx = getAC();
     const now = ctx.currentTime;
