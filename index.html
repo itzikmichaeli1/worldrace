@@ -259,6 +259,13 @@
     }
     .audio-time { font-size: 11px; color: rgba(255,255,255,0.4); margin-top: 5px; text-align: left; }
 
+    /* ===== אנימציות עזר ===== */
+    @keyframes shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-10px)} 40%{transform:translateX(10px)} 60%{transform:translateX(-6px)} 80%{transform:translateX(6px)} }
+    .shaking { animation: shake 0.55s ease; }
+    @keyframes twinkle { 0%,100%{opacity:.25;transform:scale(1)} 50%{opacity:1;transform:scale(1.5)} }
+    @keyframes popIn { 0%{transform:scale(.75);opacity:0} 100%{transform:scale(1);opacity:1} }
+    @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-5px)} }
+
     /* ===== פסנתר ===== */
     .rotate-device-msg { font-size: 14px; color: #ff9500; margin-bottom: 10px; text-align: center; display: none; }
     @media (max-width: 600px) { .rotate-device-msg { display: block; } }
@@ -394,7 +401,7 @@
           onblur="document.getElementById('glow-ring').classList.remove('focused')"
         />
       </div>
-      <div class="code-hint">↑</div>
+      <div class="code-hint">↑ הקלידו כאן</div>
       <button class="submit-btn" onclick="submitCode()">המשך לשלב הבא «</button>
     </div>
     <div class="error-msg" id="error-msg">✗ קוד שגוי — נסו שוב!</div>
@@ -835,7 +842,7 @@ function revealHint(btn) {
   confirmDiv.nextElementSibling.style.display = 'block';
 }
 
-// ===== צלילי מערכת והחותמת המשופרת (אופציה 2 - "סדן 10 טון") =====
+// ===== צלילי מערכת וחותמת מציאותית (אופציה 1: מכת פלדה) =====
 const AudioCtx = window.AudioContext || window.webkitAudioContext;
 let _ac = null;
 function getAC() { if (!_ac) _ac = new AudioCtx(); return _ac; }
@@ -849,65 +856,64 @@ function playError() {
   try { const c=getAC(); [220,180].forEach((f,i)=>{ const o=c.createOscillator(),g=c.createGain(); o.type='sawtooth'; o.connect(g); g.connect(c.destination); o.frequency.value=f; g.gain.setValueAtTime(0.18,c.currentTime+i*0.13); g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+i*0.13+0.15); o.start(c.currentTime+i*0.13); o.stop(c.currentTime+i*0.13+0.16); }); } catch(e) {}
 }
 
-// סאונד חותמת עוצמתי - אופציה 2 (10 טון)
+// סאונד חותמת - אופציה 1: מכת פלדה מסיבית + באס מהדהד 
 function playStampSound() {
-  if (navigator.vibrate) navigator.vibrate([100, 150, 300]); 
+  if (navigator.vibrate) navigator.vibrate([60, 100, 200]); 
   try { 
     const ctx = getAC();
     const now = ctx.currentTime;
 
-    // דיסטורשן קל לאימפקט (Overdrive)
-    const dist = ctx.createWaveShaper();
-    dist.curve = (function(amount) {
-      const k = typeof amount === 'number' ? amount : 50;
-      const n_samples = 44100;
-      const curve = new Float32Array(n_samples);
-      const deg = Math.PI / 180;
-      let x;
-      for (let i = 0; i < n_samples; ++i ) {
-        x = i * 2 / n_samples - 1;
-        curve[i] = ( 3 + k ) * x * 20 * deg / ( Math.PI + k * Math.abs(x) );
-      }
-      return curve;
-    })(400); 
-    dist.oversample = '4x';
-    
-    const masterGain = ctx.createGain();
-    masterGain.gain.value = 1.2;
-    dist.connect(masterGain);
-    masterGain.connect(ctx.destination);
+    // 1. מכה מתכתית (Clang)
+    [800, 1200, 2500].forEach(freq => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(freq, now);
+      osc.frequency.exponentialRampToValueAtTime(freq * 0.5, now + 0.3);
+      osc.connect(gain); gain.connect(ctx.destination);
+      gain.gain.setValueAtTime(0, now);
+      gain.gain.linearRampToValueAtTime(0.5, now + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+      osc.start(now); osc.stop(now + 0.6);
+    });
 
-    // סאב-באס נופל (רעידת אדמה) מהדהד ל-4.5 שניות
-    const sub = ctx.createOscillator();
-    const subGain = ctx.createGain();
-    sub.type = 'sine';
-    sub.frequency.setValueAtTime(100, now);
-    sub.frequency.exponentialRampToValueAtTime(10, now + 0.2);
-    sub.connect(subGain); subGain.connect(dist);
-    subGain.gain.setValueAtTime(0, now);
-    subGain.gain.linearRampToValueAtTime(3.0, now + 0.02);
-    subGain.gain.exponentialRampToValueAtTime(0.001, now + 4.5);
-    sub.start(now); sub.stop(now + 5.0);
+    // 2. באס עוצמתי ומהדהד (זולג לעמוד הבא)
+    const bass = ctx.createOscillator();
+    const bassGain = ctx.createGain();
+    bass.type = 'triangle';
+    bass.frequency.setValueAtTime(180, now);
+    bass.frequency.exponentialRampToValueAtTime(30, now + 0.15);
+    bass.connect(bassGain); bassGain.connect(ctx.destination);
+    bassGain.gain.setValueAtTime(0, now);
+    bassGain.gain.linearRampToValueAtTime(2.0, now + 0.02);
+    bassGain.gain.exponentialRampToValueAtTime(0.001, now + 4.0); // הדהוד ארוך
+    bass.start(now); bass.stop(now + 4.5);
 
-    // רעש פגיעה עצום (Debris/Dust)
-    const bufferSize = ctx.sampleRate * 1.5;
+    // 3. רעש חיכוך נייר/דיו
+    const bufferSize = ctx.sampleRate * 0.5; 
     const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
     const data = buffer.getChannelData(0);
-    for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+    for (let i = 0; i < bufferSize; i++) {
+      data[i] = Math.random() * 2 - 1;
+    }
     const noise = ctx.createBufferSource();
     noise.buffer = buffer;
     
-    const lowpass = ctx.createBiquadFilter();
-    lowpass.type = 'lowpass';
-    lowpass.frequency.value = 600;
+    const bandpass = ctx.createBiquadFilter();
+    bandpass.type = 'bandpass';
+    bandpass.frequency.value = 500; 
 
     const noiseGain = ctx.createGain();
     noiseGain.gain.setValueAtTime(0, now);
-    noiseGain.gain.linearRampToValueAtTime(2.0, now + 0.05);
-    noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 1.5);
+    noiseGain.gain.linearRampToValueAtTime(1.5, now + 0.05); 
+    noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
 
-    noise.connect(lowpass); lowpass.connect(noiseGain); noiseGain.connect(dist);
-    noise.start(now); noise.stop(now + 2.0);
+    noise.connect(bandpass);
+    bandpass.connect(noiseGain);
+    noiseGain.connect(ctx.destination);
+    
+    noise.start(now);
+    noise.stop(now + 0.5);
   } catch(e){}
 }
 
@@ -950,7 +956,7 @@ function submitCode() {
         box.classList.remove('stamp-approved');
         pendingNext = page.next;
         loadPage(pendingNext); 
-      }, 900); // ממתין 0.9 שניות - מספיק לראות את האנימציה לפני שהעמוד מתחלף והסאונד ממשיך
+      }, 900); // ממתין 0.9 שניות - מספיק לראות את האנימציה לפני שהעמוד מתחלף והסאונד ממשיך להדהד
     } else {
       pendingNext = page.next;
       loadPage(pendingNext);
@@ -1236,7 +1242,7 @@ window.onpopstate = e => {
   loadPage(id);
 };
 
-// אתחול הגדרות הנגישות וטעינת העמוד
+// אתחול הגדרות הנגישות וטעינת העמוד (ללא שמירה אוטומטית שדורסת כתובת)
 initA11y();
 loadPage(getPageId());
 </script>
