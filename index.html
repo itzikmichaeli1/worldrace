@@ -369,7 +369,7 @@ const PAGES = {
   opening: {
     step: 1, bg: "radial-gradient(ellipse at 25% 15%, #1a0800 0%, #080e00 40%, #001a18 100%)",
     title: "המירוץ העולמי - מתחילים!",
-    desc: "המירוץ העולמי יוצא לדרך בעונה חדשה ומפתיעה והפעם – אתם המתחרים! שימו לב! מוכנים? צפו בסרטון והתחילו לשחק!",
+    desc: "המירוץ העולמי יוצא לדרך בעונה חדשה ומפתיעה והפעם – אתם המתחרים! מוכנים? צפו בסרטון והתחילו לשחק!",
     youtube: "FlTe_-Wxf6k", code: "3682", next: "london", type: "code",
     hints: [
       "במעטפה 13 ספחים של כרטיסי טיסה המייצגים 13 מקומות ספציפיים במטוס. סימון מושבים אלה על גבי דיאגרמת המטוס ודאי יסייע להגיע לפתרון. הקוד הוא בן ארבע ספרות.",
@@ -474,7 +474,7 @@ const PAGES = {
   tajmahal: {
     step: 9, bg: "radial-gradient(ellipse at 25% 15%, #221100 0%, #110800 40%, #0a0500 100%)",
     title: "כל הכבוד צוות!",
-    desc: "ממתינה לכם משימה נוספת כאן במוזיאון לאמנות. פיתחו את המעטפה השביעית. אם עמדתם במשימה, הזינו כאן את שם המדינה הבאה עליכם להגיע",
+    desc: "ממתינה לכם משימה נוספת כאן במוזיאון לאמנות. פיתחו את המעטפה השביעית. אם עמדתם במשימה, <span style=\"color:#ff9500; font-weight:bold;\">הזינו כאן את שם המדינה</span> הבאה עליכם להגיע",
     youtube: null, code: "הודו", next: "airport", type: "code",
     hints: [
       "בחרו חבר\\ת צוות שיקראו את מה שכתוב במשימה. לאחר מכן הכול תלוי רק במי שנבחר\\ה.\nמדובר באתרים מפורסמים סביב העולם. זהו שלושה מהם.",
@@ -571,7 +571,9 @@ function loadPage(id) {
 
   document.title = page.title + ' — פאזלס חדרי בריחה';
   document.getElementById('page-title').textContent = page.title;
-  document.getElementById('page-desc').textContent  = page.desc;
+  
+  // כאן השתמשנו ב-innerHTML כדי שהעיצוב המודגש (הודו) יעבוד
+  document.getElementById('page-desc').innerHTML  = page.desc;
 
   const step = page.step || 1;
   document.getElementById('global-progress-fill').style.width = ((step / 13) * 100) + '%';
@@ -761,7 +763,7 @@ function revealHint(btn) {
   confirmDiv.nextElementSibling.style.display = 'block';
 }
 
-// ===== צלילי מערכת וחותמת משופרת (אופציה מלודית) =====
+// ===== צלילי מערכת וחותמת משופרת (אופציה 1 - מכת פלדה) =====
 const AudioCtx = window.AudioContext || window.webkitAudioContext;
 let _ac = null;
 function getAC() { if (!_ac) _ac = new AudioCtx(); return _ac; }
@@ -775,48 +777,60 @@ function playError() {
   try { const c=getAC(); [220,180].forEach((f,i)=>{ const o=c.createOscillator(),g=c.createGain(); o.type='sawtooth'; o.connect(g); g.connect(c.destination); o.frequency.value=f; g.gain.setValueAtTime(0.18,c.currentTime+i*0.13); g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+i*0.13+0.15); o.start(c.currentTime+i*0.13); o.stop(c.currentTime+i*0.13+0.16); }); } catch(e) {}
 }
 
-// סאונד חותמת - אקורד ניצחון ממושך ("כוכב נולד")
 function playStampSound() {
-  if (navigator.vibrate) navigator.vibrate([100, 200, 300]); 
+  if (navigator.vibrate) navigator.vibrate([60, 100, 200]); 
   try { 
     const ctx = getAC();
     const now = ctx.currentTime;
-    
-    // אקורד עשיר ודרמטי
-    const freqs = [261.63, 329.63, 392.00, 493.88, 587.33]; 
 
-    freqs.forEach((freq, i) => {
+    [800, 1200, 2500].forEach(freq => {
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
-      osc.type = i % 2 === 0 ? 'triangle' : 'sine'; 
-      osc.frequency.value = freq;
-
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(freq, now);
+      osc.frequency.exponentialRampToValueAtTime(freq * 0.5, now + 0.3);
+      osc.connect(gain); gain.connect(ctx.destination);
       gain.gain.setValueAtTime(0, now);
-      gain.gain.linearRampToValueAtTime(0.3 / freqs.length, now + 0.2); 
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 4.0); 
-
-      osc.start(now);
-      osc.stop(now + 4.5);
+      gain.gain.linearRampToValueAtTime(0.5, now + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+      osc.start(now); osc.stop(now + 0.6);
     });
 
-    const bassOsc = ctx.createOscillator();
+    const bass = ctx.createOscillator();
     const bassGain = ctx.createGain();
-    bassOsc.type = 'sine';
-    bassOsc.frequency.setValueAtTime(100, now);
-    bassOsc.frequency.exponentialRampToValueAtTime(30, now + 1.5);
-    bassOsc.connect(bassGain);
-    bassGain.connect(ctx.destination);
-    
+    bass.type = 'triangle';
+    bass.frequency.setValueAtTime(180, now);
+    bass.frequency.exponentialRampToValueAtTime(30, now + 0.15);
+    bass.connect(bassGain); bassGain.connect(ctx.destination);
     bassGain.gain.setValueAtTime(0, now);
-    bassGain.gain.linearRampToValueAtTime(0.5, now + 0.3);
-    bassGain.gain.exponentialRampToValueAtTime(0.001, now + 3.0);
-    
-    bassOsc.start(now);
-    bassOsc.stop(now + 3.5);
+    bassGain.gain.linearRampToValueAtTime(2.0, now + 0.02);
+    bassGain.gain.exponentialRampToValueAtTime(0.001, now + 4.0); 
+    bass.start(now); bass.stop(now + 4.5);
 
+    const bufferSize = ctx.sampleRate * 0.5; 
+    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      data[i] = Math.random() * 2 - 1;
+    }
+    const noise = ctx.createBufferSource();
+    noise.buffer = buffer;
+    
+    const bandpass = ctx.createBiquadFilter();
+    bandpass.type = 'bandpass';
+    bandpass.frequency.value = 500; 
+
+    const noiseGain = ctx.createGain();
+    noiseGain.gain.setValueAtTime(0, now);
+    noiseGain.gain.linearRampToValueAtTime(1.5, now + 0.05); 
+    noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+
+    noise.connect(bandpass);
+    bandpass.connect(noiseGain);
+    noiseGain.connect(ctx.destination);
+    
+    noise.start(now);
+    noise.stop(now + 0.5);
   } catch(e){}
 }
 
@@ -863,7 +877,6 @@ function submitCode() {
       playStampSound();
       const box = document.getElementById('code-box');
       
-      // חותמת אקראית
       const randomRot = Math.floor(Math.random() * 40) - 20; 
       box.style.setProperty('--stamp-rot', randomRot + 'deg');
       
@@ -873,7 +886,7 @@ function submitCode() {
           box.classList.remove('stamp-approved');
           pendingNext = page.next;
           loadPage(pendingNext); 
-        }, 2000); 
+        }, 1500); 
       } else {
         pendingNext = page.next;
         loadPage(pendingNext);
@@ -889,7 +902,7 @@ function submitCode() {
       }
       document.getElementById('error-msg').style.display = 'block';
     }
-  }, 1500); // 1.5 שניות של מתח
+  }, 1500); 
 }
 
 function clearError() {
