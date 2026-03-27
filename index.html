@@ -21,12 +21,21 @@
       touch-action: manipulation;
     }
 
+    /* טקסטורת חספוס (אופציה 4) - עושה את האתר פחות דיגיטלי ויותר "חדר בריחה" */
+    body::after {
+      content: '';
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><filter id="noiseFilter"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23noiseFilter)" opacity="0.04"/></svg>');
+      opacity: 0.6;
+    }
+
     .page-title, .crossroads-title, .finish-title, .modal-title, .success-title {
       font-family: 'Rubik', sans-serif;
     }
 
     /* ===== הגדרות נגישות ===== */
     body.a11y-high-contrast { background-image: none !important; background-color: #000000 !important; }
+    body.a11y-high-contrast::after { display: none !important; } /* הסרת טקסטורה בניגודיות גבוהה */
     body.a11y-high-contrast * { box-shadow: none !important; text-shadow: none !important; border-color: #ffffff !important; }
     body.a11y-large-text { font-size: 120% !important; }
     body.a11y-large-text .page-title { font-size: clamp(26px, 6vw, 42px) !important; }
@@ -36,8 +45,17 @@
     #stars { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
     .star { position: absolute; border-radius: 50%; animation: twinkle ease-in-out infinite; }
 
+    /* פס התקדמות + מטוס (אופציה 1) */
     #global-progress-wrap { position: fixed; top: 0; left: 0; right: 0; height: 5px; background: rgba(255,255,255,0.1); z-index: 1000; }
-    #global-progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #ff9500, #00c8be); transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); }
+    #global-progress-fill { 
+      height: 100%; width: 0%; background: linear-gradient(90deg, #ff9500, #00c8be); 
+      transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); position: relative; 
+    }
+    #global-progress-fill::after {
+      content: '✈️'; position: absolute; left: -12px; top: -10px; font-size: 18px;
+      transform: scaleX(-1); /* הופך את המטוס שייטוס שמאלה (RTL) */
+      text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    }
 
     #app { position: relative; z-index: 1; max-width: 740px; margin: 0 auto; padding: 44px 20px 100px; }
 
@@ -72,17 +90,18 @@
     .youtube-wrap { position: relative; padding-bottom: 56.25%; height: 0; border-radius: 12px; overflow: hidden; border: 2px solid rgba(255,140,0,0.45); margin-bottom: 28px; box-shadow: 0 10px 25px rgba(0,0,0,0.6); }
     .youtube-wrap iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: none; }
 
-    /* תיבת קוד + חותמת עגולה - הותאם ל-SLOW MOTION */
+    /* תיבת קוד + חותמת אקראית מואטת */
     .code-box { background: rgba(20,8,0,0.72); border: 1.5px solid rgba(255,120,0,0.45); border-radius: 14px; margin-top: 10px; position: relative; overflow: hidden; padding: 32px 24px 28px; text-align: center; }
     .code-box::before { content: ''; position: absolute; top: 0; left: 15%; right: 15%; height: 2px; background: linear-gradient(90deg, transparent, rgba(255,160,0,0.8), rgba(0,210,190,0.5), transparent); }
     .code-box::after {
-      content: 'APPROVED'; position: absolute; top: 50%; left: 50%; z-index: 10; transform: translate(-50%, -50%) scale(5) rotate(-15deg);
+      content: 'APPROVED'; position: absolute; top: 50%; left: 50%; z-index: 10; 
+      /* משתמש במשתנה CSS לזווית אקראית (מוגדר ב-JS) */
+      transform: translate(-50%, -50%) scale(5) rotate(var(--stamp-rot, -15deg));
       font-size: 20px; font-weight: 900; color: rgba(0, 200, 100, 0.95); border: 6px solid rgba(0, 200, 100, 0.95); border-radius: 50%; 
       width: 140px; height: 140px; display: flex; align-items: center; justify-content: center; letter-spacing: 1px; opacity: 0; pointer-events: none; 
-      /* הילוך איטי של 1.5 שניות לחותמת */
       transition: all 1.5s cubic-bezier(0.2, 0.8, 0.2, 1.1);
     }
-    .code-box.stamp-approved::after { transform: translate(-50%, -50%) scale(1) rotate(-15deg); opacity: 1; }
+    .code-box.stamp-approved::after { transform: translate(-50%, -50%) scale(1) rotate(var(--stamp-rot, -15deg)); opacity: 1; }
 
     .code-section-label { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 20px; }
     .code-section-label hr { flex: 1; border: none; border-top: 1px solid rgba(255,140,0,0.2); }
@@ -138,7 +157,7 @@
     #continue-btn { background: linear-gradient(180deg, #00c8be 0%, #008a82 60%, #005a55 100%); border: none; border-bottom: 5px solid #002a27; border-radius: 10px; color: #fff; padding: 14px 40px; font-size: 17px; cursor: pointer; font-family: inherit; font-weight: 800; transition: all 0.12s; width: 100%; box-shadow: 0 6px 0 #002a27, 0 8px 16px rgba(0,0,0,0.4); text-shadow: 0 1px 3px rgba(0,0,0,0.4); }
     #continue-btn:active { transform: translateY(5px); box-shadow: 0 1px 0 #002a27; border-bottom-width: 1px; }
 
-    .audio-riddle { background: linear-gradient(145deg, rgba(40,80,140,0.4), rgba(15,35,70,0.6)); border: 1px solid rgba(80,150,220,0.5); border-radius: 12px; padding: 18px 20px; margin-bottom: 24px; display: flex; align-items: center; gap: 16px; box-shadow: 0 8px 20px rgba(0,0,0,0.5), inset 0 2px 5px rgba(255,255,255,0.1); }
+    .audio-riddle { background: linear-gradient(145deg, rgba(40,80,140,0.4), rgba(15,35,70,0.6)); border: 1px solid rgba(80,150,220,0.5); border-radius: 12px; padding: 18px 20px; margin-bottom: 24px; display: flex; align-items: center; gap: 16px; box-shadow: 0 8px 20px rgba(0,0,0,0.5), inset 0 2px 5px rgba(255,255,255,0.1); position: relative; z-index: 2; }
     .audio-play-btn { width: 46px; height: 46px; border-radius: 50%; background: linear-gradient(180deg, rgba(60,130,220,0.5), rgba(30,80,160,0.7)); border: 1px solid rgba(100,170,240,0.6); color: #fff; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; transition: all 0.15s; flex-shrink: 0; box-shadow: 0 4px 10px rgba(0,0,0,0.4), inset 0 2px 4px rgba(255,255,255,0.2); text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
     .audio-play-btn:hover { background: linear-gradient(180deg, rgba(80,150,240,0.6), rgba(40,100,180,0.8)); transform: scale(1.05); }
     .audio-play-btn:active { transform: scale(0.95); box-shadow: 0 2px 5px rgba(0,0,0,0.4); }
@@ -155,7 +174,7 @@
     @keyframes popIn { 0%{transform:scale(.75);opacity:0} 100%{transform:scale(1);opacity:1} }
 
     /* ===== פסנתר ===== */
-    .piano-scroll-wrapper { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; padding: 10px 0; direction: ltr; }
+    .piano-scroll-wrapper { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; padding: 10px 0; direction: ltr; position: relative; z-index: 2; }
     .piano-chassis {
       background: linear-gradient(145deg, #2a0a00, #110000); border: 2px solid #5a2a00; border-radius: 10px;
       padding: 20px 15px; box-shadow: 0 15px 30px rgba(0,0,0,0.6), inset 0 5px 15px rgba(0,0,0,0.8);
@@ -163,10 +182,9 @@
     }
     .piano-felt { width: 100%; height: 8px; background: #a00; border-radius: 4px 4px 0 0; box-shadow: inset 0 -3px 5px rgba(0,0,0,0.5); margin-bottom: -2px; position: relative; z-index: 3; }
     
-    /* טקסט הוראת נגינה - מעל הפסנתר עם אפקט פועם */
     .piano-instruction {
       font-size: 16px; color: #ffcc00; font-weight: 700; margin-bottom: 12px; letter-spacing: 0.5px;
-      animation: pulseText 2s infinite; text-align: center;
+      animation: pulseText 2s infinite; text-align: center; position: relative; z-index: 2;
     }
     @keyframes pulseText { 0%, 100% { opacity: 0.8; } 50% { opacity: 1; text-shadow: 0 0 8px rgba(255,200,0,0.6); } }
 
@@ -733,7 +751,7 @@ function revealHint(btn) {
   confirmDiv.nextElementSibling.style.display = 'block';
 }
 
-// ===== צלילי מערכת וחותמת משופרת ("כוכב נולד") =====
+// ===== צלילי מערכת וחותמת משופרת =====
 const AudioCtx = window.AudioContext || window.webkitAudioContext;
 let _ac = null;
 function getAC() { if (!_ac) _ac = new AudioCtx(); return _ac; }
@@ -747,50 +765,60 @@ function playError() {
   try { const c=getAC(); [220,180].forEach((f,i)=>{ const o=c.createOscillator(),g=c.createGain(); o.type='sawtooth'; o.connect(g); g.connect(c.destination); o.frequency.value=f; g.gain.setValueAtTime(0.18,c.currentTime+i*0.13); g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+i*0.13+0.15); o.start(c.currentTime+i*0.13); o.stop(c.currentTime+i*0.13+0.16); }); } catch(e) {}
 }
 
-// סאונד חותמת - אקורד ניצחון ממושך ("כוכב נולד")
 function playStampSound() {
-  if (navigator.vibrate) navigator.vibrate([100, 200, 300]); // רטט דרמטי ואיטי יותר
+  if (navigator.vibrate) navigator.vibrate([60, 100, 200]); 
   try { 
     const ctx = getAC();
     const now = ctx.currentTime;
-    
-    // אקורד עשיר (G Major 9 או דומה) עם "Swell" ודעיכה ארוכה
-    const freqs = [261.63, 329.63, 392.00, 493.88, 587.33]; 
 
-    freqs.forEach((freq, i) => {
+    [800, 1200, 2500].forEach(freq => {
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
-      osc.type = i % 2 === 0 ? 'triangle' : 'sine'; // שילוב צלילים
-      osc.frequency.value = freq;
-
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-
-      // מתנפח מהר אך לא במכה, ודועך המון זמן (4.5 שניות)
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(freq, now);
+      osc.frequency.exponentialRampToValueAtTime(freq * 0.5, now + 0.3);
+      osc.connect(gain); gain.connect(ctx.destination);
       gain.gain.setValueAtTime(0, now);
-      gain.gain.linearRampToValueAtTime(0.3 / freqs.length, now + 0.2); 
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 4.0); 
-
-      osc.start(now);
-      osc.stop(now + 4.5);
+      gain.gain.linearRampToValueAtTime(0.5, now + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+      osc.start(now); osc.stop(now + 0.6);
     });
 
-    // באס רך ועמוק מתחת כדי לתת משקל
-    const bassOsc = ctx.createOscillator();
+    const bass = ctx.createOscillator();
     const bassGain = ctx.createGain();
-    bassOsc.type = 'sine';
-    bassOsc.frequency.setValueAtTime(100, now);
-    bassOsc.frequency.exponentialRampToValueAtTime(30, now + 1.5);
-    bassOsc.connect(bassGain);
-    bassGain.connect(ctx.destination);
-    
+    bass.type = 'triangle';
+    bass.frequency.setValueAtTime(180, now);
+    bass.frequency.exponentialRampToValueAtTime(30, now + 0.15);
+    bass.connect(bassGain); bassGain.connect(ctx.destination);
     bassGain.gain.setValueAtTime(0, now);
-    bassGain.gain.linearRampToValueAtTime(0.5, now + 0.3);
-    bassGain.gain.exponentialRampToValueAtTime(0.001, now + 3.0);
-    
-    bassOsc.start(now);
-    bassOsc.stop(now + 3.5);
+    bassGain.gain.linearRampToValueAtTime(2.0, now + 0.02);
+    bassGain.gain.exponentialRampToValueAtTime(0.001, now + 4.0); 
+    bass.start(now); bass.stop(now + 4.5);
 
+    const bufferSize = ctx.sampleRate * 0.5; 
+    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      data[i] = Math.random() * 2 - 1;
+    }
+    const noise = ctx.createBufferSource();
+    noise.buffer = buffer;
+    
+    const bandpass = ctx.createBiquadFilter();
+    bandpass.type = 'bandpass';
+    bandpass.frequency.value = 500; 
+
+    const noiseGain = ctx.createGain();
+    noiseGain.gain.setValueAtTime(0, now);
+    noiseGain.gain.linearRampToValueAtTime(1.5, now + 0.05); 
+    noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+
+    noise.connect(bandpass);
+    bandpass.connect(noiseGain);
+    noiseGain.connect(ctx.destination);
+    
+    noise.start(now);
+    noise.stop(now + 0.5);
   } catch(e){}
 }
 
@@ -823,32 +851,49 @@ function submitCode() {
   playClick();
   const page = PAGES[currentPage];
   const val  = document.getElementById('code-input').value.trim().toUpperCase();
-  if (val === page.code.toUpperCase()) {
-    playStampSound();
-    const box = document.getElementById('code-box');
+  const btn = document.querySelector('.submit-btn');
+  
+  // אפקט ההשהייה (Suspense)
+  btn.innerHTML = 'מאמת נתונים... ⏳';
+  btn.style.pointerEvents = 'none';
+  btn.style.filter = 'brightness(0.8)';
+  
+  setTimeout(() => {
+    btn.innerHTML = 'המשך לשלב הבא «';
+    btn.style.pointerEvents = 'auto';
+    btn.style.filter = '';
     
-    if(!document.body.classList.contains('a11y-no-animations')) {
-      box.classList.add('stamp-approved');
-      setTimeout(() => { 
-        box.classList.remove('stamp-approved');
+    if (val === page.code.toUpperCase()) {
+      playStampSound();
+      const box = document.getElementById('code-box');
+      
+      // חותמת אקראית
+      const randomRot = Math.floor(Math.random() * 40) - 20; 
+      box.style.setProperty('--stamp-rot', randomRot + 'deg');
+      
+      if(!document.body.classList.contains('a11y-no-animations')) {
+        box.classList.add('stamp-approved');
+        setTimeout(() => { 
+          box.classList.remove('stamp-approved');
+          pendingNext = page.next;
+          loadPage(pendingNext); 
+        }, 2000); 
+      } else {
         pendingNext = page.next;
-        loadPage(pendingNext); 
-      }, 2000); // ממתין 2 שניות (זמן לסיום אנימציית הסלואו-מושן והתנפחות האקורד)
+        loadPage(pendingNext);
+      }
     } else {
-      pendingNext = page.next;
-      loadPage(pendingNext);
+      playError();
+      const inp = document.getElementById('code-input');
+      if(!document.body.classList.contains('a11y-no-animations')) {
+        inp.classList.add('error', 'shaking');
+        setTimeout(() => inp.classList.remove('shaking'), 600);
+      } else {
+        inp.classList.add('error');
+      }
+      document.getElementById('error-msg').style.display = 'block';
     }
-  } else {
-    playError();
-    const inp = document.getElementById('code-input');
-    if(!document.body.classList.contains('a11y-no-animations')) {
-      inp.classList.add('error', 'shaking');
-      setTimeout(() => inp.classList.remove('shaking'), 600);
-    } else {
-      inp.classList.add('error');
-    }
-    document.getElementById('error-msg').style.display = 'block';
-  }
+  }, 600); // חצי שנייה של מתח
 }
 
 function clearError() {
