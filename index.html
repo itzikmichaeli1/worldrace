@@ -45,36 +45,32 @@
     #stars { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
     .star { position: absolute; border-radius: 50%; animation: twinkle ease-in-out infinite; }
 
-    /* פס התקדמות + מטוס ממורכז */
+    /* פס התקדמות + מטוס מתחתיו כדי שלא ייחתך לעולם */
     #global-progress-wrap { position: fixed; top: 0; left: 0; right: 0; height: 6px; background: rgba(255,255,255,0.1); z-index: 1000; overflow: visible; }
     #global-progress-fill { 
       height: 100%; width: 0%; background: linear-gradient(90deg, #ff9500, #00c8be); 
       transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); position: relative; 
     }
     #global-progress-fill::after {
-      content: '✈️'; position: absolute; left: -10px; top: 50%;
-      transform: translateY(-50%) scaleX(-1); 
+      content: '✈️'; position: absolute; left: -10px; 
+      top: 8px; /* הוריד את המטוס להיות תלוי בבירור מתחת לפס */
+      transform: scaleX(-1); 
       font-size: 18px; line-height: 1; text-shadow: 0 2px 4px rgba(0,0,0,0.5); z-index: 10001;
     }
 
-    #app { position: relative; z-index: 1; max-width: 740px; margin: 0 auto; padding: 44px 20px 100px; }
+    #app { position: relative; z-index: 1; max-width: 740px; margin: 0 auto; padding: 54px 20px 100px; }
 
     .fade-transition { animation: fadePage 0.5s ease-out forwards; }
     @keyframes fadePage { 0% { opacity: 0; transform: translateY(15px); } 100% { opacity: 1; transform: translateY(0); } }
 
     /* ===== כפתורים צפים ===== */
-    #mute-btn {
-      position: fixed; top: 15px; left: 15px; z-index: 1000; width: 44px; height: 44px; border-radius: 50%;
-      background: rgba(20,10,0,0.8); border: 1px solid #ff9500; color: #fff; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 10px rgba(0,0,0,0.5); transition: 0.2s;
-    }
-    #mute-btn:hover { transform: scale(1.1); }
-
-    /* כפתור תפריט מפה (שחזור) */
+    
+    /* כפתור תפריט מפה (שחזור) ברור לחלוטין למשתמש */
     #floating-map-btn {
-      position: fixed; top: 70px; left: 15px; z-index: 1000; width: 44px; height: 44px; border-radius: 50%;
-      background: rgba(20,10,0,0.8); border: 1px solid #00c8be; color: #fff; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 10px rgba(0,0,0,0.5); transition: 0.2s;
+      position: fixed; top: 15px; left: 15px; z-index: 1000; height: 44px; padding: 0 16px; border-radius: 22px;
+      background: rgba(20,10,0,0.85); border: 1.5px solid #00c8be; color: #00c8be; font-size: 16px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 2px 10px rgba(0,0,0,0.5); transition: 0.2s; font-family: inherit; letter-spacing: 0.5px;
     }
-    #floating-map-btn:hover { transform: scale(1.1); }
+    #floating-map-btn:hover { background: #00c8be; color: #000; transform: scale(1.05); }
 
     #floating-hint-btn {
       position: fixed; bottom: 20px; left: 20px; z-index: 100; width: 56px; height: 56px; border-radius: 50%;
@@ -174,15 +170,6 @@
     .confetti { position: fixed; width: 10px; height: 10px; top: -20px; z-index: 9999; animation: confettiFall 4s linear forwards; pointer-events: none; }
     @keyframes confettiFall { 0% { top: -10px; transform: rotate(0deg) scale(1); } 100% { top: 100vh; transform: rotate(720deg) scale(0.5); } }
 
-    #success-overlay { display: none; position: fixed; inset: 0; z-index: 200; background: rgba(2,6,20,0.88); align-items: center; justify-content: center; }
-    #success-overlay.show { display: flex; }
-    .success-card { background: rgba(15,6,0,0.98); border: 1px solid rgba(255,160,0,0.6); border-radius: 16px; padding: 48px 56px; text-align: center; max-width: 380px; animation: popIn 0.45s cubic-bezier(0.34,1.56,0.64,1); }
-    .success-icon { width: 70px; height: 70px; border-radius: 50%; background: rgba(255,140,0,0.15); border: 2px solid rgba(255,180,0,0.7); display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 32px; color: #5aaeee; }
-    .success-title { color: #ffe0a0; font-size: 24px; margin-bottom: 10px; font-weight: 700; }
-    .success-sub { color: rgba(255,220,160,0.65); font-size: 15px; margin-bottom: 32px; }
-    #continue-btn { background: linear-gradient(180deg, #00c8be 0%, #008a82 60%, #005a55 100%); border: none; border-bottom: 5px solid #002a27; border-radius: 10px; color: #fff; padding: 14px 40px; font-size: 17px; cursor: pointer; font-family: inherit; font-weight: 800; transition: all 0.12s; width: 100%; box-shadow: 0 6px 0 #002a27, 0 8px 16px rgba(0,0,0,0.4); text-shadow: 0 1px 3px rgba(0,0,0,0.4); }
-    #continue-btn:active { transform: translateY(5px); box-shadow: 0 1px 0 #002a27; border-bottom-width: 1px; }
-
     .audio-riddle { background: linear-gradient(145deg, rgba(40,80,140,0.4), rgba(15,35,70,0.6)); border: 1px solid rgba(80,150,220,0.5); border-radius: 12px; padding: 18px 20px; margin-bottom: 24px; display: flex; align-items: center; gap: 16px; box-shadow: 0 8px 20px rgba(0,0,0,0.5), inset 0 2px 5px rgba(255,255,255,0.1); position: relative; z-index: 2; }
     .audio-play-btn { width: 46px; height: 46px; border-radius: 50%; background: linear-gradient(180deg, rgba(60,130,220,0.5), rgba(30,80,160,0.7)); border: 1px solid rgba(100,170,240,0.6); color: #fff; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; transition: all 0.15s; flex-shrink: 0; box-shadow: 0 4px 10px rgba(0,0,0,0.4), inset 0 2px 4px rgba(255,255,255,0.2); text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
     .audio-play-btn:hover { background: linear-gradient(180deg, rgba(80,150,240,0.6), rgba(40,100,180,0.8)); transform: scale(1.05); }
@@ -192,12 +179,6 @@
     .audio-progress-bar { height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; position: relative; cursor: pointer; box-shadow: inset 0 1px 2px rgba(0,0,0,0.3); touch-action: manipulation; }
     .audio-progress-fill { position: absolute; right: 0; top: 0; height: 100%; background: #5aaeee; border-radius: 4px; width: 0%; pointer-events: none; box-shadow: 0 0 5px rgba(90,174,238,0.5); }
     .audio-time { font-size: 11px; color: rgba(255,255,255,0.4); margin-top: 5px; text-align: center; }
-
-    /* ===== אנימציות עזר ===== */
-    @keyframes shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-10px)} 40%{transform:translateX(10px)} 60%{transform:translateX(-6px)} 80%{transform:translateX(6px)} }
-    .shaking { animation: shake 0.55s ease; }
-    @keyframes twinkle { 0%,100%{opacity:.25;transform:scale(1)} 50%{opacity:1;transform:scale(1.5)} }
-    @keyframes popIn { 0%{transform:scale(.75);opacity:0} 100%{transform:scale(1);opacity:1} }
 
     /* ===== פסנתר ===== */
     .piano-scroll-wrapper { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; padding: 10px 0; direction: ltr; position: relative; z-index: 2; }
@@ -242,10 +223,13 @@
     .hint-text { display: none; background: rgba(255,255,255,0.05); padding: 16px; border-radius: 8px; font-size: 15px; line-height: 1.6; border-right: 4px solid #ff9500; color: #eee; white-space: pre-wrap; margin-top: 8px; }
     .hint-text.solution-text { border-right-color: #ff4444; font-weight: bold; color: #ffcccc; }
 
-    /* רשת כפתורים למפת שחזור */
+    /* רשת כפתורים למפת שחזור עם מניעת רמאויות */
     .map-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
     .map-btn { background: #221100; border: 1px solid #00c8be; color: #ffe8c0; padding: 10px; border-radius: 8px; font-family: inherit; font-size: 14px; cursor: pointer; transition: 0.2s; font-weight: bold;}
     .map-btn:hover { background: #00c8be; color: #000; }
+    .map-btn.locked { background: #111; border-color: #333; color: #555; cursor: not-allowed; text-decoration: line-through; }
+    .map-btn.locked::after { content: ' 🔒'; text-decoration: none; display: inline-block; }
+    .map-btn.locked:hover { background: #111; color: #555; transform: none; }
     @media (max-width: 400px) { .map-grid { grid-template-columns: 1fr; } }
 
     /* תפריט נגישות */
@@ -267,8 +251,7 @@
 
 <div id="stars"></div>
 
-<button id="mute-btn" onclick="toggleMute()" title="השתקת סאונד">🔊</button>
-<button id="floating-map-btn" onclick="openMapModal()" title="מפת המירוץ (שחזור שלב)">🗺️</button>
+<button id="floating-map-btn" onclick="openMapModal()" title="שחזור שלב"><span>↺</span> שחזור שלב</button>
 
 <div id="app" class="fade-transition">
   <div class="page-header">
@@ -358,21 +341,21 @@
 <div id="map-overlay" class="modal-overlay">
   <div class="modal-card">
     <button class="close-modal-btn" onclick="closeMapModal()">✖</button>
-    <h2 class="modal-title">מפת המירוץ 🗺️</h2>
-    <p style="font-size: 14px; color: #aaa; text-align: center; margin-bottom: 15px;">יצאתם מהמשחק בטעות? בחרו את התחנה האחרונה שהייתם בה:</p>
+    <h2 class="modal-title">שחזור שלב 🗺️</h2>
+    <p style="font-size: 14px; color: #eee; text-align: center; margin-bottom: 15px;">יצאתם מהמשחק בטעות? חזרו לתחנה שהגעתם אליה:</p>
     <div class="map-grid">
-      <button class="map-btn" onclick="jumpTo('opening')">1. מתחילים</button>
-      <button class="map-btn" onclick="jumpTo('london')">2. אנגליה</button>
-      <button class="map-btn" onclick="jumpTo('crossroads')">3. צומת</button>
-      <button class="map-btn" onclick="jumpTo('time-first')">4. חבל על הזמן</button>
-      <button class="map-btn" onclick="jumpTo('show-first')">5. זמן להופעה</button>
-      <button class="map-btn" onclick="jumpTo('boarding')">6. קוד טיסה (תיק)</button>
-      <button class="map-btn" onclick="jumpTo('zoo')">7. גן חיות</button>
-      <button class="map-btn" onclick="jumpTo('museum')">8. מוזיאון הפורטרטים</button>
-      <button class="map-btn" onclick="jumpTo('tajmahal')">9. טאג' מאהל</button>
-      <button class="map-btn" onclick="jumpTo('airport')">10. שדה תעופה</button>
-      <button class="map-btn" onclick="jumpTo('guru')">11. דראמסלה (הגורו)</button>
-      <button class="map-btn" onclick="jumpTo('market')">12. השוק (מחסום)</button>
+      <button class="map-btn" data-page="opening">1. מתחילים</button>
+      <button class="map-btn" data-page="london">2. אנגליה</button>
+      <button class="map-btn" data-page="crossroads">3. צומת</button>
+      <button class="map-btn" data-page="time-first">4. חבל על הזמן</button>
+      <button class="map-btn" data-page="show-first">5. זמן להופעה</button>
+      <button class="map-btn" data-page="boarding">6. קוד טיסה (תיק)</button>
+      <button class="map-btn" data-page="zoo">7. גן חיות</button>
+      <button class="map-btn" data-page="museum">8. מוזיאון הפורטרטים</button>
+      <button class="map-btn" data-page="tajmahal">9. טאג' מאהל</button>
+      <button class="map-btn" data-page="airport">10. שדה תעופה</button>
+      <button class="map-btn" data-page="guru">11. דראמסלה (הגורו)</button>
+      <button class="map-btn" data-page="market">12. השוק (מחסום)</button>
     </div>
   </div>
 </div>
@@ -410,7 +393,7 @@
 
 <script>
 // ================================================================
-//  מבנה המשחק המלא
+//  מבנה המשחק המלא (נקי ממשפטים מיותרים)
 // ================================================================
 const PAGES = {
   opening: {
@@ -578,7 +561,8 @@ const PAGES = {
 
 let currentPage = null;
 let pendingNext  = null;
-let isMuted = false;
+// שמירת השלב הכי מתקדם של השחקן בזיכרון המכשיר (מונע רמאויות בשחזור)
+let maxStep = parseInt(localStorage.getItem('puzzleMaxStep')) || 1;
 
 function getPageId() {
   const urlParams = new URLSearchParams(location.search);
@@ -609,17 +593,17 @@ function toggleA11y(className, isChecked) {
   }
 }
 
-function toggleMute() {
-  isMuted = !isMuted;
-  const btn = document.getElementById('mute-btn');
-  btn.innerHTML = isMuted ? '🔇' : '🔊';
-  if (navigator.vibrate) navigator.vibrate(10);
-}
-
 function loadPage(id) {
   currentPage = id;
   const page  = PAGES[id];
   if (!page) return;
+
+  // עדכון השלב המקסימלי לטובת מפת השחזור
+  const step = page.step || 1;
+  if (step > maxStep) {
+    maxStep = step;
+    localStorage.setItem('puzzleMaxStep', maxStep);
+  }
 
   const url = id === 'opening' ? location.pathname : `${location.pathname}?page=${id}`;
   history.pushState({ page: id }, '', url);
@@ -627,9 +611,9 @@ function loadPage(id) {
   document.title = page.title + ' — פאזלס חדרי בריחה';
   document.getElementById('page-title').textContent = page.title;
   
+  // כאן השתמשנו ב-innerHTML כדי שהעיצוב המודגש (הודו) יעבוד
   document.getElementById('page-desc').innerHTML  = page.desc;
 
-  const step = page.step || 1;
   document.getElementById('global-progress-fill').style.width = ((step / 13) * 100) + '%';
   
   if(!document.body.classList.contains('a11y-high-contrast')) {
@@ -696,10 +680,25 @@ function loadPage(id) {
   window.scrollTo(0, 0);
 }
 
-// ===== ניהול מפה / שחזור =====
+// ===== ניהול מפה / שחזור (מנגנון אבטחה) =====
 function openMapModal() {
   if (navigator.vibrate) navigator.vibrate(15);
   playHintOpen();
+  
+  const mapBtns = document.querySelectorAll('.map-btn');
+  mapBtns.forEach(btn => {
+    const targetPageId = btn.getAttribute('data-page');
+    const targetStep = PAGES[targetPageId].step;
+    
+    if (targetStep > maxStep) {
+      btn.classList.add('locked');
+      btn.onclick = null; // מנתק לחלוטין את הכפתור מלחיצות למניעת רמאות
+    } else {
+      btn.classList.remove('locked');
+      btn.onclick = () => jumpTo(targetPageId);
+    }
+  });
+
   document.getElementById('map-overlay').classList.add('show');
 }
 function closeMapModal() {
@@ -713,11 +712,11 @@ function jumpTo(pageId) {
 }
 
 // ===== חיוויי סאונד לממשק =====
-function playHintOpen() { if(isMuted) return; try { const c=getAC(), o=c.createOscillator(), g=c.createGain(); o.type='sine'; o.frequency.setValueAtTime(880, c.currentTime); o.connect(g); g.connect(c.destination); g.gain.setValueAtTime(0, c.currentTime); g.gain.linearRampToValueAtTime(0.1, c.currentTime+0.05); g.gain.exponentialRampToValueAtTime(0.001, c.currentTime+1); o.start(); o.stop(c.currentTime+1.1); } catch(e){} }
-function playHintClick() { if(isMuted) return; try { const c=getAC(), o=c.createOscillator(), g=c.createGain(); o.type='square'; o.frequency.setValueAtTime(300, c.currentTime); o.frequency.exponentialRampToValueAtTime(50, c.currentTime+0.05); o.connect(g); g.connect(c.destination); g.gain.setValueAtTime(0, c.currentTime); g.gain.linearRampToValueAtTime(0.1, c.currentTime+0.01); g.gain.exponentialRampToValueAtTime(0.001, c.currentTime+0.05); o.start(); o.stop(c.currentTime+0.06); } catch(e){} }
-function playHintReveal() { if(isMuted) return; try { const c=getAC(); const now=c.currentTime; [1046.5, 1318.51, 1567.98].forEach((f, i) => { const o=c.createOscillator(), g=c.createGain(); o.type='triangle'; o.frequency.value=f; o.connect(g); g.connect(c.destination); g.gain.setValueAtTime(0, now); g.gain.setValueAtTime(0, now + i*0.05); g.gain.linearRampToValueAtTime(0.1, now + i*0.05 + 0.05); g.gain.exponentialRampToValueAtTime(0.001, now + 1.5); o.start(now); o.stop(now + 1.6); }); } catch(e){} }
-function playHintClose() { if(isMuted) return; try { const c=getAC(), o=c.createOscillator(), g=c.createGain(); o.type='sine'; o.frequency.setValueAtTime(400, c.currentTime); o.frequency.exponentialRampToValueAtTime(100, c.currentTime+0.15); o.connect(g); g.connect(c.destination); g.gain.setValueAtTime(0, c.currentTime); g.gain.linearRampToValueAtTime(0.1, c.currentTime+0.02); g.gain.exponentialRampToValueAtTime(0.001, c.currentTime+0.2); o.start(); o.stop(c.currentTime+0.25); } catch(e){} }
-function playTypeSound() { if(isMuted) return; if (navigator.vibrate) navigator.vibrate(5); try { const ctx=getAC(); const now=ctx.currentTime; const osc=ctx.createOscillator(); const gain=ctx.createGain(); osc.type='sine'; osc.frequency.setValueAtTime(600, now); osc.frequency.exponentialRampToValueAtTime(300, now+0.05); osc.connect(gain); gain.connect(ctx.destination); gain.gain.setValueAtTime(0, now); gain.gain.linearRampToValueAtTime(0.08, now+0.01); gain.gain.exponentialRampToValueAtTime(0.001, now+0.05); osc.start(now); osc.stop(now+0.06); } catch(e){} }
+function playHintOpen() { try { const c=getAC(), o=c.createOscillator(), g=c.createGain(); o.type='sine'; o.frequency.setValueAtTime(880, c.currentTime); o.connect(g); g.connect(c.destination); g.gain.setValueAtTime(0, c.currentTime); g.gain.linearRampToValueAtTime(0.1, c.currentTime+0.05); g.gain.exponentialRampToValueAtTime(0.001, c.currentTime+1); o.start(); o.stop(c.currentTime+1.1); } catch(e){} }
+function playHintClick() { try { const c=getAC(), o=c.createOscillator(), g=c.createGain(); o.type='square'; o.frequency.setValueAtTime(300, c.currentTime); o.frequency.exponentialRampToValueAtTime(50, c.currentTime+0.05); o.connect(g); g.connect(c.destination); g.gain.setValueAtTime(0, c.currentTime); g.gain.linearRampToValueAtTime(0.1, c.currentTime+0.01); g.gain.exponentialRampToValueAtTime(0.001, c.currentTime+0.05); o.start(); o.stop(c.currentTime+0.06); } catch(e){} }
+function playHintReveal() { try { const c=getAC(); const now=c.currentTime; [1046.5, 1318.51, 1567.98].forEach((f, i) => { const o=c.createOscillator(), g=c.createGain(); o.type='triangle'; o.frequency.value=f; o.connect(g); g.connect(c.destination); g.gain.setValueAtTime(0, now); g.gain.setValueAtTime(0, now + i*0.05); g.gain.linearRampToValueAtTime(0.1, now + i*0.05 + 0.05); g.gain.exponentialRampToValueAtTime(0.001, now + 1.5); o.start(now); o.stop(now + 1.6); }); } catch(e){} }
+function playHintClose() { try { const c=getAC(), o=c.createOscillator(), g=c.createGain(); o.type='sine'; o.frequency.setValueAtTime(400, c.currentTime); o.frequency.exponentialRampToValueAtTime(100, c.currentTime+0.15); o.connect(g); g.connect(c.destination); g.gain.setValueAtTime(0, c.currentTime); g.gain.linearRampToValueAtTime(0.1, c.currentTime+0.02); g.gain.exponentialRampToValueAtTime(0.001, c.currentTime+0.2); o.start(); o.stop(c.currentTime+0.25); } catch(e){} }
+function playTypeSound() { if (navigator.vibrate) navigator.vibrate(5); try { const ctx=getAC(); const now=ctx.currentTime; const osc=ctx.createOscillator(); const gain=ctx.createGain(); osc.type='sine'; osc.frequency.setValueAtTime(600, now); osc.frequency.exponentialRampToValueAtTime(300, now+0.05); osc.connect(gain); gain.connect(ctx.destination); gain.gain.setValueAtTime(0, now); gain.gain.linearRampToValueAtTime(0.08, now+0.01); gain.gain.exponentialRampToValueAtTime(0.001, now+0.05); osc.start(now); osc.stop(now+0.06); } catch(e){} }
 
 // ===== מערכת רמזים דינמית =====
 function openHintsModal() {
@@ -837,19 +836,16 @@ let _ac = null;
 function getAC() { if (!_ac) _ac = new AudioCtx(); return _ac; }
 
 function playClick() {
-  if(isMuted) return;
   if (navigator.vibrate) navigator.vibrate(15);
   try { const c=getAC(),o=c.createOscillator(),g=c.createGain(); o.connect(g); g.connect(c.destination); o.frequency.value=700; g.gain.setValueAtTime(0.1,c.currentTime); g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+0.07); o.start(); o.stop(c.currentTime+0.07); } catch(e) {}
 }
 function playError() {
-  if(isMuted) return;
   if (navigator.vibrate) navigator.vibrate([50, 50, 50]);
   try { const c=getAC(); [220,180].forEach((f,i)=>{ const o=c.createOscillator(),g=c.createGain(); o.type='sawtooth'; o.connect(g); g.connect(c.destination); o.frequency.value=f; g.gain.setValueAtTime(0.18,c.currentTime+i*0.13); g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+i*0.13+0.15); o.start(c.currentTime+i*0.13); o.stop(c.currentTime+i*0.13+0.16); }); } catch(e) {}
 }
 
 function playStampSound() {
   if (navigator.vibrate) navigator.vibrate([100, 200, 300]); 
-  if(isMuted) return;
   try { 
     const ctx = getAC();
     const now = ctx.currentTime;
@@ -903,7 +899,6 @@ function playVictoryEffects() {
       document.body.appendChild(conf);
       setTimeout(()=>conf.remove(), 4500);
   }
-  if(isMuted) return;
   try {
     const c = getAC();
     [523.25, 659.25, 783.99, 1046.50, 1318.51].forEach((f, i) => {
@@ -1025,14 +1020,12 @@ function toggleRiddle() {
     const secs = Math.floor(riddleElapsed / 1000);
     timeDisplay.textContent = `0:${String(secs).padStart(2, '0')} / 0:15`;
 
-    if(!isMuted) {
-      RIDDLE_NOTES.forEach((freq, index) => {
-        if (!notesPlayed[index] && riddleElapsed > index * noteInterval) {
-          notesPlayed[index] = true;
-          playPianoNote(freq, null, null, true); 
-        }
-      });
-    }
+    RIDDLE_NOTES.forEach((freq, index) => {
+      if (!notesPlayed[index] && riddleElapsed > index * noteInterval) {
+        notesPlayed[index] = true;
+        playPianoNote(freq, null, null, true); 
+      }
+    });
   }, 50);
 }
 
@@ -1153,7 +1146,6 @@ window.addEventListener('touchend', () => { isDraggingBar = false; });
 
 function playPianoNote(freq, keyEl, isBlack, fromRiddle = false) {
   if (!fromRiddle && navigator.vibrate) navigator.vibrate(15);
-  if (!fromRiddle && isMuted) return;
   try {
     const ctx = getAC();
     const now = ctx.currentTime;
