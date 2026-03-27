@@ -53,7 +53,7 @@
     }
     #global-progress-fill::after {
       content: '✈️'; position: absolute; left: -10px; 
-      top: 8px; /* הוריד את המטוס להיות תלוי בבירור מתחת לפס */
+      top: 8px; 
       transform: scaleX(-1); 
       font-size: 18px; line-height: 1; text-shadow: 0 2px 4px rgba(0,0,0,0.5); z-index: 10001;
     }
@@ -98,7 +98,6 @@
     
     /* תיאור עם תמיכה באפקט ההדפסה */
     .page-desc { color: rgba(255,230,180,0.78); font-size: 15.5px; line-height: 2.1; white-space: pre-wrap; max-width: 560px; margin: 0 auto; min-height: 40px; }
-    /* סמן כתיבה (Caret) */
     .page-desc::after { content: '|'; animation: blinkCaret 1s infinite; color: #ff9500; font-weight: bold; }
     @keyframes blinkCaret { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
 
@@ -380,6 +379,9 @@
       <button class="map-btn" data-page="guru">🇮🇳 דראמסלה (גורו)</button>
       <button class="map-btn" data-page="market">🇮🇳 השוק</button>
     </div>
+    
+    <hr style="border:0; border-top:1px solid rgba(255,140,0,0.3); margin: 20px 0 15px;" />
+    <button class="submit-btn" style="width:100%; margin-top:0; padding:10px; font-size:14px; background:linear-gradient(180deg, #aa0000 0%, #880000 100%); border-bottom-color:#440000;" onclick="promptResetGame()">🗑️ התחלת משחק חדש (איפוס נתונים)</button>
   </div>
 </div>
 
@@ -620,7 +622,7 @@ function toggleA11y(className, isChecked) {
   }
 }
 
-// פונקציית אפקט מכונת כתיבה חכמה (תומכת HTML)
+// פונקציית אפקט מכונת כתיבה חכמה (ללא סאונד לבקשתך, מהירות 40)
 function typeWriterEffect(htmlText, elementId, callback) {
   const el = document.getElementById(elementId);
   if (document.body.classList.contains('a11y-no-animations')) {
@@ -642,13 +644,8 @@ function typeWriterEffect(htmlText, elementId, callback) {
       if (htmlText.charAt(i) === '<') isTag = true;
       if (htmlText.charAt(i) === '>') isTag = false;
 
-      // תקתוק עדין רק על טקסט ולא על תווי HTML או רווחים
-      if (!isTag && htmlText.charAt(i) !== ' ') {
-        playTypewriterSound();
-      }
-
       i++;
-      setTimeout(type, isTag ? 0 : 25);
+      setTimeout(type, isTag ? 0 : 40); // הואט ל-40 מילישניות לקריאה נעימה
     } else {
       if (callback) callback();
     }
@@ -811,12 +808,19 @@ function jumpTo(pageId) {
   loadPage(pageId);
 }
 
-// ניקוי נתונים לתחילת משחק חדש
+// ניקוי נתונים לתחילת משחק חדש עם אישור
+function promptResetGame() {
+  if (confirm("פעולה זו תמחק את ההתקדמות שלכם ותתחיל משחק חדש. בטוחים?")) {
+    resetGame();
+  }
+}
+
+// ניקוי אוטומטי (שקוף) לעמוד הסיום
 function resetGame() {
   localStorage.removeItem('puzzleMaxStep');
   localStorage.removeItem('puzzleHintsUsed');
   localStorage.removeItem('puzzleStageTimes');
-  location.href = '?page=opening';
+  location.href = location.pathname; 
 }
 
 // ===== חיוויי סאונד לממשק =====
@@ -825,7 +829,6 @@ function playHintClick() { try { const c=getAC(), o=c.createOscillator(), g=c.cr
 function playHintReveal() { try { const c=getAC(); const now=c.currentTime; [1046.5, 1318.51, 1567.98].forEach((f, i) => { const o=c.createOscillator(), g=c.createGain(); o.type='triangle'; o.frequency.value=f; o.connect(g); g.connect(c.destination); g.gain.setValueAtTime(0, now); g.gain.setValueAtTime(0, now + i*0.05); g.gain.linearRampToValueAtTime(0.1, now + i*0.05 + 0.05); g.gain.exponentialRampToValueAtTime(0.001, now + 1.5); o.start(now); o.stop(now + 1.6); }); } catch(e){} }
 function playHintClose() { try { const c=getAC(), o=c.createOscillator(), g=c.createGain(); o.type='sine'; o.frequency.setValueAtTime(400, c.currentTime); o.frequency.exponentialRampToValueAtTime(100, c.currentTime+0.15); o.connect(g); g.connect(c.destination); g.gain.setValueAtTime(0, c.currentTime); g.gain.linearRampToValueAtTime(0.1, c.currentTime+0.02); g.gain.exponentialRampToValueAtTime(0.001, c.currentTime+0.2); o.start(); o.stop(c.currentTime+0.25); } catch(e){} }
 function playTypeSound() { if (navigator.vibrate) navigator.vibrate(5); try { const ctx=getAC(); const now=ctx.currentTime; const osc=ctx.createOscillator(); const gain=ctx.createGain(); osc.type='sine'; osc.frequency.setValueAtTime(600, now); osc.frequency.exponentialRampToValueAtTime(300, now+0.05); osc.connect(gain); gain.connect(ctx.destination); gain.gain.setValueAtTime(0, now); gain.gain.linearRampToValueAtTime(0.08, now+0.01); gain.gain.exponentialRampToValueAtTime(0.001, now+0.05); osc.start(now); osc.stop(now+0.06); } catch(e){} }
-function playTypewriterSound() { try { const ctx=getAC(); const now=ctx.currentTime; const osc=ctx.createOscillator(); const gain=ctx.createGain(); osc.type='square'; osc.frequency.setValueAtTime(800 + Math.random()*200, now); osc.connect(gain); gain.connect(ctx.destination); gain.gain.setValueAtTime(0, now); gain.gain.linearRampToValueAtTime(0.03, now+0.005); gain.gain.exponentialRampToValueAtTime(0.001, now+0.03); osc.start(now); osc.stop(now+0.04); } catch(e){} }
 
 // ===== מערכת רמזים דינמית =====
 function openHintsModal() {
