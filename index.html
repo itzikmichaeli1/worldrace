@@ -89,7 +89,7 @@
     .youtube-wrap { position: relative; padding-bottom: 56.25%; height: 0; border-radius: 12px; overflow: hidden; border: 2px solid rgba(255,140,0,0.45); margin-bottom: 28px; box-shadow: 0 10px 25px rgba(0,0,0,0.6); }
     .youtube-wrap iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: none; }
 
-    /* תיבת קוד + חותמת אקראית מואטת */
+    /* תיבת קוד + חותמת אקראית מואטת (Slow Motion) */
     .code-box { background: rgba(20,8,0,0.72); border: 1.5px solid rgba(255,120,0,0.45); border-radius: 14px; margin-top: 10px; position: relative; overflow: hidden; padding: 32px 24px 28px; text-align: center; }
     .code-box::before { content: ''; position: absolute; top: 0; left: 15%; right: 15%; height: 2px; background: linear-gradient(90deg, transparent, rgba(255,160,0,0.8), rgba(0,210,190,0.5), transparent); }
     .code-box::after {
@@ -129,7 +129,7 @@
     .submit-btn:active { transform: translateY(5px); box-shadow: 0 1px 0 #6a2800, 0 2px 6px rgba(0,0,0,0.3); border-bottom-width: 1px; }
     
     .verifying-state {
-      animation: pulseVerify 0.6s infinite ease-in-out;
+      animation: pulseVerify 0.5s infinite ease-in-out;
       pointer-events: none;
     }
     @keyframes pulseVerify {
@@ -496,7 +496,7 @@ const PAGES = {
   guru: {
     step: 11, bg: "radial-gradient(ellipse at 25% 15%, #2a1100 0%, #150800 40%, #0a0400 100%)",
     title: "כל הכבוד!",
-    desc: "ניחשתם נכון! ברוכים הבאים לדראמסלה, הודו.\n\nשימו לב! נראה שאחת הקבוצות המתחרות ניסתה לחבל לכם בהתקדמות והרסה את ה-QR קוד שבמעטפה. למזלכם, הפקת המירוץ שמה לב לזה ודאגה להעלות את המסר מהגורו ישירות לכאן.\n\nצפו בסרטון והזינו כאן את קוד הגורו:",
+    desc: "ברוכים הבאים לדראמסלה, הודו.\n\nנראה שאחת הקבוצות המתחרות ניסתה לחבל לכם בהתקדמות והרסה את ה-QR קוד שבמעטפה. למזלכם, הפקת המירוץ שמה לב לזה ודאגה להעלות את המסר מהגורו ישירות לכאן.\n\nצפו בסרטון והזינו כאן את קוד הגורו:",
     youtube: "jnxgqrVLbIg", code: "41", next: "market", type: "code",
     hints: [
       "צפו בסרטון של הגורו. צפיה בסבלנות היא חשובה, אל תנסו לדלג.",
@@ -763,7 +763,7 @@ function revealHint(btn) {
   confirmDiv.nextElementSibling.style.display = 'block';
 }
 
-// ===== צלילי מערכת וחותמת משופרת (אופציה 1 - מכת פלדה) =====
+// ===== צלילי מערכת וחותמת משופרת (אקורד טלוויזיוני "כוכב נולד") =====
 const AudioCtx = window.AudioContext || window.webkitAudioContext;
 let _ac = null;
 function getAC() { if (!_ac) _ac = new AudioCtx(); return _ac; }
@@ -778,59 +778,45 @@ function playError() {
 }
 
 function playStampSound() {
-  if (navigator.vibrate) navigator.vibrate([60, 100, 200]); 
+  if (navigator.vibrate) navigator.vibrate([100, 200, 300]); 
   try { 
     const ctx = getAC();
     const now = ctx.currentTime;
+    
+    const freqs = [261.63, 329.63, 392.00, 493.88, 587.33]; 
 
-    [800, 1200, 2500].forEach(freq => {
+    freqs.forEach((freq, i) => {
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
-      osc.type = 'square';
-      osc.frequency.setValueAtTime(freq, now);
-      osc.frequency.exponentialRampToValueAtTime(freq * 0.5, now + 0.3);
-      osc.connect(gain); gain.connect(ctx.destination);
+      osc.type = i % 2 === 0 ? 'triangle' : 'sine'; 
+      osc.frequency.value = freq;
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
       gain.gain.setValueAtTime(0, now);
-      gain.gain.linearRampToValueAtTime(0.5, now + 0.01);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
-      osc.start(now); osc.stop(now + 0.6);
+      gain.gain.linearRampToValueAtTime(0.3 / freqs.length, now + 0.2); 
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 4.0); 
+
+      osc.start(now);
+      osc.stop(now + 4.5);
     });
 
-    const bass = ctx.createOscillator();
+    const bassOsc = ctx.createOscillator();
     const bassGain = ctx.createGain();
-    bass.type = 'triangle';
-    bass.frequency.setValueAtTime(180, now);
-    bass.frequency.exponentialRampToValueAtTime(30, now + 0.15);
-    bass.connect(bassGain); bassGain.connect(ctx.destination);
+    bassOsc.type = 'sine';
+    bassOsc.frequency.setValueAtTime(100, now);
+    bassOsc.frequency.exponentialRampToValueAtTime(30, now + 1.5);
+    bassOsc.connect(bassGain);
+    bassGain.connect(ctx.destination);
+    
     bassGain.gain.setValueAtTime(0, now);
-    bassGain.gain.linearRampToValueAtTime(2.0, now + 0.02);
-    bassGain.gain.exponentialRampToValueAtTime(0.001, now + 4.0); 
-    bass.start(now); bass.stop(now + 4.5);
-
-    const bufferSize = ctx.sampleRate * 0.5; 
-    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-    const data = buffer.getChannelData(0);
-    for (let i = 0; i < bufferSize; i++) {
-      data[i] = Math.random() * 2 - 1;
-    }
-    const noise = ctx.createBufferSource();
-    noise.buffer = buffer;
+    bassGain.gain.linearRampToValueAtTime(0.5, now + 0.3);
+    bassGain.gain.exponentialRampToValueAtTime(0.001, now + 3.0);
     
-    const bandpass = ctx.createBiquadFilter();
-    bandpass.type = 'bandpass';
-    bandpass.frequency.value = 500; 
+    bassOsc.start(now);
+    bassOsc.stop(now + 3.5);
 
-    const noiseGain = ctx.createGain();
-    noiseGain.gain.setValueAtTime(0, now);
-    noiseGain.gain.linearRampToValueAtTime(1.5, now + 0.05); 
-    noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
-
-    noise.connect(bandpass);
-    bandpass.connect(noiseGain);
-    noiseGain.connect(ctx.destination);
-    
-    noise.start(now);
-    noise.stop(now + 0.5);
   } catch(e){}
 }
 
@@ -869,6 +855,7 @@ function submitCode() {
   btn.innerHTML = 'מאמת נתונים... ⏳';
   btn.classList.add('verifying-state');
   
+  // קוצר ל-1 שנייה בדיוק (1000 מילישניות)
   setTimeout(() => {
     btn.innerHTML = 'המשך לשלב הבא «';
     btn.classList.remove('verifying-state');
@@ -886,7 +873,7 @@ function submitCode() {
           box.classList.remove('stamp-approved');
           pendingNext = page.next;
           loadPage(pendingNext); 
-        }, 1500); 
+        }, 2000); // ממתין שתי שניות כדי לאפשר לחותמת לנחות לאט והסאונד יהדהד
       } else {
         pendingNext = page.next;
         loadPage(pendingNext);
@@ -902,7 +889,7 @@ function submitCode() {
       }
       document.getElementById('error-msg').style.display = 'block';
     }
-  }, 1500); 
+  }, 1000); 
 }
 
 function clearError() {
