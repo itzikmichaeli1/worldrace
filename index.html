@@ -44,7 +44,7 @@
     #stars { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
     .star { position: absolute; border-radius: 50%; animation: twinkle ease-in-out infinite; }
 
-    /* פס התקדמות + מטוס - כוונן כדי שלא ייחתך ויישאר מלא */
+    /* פס התקדמות + מטוס */
     #global-progress-wrap { position: fixed; top: 0; left: 0; right: 0; height: 5px; background: rgba(255,255,255,0.1); z-index: 1000; overflow: visible; }
     #global-progress-fill { 
       height: 100%; width: 0%; background: linear-gradient(90deg, #ff9500, #00c8be); 
@@ -104,8 +104,13 @@
     .code-section-label { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 20px; }
     .code-section-label hr { flex: 1; border: none; border-top: 1px solid rgba(255,140,0,0.2); }
     .code-section-label span { font-size: 13px; letter-spacing: 3px; color: rgba(0,200,190,0.75); white-space: nowrap; }
-    .code-instruction { font-size: 15px; color: rgba(255,230,180,0.9); margin-bottom: 22px; font-weight: 500; }
+    .code-instruction { font-size: 15px; color: rgba(255,230,180,0.9); margin-bottom: 12px; font-weight: 500; }
     .code-input-wrap { display: inline-flex; flex-direction: column; align-items: center; gap: 14px; }
+    
+    /* אנימציית החץ המוגדל כלפי מטה */
+    .code-hint-arrow { font-size: 22px; color: #00c8be; text-shadow: 0 0 10px rgba(0,200,190,0.5); margin-bottom: -4px; animation: bounceDown 1.5s ease-in-out infinite; }
+    @keyframes bounceDown { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(8px); } }
+
     .code-glow-ring { border-radius: 10px; padding: 3px; background: linear-gradient(135deg, rgba(255,100,0,0.25), rgba(0,180,170,0.15)); transition: background 0.3s; }
     .code-glow-ring.focused { background: linear-gradient(135deg, rgba(255,160,0,0.7), rgba(0,210,190,0.5)); }
     .code-input {
@@ -114,14 +119,10 @@
       width: 260px; transition: background 0.2s; caret-color: #ff9500; font-family: inherit;
     }
     .code-input.error { background: rgba(80,10,0,0.9); color: #ffaaaa; }
-    
-    /* אנימציית החץ המקפץ */
-    .code-hint { font-size: 14px; font-weight: bold; color: rgba(0,200,190,0.7); margin-top: 10px; animation: bounceHint 1.2s ease-in-out infinite; }
-    @keyframes bounceHint { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
 
     /* כפתור ואפקט אימות נתונים */
     .submit-btn {
-      margin-top: 15px; background: linear-gradient(180deg, #ff9500 0%, #d96000 60%, #a84000 100%);
+      margin-top: 10px; background: linear-gradient(180deg, #ff9500 0%, #d96000 60%, #a84000 100%);
       border: none; border-bottom: 5px solid #6a2800; border-radius: 10px; color: #fff; padding: 14px 40px; font-size: 16px; cursor: pointer;
       font-family: inherit; font-weight: 800; letter-spacing: 1px; width: 260px; text-shadow: 0 1px 3px rgba(0,0,0,0.4); box-shadow: 0 6px 0 #6a2800, 0 8px 16px rgba(0,0,0,0.35); transition: all 0.12s;
     }
@@ -129,7 +130,7 @@
     .submit-btn:active { transform: translateY(5px); box-shadow: 0 1px 0 #6a2800, 0 2px 6px rgba(0,0,0,0.3); border-bottom-width: 1px; }
     
     .verifying-state {
-      animation: pulseVerify 0.6s infinite ease-in-out;
+      animation: pulseVerify 0.5s infinite ease-in-out;
       pointer-events: none;
     }
     @keyframes pulseVerify {
@@ -283,6 +284,7 @@
     <div class="code-section-label"><hr/><span>🔐 הזנת קוד</span><hr/></div>
     <p class="code-instruction">הזינו את הקוד שקיבלתם</p>
     <div class="code-input-wrap">
+      <div class="code-hint-arrow">▼</div>
       <div class="code-glow-ring" id="glow-ring">
         <input type="text" class="code-input" id="code-input"
           oninput="clearError(); playTypeSound()"
@@ -291,7 +293,6 @@
           onblur="document.getElementById('glow-ring').classList.remove('focused')"
         />
       </div>
-      <div class="code-hint">↑ הקלידו כאן</div>
       <button class="submit-btn" onclick="submitCode()">המשך לשלב הבא «</button>
     </div>
     <div class="error-msg" id="error-msg">✗ קוד שגוי — נסו שוב!</div>
@@ -369,7 +370,7 @@ const PAGES = {
   opening: {
     step: 1, bg: "radial-gradient(ellipse at 25% 15%, #1a0800 0%, #080e00 40%, #001a18 100%)",
     title: "המירוץ העולמי - מתחילים!",
-    desc: "המירוץ העולמי יוצא לדרך בעונה חדשה ומפתיעה והפעם – אתם המתחרים! שימו לב! מוכנים? צפו בסרטון והתחילו לשחק!",
+    desc: "המירוץ העולמי יוצא לדרך בעונה חדשה ומפתיעה והפעם – אתם המתחרים! מוכנים? צפו בסרטון והתחילו לשחק!",
     youtube: "FlTe_-Wxf6k", code: "3682", next: "london", type: "code",
     hints: [
       "במעטפה 13 ספחים של כרטיסי טיסה המייצגים 13 מקומות ספציפיים במטוס. סימון מושבים אלה על גבי דיאגרמת המטוס ודאי יסייע להגיע לפתרון. הקוד הוא בן ארבע ספרות.",
@@ -496,7 +497,7 @@ const PAGES = {
   guru: {
     step: 11, bg: "radial-gradient(ellipse at 25% 15%, #2a1100 0%, #150800 40%, #0a0400 100%)",
     title: "כל הכבוד!",
-    desc: "ניחשתם נכון! ברוכים הבאים לדראמסלה, הודו.\n\nשימו לב! נראה שאחת הקבוצות המתחרות ניסתה לחבל לכם בהתקדמות והרסה את ה-QR קוד שבמעטפה. למזלכם, הפקת המירוץ שמה לב לזה ודאגה להעלות את המסר מהגורו ישירות לכאן.\n\nצפו בסרטון והזינו כאן את קוד הגורו:",
+    desc: "ברוכים הבאים לדראמסלה, הודו.\n\nנראה שאחת הקבוצות המתחרות ניסתה לחבל לכם בהתקדמות והרסה את ה-QR קוד שבמעטפה. למזלכם, הפקת המירוץ שמה לב לזה ודאגה להעלות את המסר מהגורו ישירות לכאן.\n\nצפו בסרטון והזינו כאן את קוד הגורו:",
     youtube: "jnxgqrVLbIg", code: "41", next: "market", type: "code",
     hints: [
       "צפו בסרטון של הגורו. צפיה בסבלנות היא חשובה, אל תנסו לדלג.",
@@ -763,7 +764,7 @@ function revealHint(btn) {
   confirmDiv.nextElementSibling.style.display = 'block';
 }
 
-// ===== צלילי מערכת וחותמת משופרת (אופציה מלודית) =====
+// ===== צלילי מערכת וחותמת משופרת (אקורד טלוויזיוני "כוכב נולד") =====
 const AudioCtx = window.AudioContext || window.webkitAudioContext;
 let _ac = null;
 function getAC() { if (!_ac) _ac = new AudioCtx(); return _ac; }
@@ -783,7 +784,6 @@ function playStampSound() {
     const ctx = getAC();
     const now = ctx.currentTime;
     
-    // אקורד עשיר ודרמטי
     const freqs = [261.63, 329.63, 392.00, 493.88, 587.33]; 
 
     freqs.forEach((freq, i) => {
@@ -856,6 +856,7 @@ function submitCode() {
   btn.innerHTML = 'מאמת נתונים... ⏳';
   btn.classList.add('verifying-state');
   
+  // קוצר ל-1 שנייה בדיוק (1000 מילישניות)
   setTimeout(() => {
     btn.innerHTML = 'המשך לשלב הבא «';
     btn.classList.remove('verifying-state');
@@ -889,7 +890,7 @@ function submitCode() {
       }
       document.getElementById('error-msg').style.display = 'block';
     }
-  }, 1000); // 1 שניה של מתח
+  }, 1000); 
 }
 
 function clearError() {
@@ -1160,7 +1161,7 @@ window.onpopstate = e => {
   loadPage(id);
 };
 
-// אתחול הגדרות הנגישות וטעינת העמוד (ללא שמירה אוטומטית שדורסת כתובת)
+// אתחול הגדרות הנגישות וטעינת העמוד
 initA11y();
 loadPage(getPageId());
 </script>
