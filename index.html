@@ -142,7 +142,7 @@
     .audio-play-btn:active { transform: scale(0.95); box-shadow: 0 2px 5px rgba(0,0,0,0.4); }
     .audio-track { flex: 1; }
     .audio-label { font-size: 13px; color: rgba(140,200,255,0.85); margin-bottom: 6px; font-weight: 600; text-align: center; }
-    .audio-progress-bar { height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; position: relative; cursor: pointer; box-shadow: inset 0 1px 2px rgba(0,0,0,0.3); }
+    .audio-progress-bar { height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; position: relative; cursor: pointer; box-shadow: inset 0 1px 2px rgba(0,0,0,0.3); touch-action: manipulation; }
     .audio-progress-fill { position: absolute; right: 0; top: 0; height: 100%; background: #5aaeee; border-radius: 4px; width: 0%; pointer-events: none; box-shadow: 0 0 5px rgba(90,174,238,0.5); }
     .audio-time { font-size: 11px; color: rgba(255,255,255,0.4); margin-top: 5px; text-align: center; }
 
@@ -153,8 +153,6 @@
     @keyframes popIn { 0%{transform:scale(.75);opacity:0} 100%{transform:scale(1);opacity:1} }
 
     /* ===== פסנתר ===== */
-    .rotate-device-msg { font-size: 14px; color: #ff9500; margin-bottom: 10px; text-align: center; display: none; }
-    @media (max-width: 600px) { .rotate-device-msg { display: block; } }
     .piano-scroll-wrapper { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; padding: 10px 0; direction: ltr; }
     .piano-chassis {
       background: linear-gradient(145deg, #2a0a00, #110000); border: 2px solid #5a2a00; border-radius: 10px;
@@ -163,10 +161,10 @@
     }
     .piano-felt { width: 100%; height: 8px; background: #a00; border-radius: 4px 4px 0 0; box-shadow: inset 0 -3px 5px rgba(0,0,0,0.5); margin-bottom: -2px; position: relative; z-index: 3; }
     
-    /* טקסט הוראת נגינה - מעל הפסנתר */
+    /* טקסט הוראת נגינה - מעל הפסנתר עם אפקט פועם */
     .piano-instruction {
       font-size: 16px; color: #ffcc00; font-weight: 700; margin-bottom: 12px; letter-spacing: 0.5px;
-      animation: pulseText 2s infinite;
+      animation: pulseText 2s infinite; text-align: center;
     }
     @keyframes pulseText { 0%, 100% { opacity: 0.8; } 50% { opacity: 1; text-shadow: 0 0 8px rgba(255,200,0,0.6); } }
 
@@ -233,7 +231,7 @@
   <div class="audio-riddle" id="audio-riddle" style="display:none">
     <button class="audio-play-btn" id="riddle-play-btn" onclick="toggleRiddle()">▶</button>
     <div class="audio-track">
-      <div class="audio-label">חידת שמיעה — הקשיבו לתווים</div>
+      <div class="audio-label">הקלטה מסווגת: פענחו את רצף התווים</div>
       <div class="audio-progress-bar" id="riddle-progress-bar">
         <div class="audio-progress-fill" id="riddle-fill"></div>
       </div>
@@ -242,8 +240,7 @@
   </div>
 
   <div id="piano-section" style="display:none; margin-bottom:24px; text-align:center;">
-    <div class="rotate-device-msg">📱 לחוויית נגינה טובה יותר, מומלץ לסובב את המכשיר לרוחב</div>
-    <div class="piano-instruction">לחצו על התווים לנגינה 🎹</div>
+    <div class="piano-instruction">📱 סובבו את המסך ולחצו על התווים לנגינה 🎹</div>
     <div class="piano-scroll-wrapper">
       <div class="piano-chassis">
         <div class="piano-felt"></div>
@@ -254,7 +251,7 @@
 
   <div class="code-box" id="code-box">
     <div class="code-section-label"><hr/><span>🔐 הזנת קוד</span><hr/></div>
-    <p class="code-instruction">הכניסו את הקוד שקיבלתם כדי להמשיך</p>
+    <p class="code-instruction">הזינו את הקוד שקיבלתם</p>
     <div class="code-input-wrap">
       <div class="code-glow-ring" id="glow-ring">
         <input type="text" class="code-input" id="code-input"
@@ -307,6 +304,7 @@
   <div class="modal-card">
     <button class="close-modal-btn" onclick="closeA11yModal()">✖</button>
     <h2 class="modal-title">הגדרות ונגישות</h2>
+    
     <div class="a11y-toggle-row">
       <span class="a11y-toggle-label">טקסט מוגדל</span>
       <label class="switch">
@@ -314,6 +312,7 @@
         <span class="slider"></span>
       </label>
     </div>
+    
     <div class="a11y-toggle-row">
       <span class="a11y-toggle-label">ניגודיות גבוהה (רקע שחור)</span>
       <label class="switch">
@@ -321,6 +320,7 @@
         <span class="slider"></span>
       </label>
     </div>
+    
     <div class="a11y-toggle-row">
       <span class="a11y-toggle-label">ביטול אנימציות</span>
       <label class="switch">
@@ -633,7 +633,7 @@ function openHintsModal() {
     });
   }
   if (page.solution) {
-    // השתנה מ"פיתרון מפורט" ל"פיתרון"
+    // השתנה ל"פיתרון"
     container.appendChild(createHintElement(`פיתרון`, page.solution, true));
   }
   
@@ -684,6 +684,20 @@ function createHintElement(title, text, isSolution) {
 function showHintConfirm(btn) {
   if (navigator.vibrate) navigator.vibrate(15);
   playHintClick();
+
+  // סגירת כל שאר הרמזים שפתוחים (אפקט אקורדיון)
+  const allItems = document.querySelectorAll('#hints-container .hint-item');
+  allItems.forEach(item => {
+    const tBtn = item.querySelector('.hint-btn');
+    const cDiv = item.querySelector('.hint-confirm');
+    const xDiv = item.querySelector('.hint-text');
+    if (tBtn !== btn) {
+      tBtn.style.display = 'block';
+      cDiv.style.display = 'none';
+      xDiv.style.display = 'none';
+    }
+  });
+
   btn.style.display = 'none';
   btn.nextElementSibling.style.display = 'block';
 }
@@ -699,6 +713,21 @@ function cancelHint(btn) {
 function revealHint(btn) {
   if (navigator.vibrate) navigator.vibrate(25);
   playHintReveal();
+  
+  // סגירת כל שאר הרמזים במקרה ויש טקסטים או אישורים פתוחים
+  const allItems = document.querySelectorAll('#hints-container .hint-item');
+  allItems.forEach(item => {
+    const tBtn = item.querySelector('.hint-btn');
+    const cDiv = item.querySelector('.hint-confirm');
+    const xDiv = item.querySelector('.hint-text');
+    // אם זה לא הפריט הנוכחי שלחצנו עליו, נחזיר אותו למצב סגור
+    if (cDiv !== btn.closest('.hint-confirm')) {
+      tBtn.style.display = 'block';
+      cDiv.style.display = 'none';
+      xDiv.style.display = 'none';
+    }
+  });
+
   const confirmDiv = btn.closest('.hint-confirm');
   confirmDiv.style.display = 'none';
   confirmDiv.nextElementSibling.style.display = 'block';
@@ -1100,7 +1129,7 @@ window.onpopstate = e => {
   loadPage(id);
 };
 
-// אתחול הגדרות הנגישות וטעינת העמוד
+// אתחול הגדרות הנגישות וטעינת העמוד (ללא שמירה אוטומטית שדורסת כתובת)
 initA11y();
 loadPage(getPageId());
 </script>
