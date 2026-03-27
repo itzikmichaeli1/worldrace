@@ -44,7 +44,7 @@
     #stars { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
     .star { position: absolute; border-radius: 50%; animation: twinkle ease-in-out infinite; }
 
-    /* פס התקדמות */
+    /* פס התקדמות גלובלי */
     #global-progress-wrap {
       position: fixed; top: 0; left: 0; right: 0; height: 5px;
       background: rgba(255,255,255,0.1); z-index: 1000;
@@ -61,6 +61,7 @@
       padding: 44px 20px 100px;
     }
 
+    /* אנימציית מעבר עמודים */
     .fade-transition { animation: fadePage 0.5s ease-out forwards; }
     @keyframes fadePage {
       0% { opacity: 0; transform: translateY(15px); }
@@ -126,7 +127,7 @@
     }
     .youtube-wrap iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: none; }
 
-    /* ===== תיבת קוד + חותמת ===== */
+    /* ===== תיבת קוד + חותמת עגולה APPROVED ===== */
     .code-box {
       background: rgba(20,8,0,0.72); border: 1.5px solid rgba(255,120,0,0.45); border-radius: 14px; margin-top: 10px;
       position: relative; overflow: hidden; padding: 32px 24px 28px; text-align: center;
@@ -136,10 +137,12 @@
       background: linear-gradient(90deg, transparent, rgba(255,160,0,0.8), rgba(0,210,190,0.5), transparent);
     }
     .code-box::after {
-      content: 'אושר'; position: absolute; top: 50%; left: 50%; z-index: 10;
+      content: 'APPROVED'; position: absolute; top: 50%; left: 50%; z-index: 10;
       transform: translate(-50%, -50%) scale(5) rotate(-15deg);
-      font-size: 50px; font-weight: 900; color: rgba(0, 200, 100, 0.9);
-      border: 6px solid rgba(0, 200, 100, 0.9); border-radius: 15px; padding: 10px 30px;
+      font-size: 20px; font-weight: 900; color: rgba(0, 200, 100, 0.95);
+      border: 6px solid rgba(0, 200, 100, 0.95); border-radius: 50%; 
+      width: 140px; height: 140px; display: flex; align-items: center; justify-content: center;
+      letter-spacing: 1px;
       opacity: 0; pointer-events: none; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
     .code-box.stamp-approved::after { transform: translate(-50%, -50%) scale(1) rotate(-15deg); opacity: 1; }
@@ -188,36 +191,6 @@
     .choice-img { width: 100%; height: 220px; object-fit: cover; display: block; }
     .choice-lbl { display: block; width: 100%; background: linear-gradient(180deg, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.7) 100%); color: #fff; font-size: 22px; font-weight: 800; padding: 16px 20px 20px; text-shadow: 0 2px 8px rgba(0,0,0,0.9); letter-spacing: 0.5px; }
 
-    /* ===== נכון/לא נכון ===== */
-    .tf-wrap { margin-top: 10px; }
-    .tf-title { text-align: center; font-size: 15px; color: rgba(190,225,255,0.85); margin-bottom: 20px; font-weight: 500; padding: 0 12px; line-height: 1.6;}
-    .tf-questions { display: flex; flex-direction: column; gap: 12px; }
-    .tf-row {
-      display: flex; align-items: center; gap: 12px; background: rgba(15,35,80,0.5);
-      border: 1px solid rgba(60,120,200,0.25); border-radius: 10px; padding: 14px 18px;
-    }
-    .tf-row-num { font-size: 13px; color: rgba(120,180,255,0.5); min-width: 24px; }
-    .tf-row-label { flex: 1; font-size: 15px; color: rgba(200,225,255,0.8); }
-    .tf-btn-group { display: flex; gap: 8px; }
-    .tf-btn {
-      padding: 8px 18px; border-radius: 7px; font-size: 14px; font-weight: 600; cursor: pointer;
-      font-family: inherit; border: 1.5px solid; transition: all 0.2s; touch-action: manipulation;
-    }
-    .tf-btn.correct-btn { border-color: rgba(60,180,100,0.5); background: rgba(20,80,40,0.3); color: #7de8a0; }
-    .tf-btn.correct-btn.selected, .tf-btn.correct-btn:hover { background: rgba(30,120,60,0.6); border-color: rgba(80,220,130,0.8); }
-    .tf-btn.wrong-btn { border-color: rgba(200,80,80,0.5); background: rgba(80,20,20,0.3); color: #f08080; }
-    .tf-btn.wrong-btn.selected, .tf-btn.wrong-btn:hover { background: rgba(140,30,30,0.6); border-color: rgba(240,100,100,0.8); }
-    .tf-submit {
-      margin-top: 20px; width: 100%; background: linear-gradient(135deg, rgba(30,90,200,0.7), rgba(50,130,230,0.5));
-      border: 1.5px solid rgba(80,160,240,0.7); border-radius: 10px; color: #c8e8ff; padding: 15px; font-size: 16px;
-      cursor: pointer; font-family: inherit; font-weight: 700; transition: all 0.2s; touch-action: manipulation;
-    }
-    .tf-submit:hover { opacity: 0.85; }
-    .tf-error {
-      display: none; margin-top: 14px; text-align: center; color: rgba(255,150,150,0.9); font-size: 14px;
-      background: rgba(180,30,30,0.2); border: 1px solid rgba(220,80,80,0.35); border-radius: 8px; padding: 10px;
-    }
-
     /* ===== עמוד סיום וקונפטי ===== */
     .finish-wrap { text-align: center; padding: 20px; }
     .finish-trophy { font-size: 80px; margin-bottom: 20px; animation: popIn 1s cubic-bezier(0.34,1.56,0.64,1); }
@@ -232,31 +205,6 @@
       0% { top: -10px; transform: rotate(0deg) scale(1); }
       100% { top: 100vh; transform: rotate(720deg) scale(0.5); }
     }
-
-    /* ===== חלון הצלחה ===== */
-    #success-overlay {
-      display: none; position: fixed; inset: 0; z-index: 200;
-      background: rgba(2,6,20,0.88); align-items: center; justify-content: center;
-    }
-    #success-overlay.show { display: flex; }
-    .success-card {
-      background: rgba(15,6,0,0.98); border: 1px solid rgba(255,160,0,0.6); border-radius: 16px; padding: 48px 56px;
-      text-align: center; max-width: 380px; animation: popIn 0.45s cubic-bezier(0.34,1.56,0.64,1);
-    }
-    .success-icon {
-      width: 70px; height: 70px; border-radius: 50%; background: rgba(255,140,0,0.15); border: 2px solid rgba(255,180,0,0.7);
-      display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 32px; color: #5aaeee;
-    }
-    .success-title { color: #ffe0a0; font-size: 24px; margin-bottom: 10px; font-weight: 700; }
-    .success-sub { color: rgba(255,220,160,0.65); font-size: 15px; margin-bottom: 32px; }
-    #continue-btn {
-      background: linear-gradient(180deg, #00c8be 0%, #008a82 60%, #005a55 100%);
-      border: none; border-bottom: 5px solid #002a27; border-radius: 10px; color: #fff;
-      padding: 14px 40px; font-size: 17px; cursor: pointer; font-family: inherit; font-weight: 800;
-      transition: all 0.12s; width: 100%; box-shadow: 0 6px 0 #002a27, 0 8px 16px rgba(0,0,0,0.4); text-shadow: 0 1px 3px rgba(0,0,0,0.4);
-      touch-action: manipulation;
-    }
-    #continue-btn:active { transform: translateY(5px); box-shadow: 0 1px 0 #002a27; border-bottom-width: 1px; }
 
     /* ===== נגן אודיו ===== */
     .audio-riddle {
@@ -285,6 +233,13 @@
       pointer-events: none; box-shadow: 0 0 5px rgba(90,174,238,0.5);
     }
     .audio-time { font-size: 11px; color: rgba(255,255,255,0.4); margin-top: 5px; text-align: left; }
+
+    /* ===== אנימציות עזר ===== */
+    @keyframes shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-10px)} 40%{transform:translateX(10px)} 60%{transform:translateX(-6px)} 80%{transform:translateX(6px)} }
+    .shaking { animation: shake 0.55s ease; }
+    @keyframes twinkle { 0%,100%{opacity:.25;transform:scale(1)} 50%{opacity:1;transform:scale(1.5)} }
+    @keyframes popIn { 0%{transform:scale(.75);opacity:0} 100%{transform:scale(1);opacity:1} }
+    @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-5px)} }
 
     /* ===== פסנתר ===== */
     .rotate-device-msg { font-size: 14px; color: #ff9500; margin-bottom: 10px; text-align: center; display: none; }
@@ -352,7 +307,7 @@
     }
     .hint-text.solution-text { border-right-color: #ff4444; font-weight: bold; color: #ffcccc; }
 
-    /* תפריט נגישות ספציפי */
+    /* תפריט נגישות ספציפי וסליידרים */
     .a11y-toggle-row { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; margin-bottom: 10px; }
     .a11y-toggle-label { font-size: 16px; font-weight: bold; }
     .switch { position: relative; display: inline-block; width: 50px; height: 26px; }
@@ -361,6 +316,11 @@
     .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
     input:checked + .slider { background-color: #005a9c; }
     input:checked + .slider:before { transform: translateX(24px); }
+    
+    /* סליידר ווליום */
+    input[type=range] { -webkit-appearance: none; width: 120px; background: transparent; margin: 0; }
+    input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 18px; width: 18px; border-radius: 50%; background: #ff9500; cursor: pointer; margin-top: -7px; }
+    input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 4px; cursor: pointer; background: #555; border-radius: 2px; }
 
   </style>
 </head>
@@ -446,24 +406,16 @@
     </div>
   </div>
 
-  <div class="code-box tf-wrap" id="tf-box" style="display:none">
-    <div class="code-section-label"><hr/><span>✓✗ נכון או לא נכון</span><hr/></div>
-    <p class="tf-title">סמנו נכון או לא נכון לכל משפט, ואז לחצו על אישור</p>
-    <div class="tf-questions" id="tf-questions"></div>
-    <button class="tf-submit" onclick="submitTF()">אישור «</button>
-    <div class="tf-error" id="tf-error">✗ תשובה שגויה — בדקו שוב!</div>
-  </div>
-
   <div class="finish-wrap" id="finish-box" style="display:none">
     <div class="finish-trophy">🏆</div>
     <div class="finish-title" id="finish-title-text">כל הכבוד צוות!</div>
     <div class="finish-sub" id="finish-sub-text">עברתם את כל המדינות, והצלחתם בכל המשימות! הגיע הזמן לטוס חזרה לישראל! הצוות הראשון שיחצה את קו הגמר יזכה במיליון! פיתחו את המעטפה האחרונה, שם תחכה לכם משימת הסיום!</div>
-    <button class="submit-btn" style="margin-top: 35px;" onclick="location.href='?page=opening'">התחל מירוץ חדש ⟳</button>
+    <button class="submit-btn" style="margin-top: 35px;" onclick="location.href='?page=opening'">התחילו משחק חדש ⟳</button>
   </div>
 </div>
 
 <button id="floating-hint-btn" onclick="openHintsModal()" title="רמזים">💡</button>
-<button id="floating-a11y-btn" onclick="openA11yModal()" title="תפריט נגישות">♿</button>
+<button id="floating-a11y-btn" onclick="openA11yModal()" title="הגדרות ונגישות">♿</button>
 
 <div id="hints-overlay" class="modal-overlay">
   <div class="modal-card">
@@ -476,8 +428,13 @@
 <div id="a11y-overlay" class="modal-overlay">
   <div class="modal-card">
     <button class="close-modal-btn" onclick="closeA11yModal()">✖</button>
-    <h2 class="modal-title">הגדרות נגישות</h2>
+    <h2 class="modal-title">הגדרות ונגישות</h2>
     
+    <div class="a11y-toggle-row">
+      <span class="a11y-toggle-label">עוצמת רעשי רקע</span>
+      <input type="range" id="ambient-volume" min="0" max="1" step="0.1" value="1" onchange="changeVolume(this.value)" oninput="changeVolume(this.value)">
+    </div>
+
     <div class="a11y-toggle-row">
       <span class="a11y-toggle-label">טקסט מוגדל</span>
       <label class="switch">
@@ -504,18 +461,9 @@
   </div>
 </div>
 
-<div id="success-overlay">
-  <div class="success-card">
-    <div class="success-icon">✓</div>
-    <h2 class="success-title">כל הכבוד!</h2>
-    <p class="success-sub" id="success-sub">קוד נכון! ממשיכים לשלב הבא...</p>
-    <button id="continue-btn" onclick="doContinue()">המשך «</button>
-  </div>
-</div>
-
 <script>
 // ================================================================
-//  מבנה המשחק המלא כולל כל הרמזים, הרקעים, וסדר ההתקדמות
+//  מבנה המשחק המלא: הכל נשאר בדיוק במקום
 // ================================================================
 const PAGES = {
   opening: {
@@ -697,26 +645,17 @@ const PAGES = {
 };
 
 // ================================================================
-//  לוגיקת ניווט, שמירת התקדמות, וסאונד אווירה
+//  לוגיקת ניווט, קריאה מ-URL (ללא שמירה אוטומטית), ואווירה
 // ================================================================
 let currentPage = null;
 let pendingNext  = null;
 let isMuted = false;
 
+// לא קוראים יותר מ-localStorage. המעברים מתבססים נטו על ה-URL או שמתחילים מההתחלה.
 function getPageId() {
   const urlParams = new URLSearchParams(location.search);
   const p = urlParams.get('page');
-  if (p && PAGES[p]) {
-    // מחיקת השמירה האוטומטית אם השחקן ניגש ידנית לפתיחה
-    if (p === 'opening') localStorage.removeItem('puzzles_world_race_page');
-    return p;
-  }
-  
-  // טעינה מהזיכרון המקומי
-  const savedPage = localStorage.getItem('puzzles_world_race_page');
-  if (savedPage && PAGES[savedPage]) return savedPage;
-  
-  return 'opening';
+  return p && PAGES[p] ? p : 'opening';
 }
 
 function initA11y() {
@@ -742,24 +681,31 @@ function toggleA11y(className, isChecked) {
   }
 }
 
+// שליטה על הווליום
+function changeVolume(val) {
+  const bgAudio = document.getElementById('ambient-audio');
+  bgAudio.volume = val;
+  bgAudio.muted = false;
+  isMuted = false;
+  document.getElementById('mute-btn').innerText = val == 0 ? '🔇' : '🔊';
+  if(val > 0 && bgAudio.paused && bgAudio.src) {
+     bgAudio.play().catch(e=>{});
+  }
+}
+
 function toggleMute() {
   if (navigator.vibrate) navigator.vibrate(10);
-  isMuted = !isMuted;
   const bgAudio = document.getElementById('ambient-audio');
+  isMuted = !isMuted;
   bgAudio.muted = isMuted;
   document.getElementById('mute-btn').innerText = isMuted ? '🔇' : '🔊';
-  if(!isMuted && bgAudio.src) {
-     bgAudio.play().catch(e => console.log("Audio autoplay prevented"));
-  }
+  if(!isMuted && bgAudio.src) bgAudio.play().catch(e=>{});
 }
 
 function loadPage(id) {
   currentPage = id;
   const page  = PAGES[id];
   if (!page) return;
-
-  // שמירה לזיכרון הדפדפן
-  localStorage.setItem('puzzles_world_race_page', id);
 
   const url = id === 'opening' ? location.pathname : `${location.pathname}?page=${id}`;
   history.pushState({ page: id }, '', url);
@@ -781,7 +727,7 @@ function loadPage(id) {
     if(!bgAudio.src.endsWith(page.ambient)) {
        bgAudio.src = page.ambient;
     }
-    if(!isMuted) bgAudio.play().catch(e => console.log("Audio play prevented by browser"));
+    if(!isMuted && bgAudio.volume > 0) bgAudio.play().catch(e => console.log("Audio play prevented by browser"));
   } else {
     bgAudio.pause();
     bgAudio.src = '';
@@ -828,10 +774,8 @@ function loadPage(id) {
 
   document.getElementById('piano-section').style.display = page.piano ? '' : 'none';
   
-  // הסתרת כל האלמנטים לפני שמחליטים מה להציג
   document.getElementById('code-box').style.display       = 'none';
   document.getElementById('crossroads-box').style.display = 'none';
-  document.getElementById('tf-box').style.display         = 'none';
   document.getElementById('finish-box').style.display     = 'none';
 
   if (page.type === 'code') {
@@ -841,9 +785,6 @@ function loadPage(id) {
     document.getElementById('code-input').classList.remove('error');
   } else if (page.type === 'crossroads') {
     document.getElementById('crossroads-box').style.display = '';
-  } else if (page.type === 'truefalse') {
-    buildTF(page.questions);
-    document.getElementById('tf-box').style.display = '';
   } else if (page.type === 'finish') {
     document.getElementById('finish-box').style.display = '';
     playVictoryEffects();
@@ -1025,67 +966,7 @@ function goChoice(choice) {
   loadPage(choice === 'A' ? page.choiceA : page.choiceB);
 }
 
-function showSuccess() {
-  document.getElementById('success-overlay').classList.add('show');
-}
-
-function doContinue() {
-  document.getElementById('success-overlay').classList.remove('show');
-  if (pendingNext) loadPage(pendingNext);
-}
-
-// ===== נכון / לא נכון (נשאר ברקע למקרה שתצטרך, אבל כרגע לא מופעל כחלק מהמסלול) =====
-let tfAnswers = [];
-
-function buildTF(questions) {
-  tfAnswers = new Array(questions.length).fill(null);
-  const container = document.getElementById('tf-questions');
-  container.innerHTML = '';
-  questions.forEach((q, i) => {
-    const row = document.createElement('div');
-    row.className = 'tf-row';
-    row.innerHTML = `
-      <div class="tf-row-num">${i + 1}</div>
-      <div class="tf-row-label">${q.label}</div>
-      <div class="tf-btn-group">
-        <button class="tf-btn correct-btn" onclick="selectTF(${i}, true, this)">✓ נכון</button>
-        <button class="tf-btn wrong-btn"   onclick="selectTF(${i}, false, this)">✗ לא נכון</button>
-      </div>`;
-    container.appendChild(row);
-  });
-  document.getElementById('tf-error').style.display = 'none';
-}
-
-function selectTF(idx, val, btn) {
-  if (navigator.vibrate) navigator.vibrate(10);
-  tfAnswers[idx] = val;
-  const row = btn.closest('.tf-row');
-  row.querySelectorAll('.tf-btn').forEach(b => b.classList.remove('selected'));
-  btn.classList.add('selected');
-}
-
-function submitTF() {
-  playClick();
-  const page = PAGES[currentPage];
-  if (tfAnswers.some(a => a === null)) {
-    playError();
-    document.getElementById('tf-error').style.display = 'block';
-    document.getElementById('tf-error').textContent = '✗ ענו על כל המשפטים לפני האישור!';
-    return;
-  }
-  const correct = page.questions.every((q, i) => q.answer === tfAnswers[i]);
-  if (correct) {
-    playStampSound();
-    pendingNext = page.next;
-    showSuccess();
-  } else {
-    playError();
-    document.getElementById('tf-error').style.display = 'block';
-    document.getElementById('tf-error').textContent = '✗ תשובה שגויה — בדקו שוב!';
-  }
-}
-
-// ===== אודיו חידה =====
+// ===== אודיו חידה (תמיכה בהשהיה וניגון מאותו מקור סאונד של הפסנתר ללא חיווי ויזואלי) =====
 let riddlePlaying = false;
 let riddleInterval = null;
 let riddleElapsed = 0; 
@@ -1197,7 +1078,7 @@ window.addEventListener('touchend', () => { isDraggingBar = false; });
   }
 })();
 
-// ===== פסנתר 3D =====
+// ===== פסנתר 3D וסאונד אחיד =====
 (function(){
   const NOTES = [
     {n:'C2', f:65.41,  b:false}, {n:'C#2',f:69.30,  b:true}, {n:'D2', f:73.42,  b:false}, {n:'D#2',f:77.78,  b:true}, 
