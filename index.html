@@ -10,6 +10,7 @@
     body {
       min-height: 100vh;
       background-color: #080800;
+      /* הרקע הדינמי ידרס על ידי ה-JS, אבל זה הדיפולט */
       background-image: radial-gradient(ellipse at 25% 15%, #1a0800 0%, #080e00 40%, #001a18 100%);
       background-attachment: fixed;
       transition: background-image 1.5s ease;
@@ -187,6 +188,36 @@
     .choice-img { width: 100%; height: 220px; object-fit: cover; display: block; }
     .choice-lbl { display: block; width: 100%; background: linear-gradient(180deg, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.7) 100%); color: #fff; font-size: 22px; font-weight: 800; padding: 16px 20px 20px; text-shadow: 0 2px 8px rgba(0,0,0,0.9); letter-spacing: 0.5px; }
 
+    /* ===== נכון/לא נכון ===== */
+    .tf-wrap { margin-top: 10px; }
+    .tf-title { text-align: center; font-size: 15px; color: rgba(190,225,255,0.85); margin-bottom: 20px; font-weight: 500; padding: 0 12px; line-height: 1.6;}
+    .tf-questions { display: flex; flex-direction: column; gap: 12px; }
+    .tf-row {
+      display: flex; align-items: center; gap: 12px; background: rgba(15,35,80,0.5);
+      border: 1px solid rgba(60,120,200,0.25); border-radius: 10px; padding: 14px 18px;
+    }
+    .tf-row-num { font-size: 13px; color: rgba(120,180,255,0.5); min-width: 24px; }
+    .tf-row-label { flex: 1; font-size: 15px; color: rgba(200,225,255,0.8); }
+    .tf-btn-group { display: flex; gap: 8px; }
+    .tf-btn {
+      padding: 8px 18px; border-radius: 7px; font-size: 14px; font-weight: 600; cursor: pointer;
+      font-family: inherit; border: 1.5px solid; transition: all 0.2s; touch-action: manipulation;
+    }
+    .tf-btn.correct-btn { border-color: rgba(60,180,100,0.5); background: rgba(20,80,40,0.3); color: #7de8a0; }
+    .tf-btn.correct-btn.selected, .tf-btn.correct-btn:hover { background: rgba(30,120,60,0.6); border-color: rgba(80,220,130,0.8); }
+    .tf-btn.wrong-btn { border-color: rgba(200,80,80,0.5); background: rgba(80,20,20,0.3); color: #f08080; }
+    .tf-btn.wrong-btn.selected, .tf-btn.wrong-btn:hover { background: rgba(140,30,30,0.6); border-color: rgba(240,100,100,0.8); }
+    .tf-submit {
+      margin-top: 20px; width: 100%; background: linear-gradient(135deg, rgba(30,90,200,0.7), rgba(50,130,230,0.5));
+      border: 1.5px solid rgba(80,160,240,0.7); border-radius: 10px; color: #c8e8ff; padding: 15px; font-size: 16px;
+      cursor: pointer; font-family: inherit; font-weight: 700; transition: all 0.2s; touch-action: manipulation;
+    }
+    .tf-submit:hover { opacity: 0.85; }
+    .tf-error {
+      display: none; margin-top: 14px; text-align: center; color: rgba(255,150,150,0.9); font-size: 14px;
+      background: rgba(180,30,30,0.2); border: 1px solid rgba(220,80,80,0.35); border-radius: 8px; padding: 10px;
+    }
+
     /* ===== עמוד סיום וקונפטי ===== */
     .finish-wrap { text-align: center; padding: 20px; }
     .finish-trophy { font-size: 80px; margin-bottom: 20px; animation: popIn 1s cubic-bezier(0.34,1.56,0.64,1); }
@@ -202,7 +233,32 @@
       100% { top: 100vh; transform: rotate(720deg) scale(0.5); }
     }
 
-    /* ===== נגן אודיו מעודכן ===== */
+    /* ===== חלון הצלחה ===== */
+    #success-overlay {
+      display: none; position: fixed; inset: 0; z-index: 200;
+      background: rgba(2,6,20,0.88); align-items: center; justify-content: center;
+    }
+    #success-overlay.show { display: flex; }
+    .success-card {
+      background: rgba(15,6,0,0.98); border: 1px solid rgba(255,160,0,0.6); border-radius: 16px; padding: 48px 56px;
+      text-align: center; max-width: 380px; animation: popIn 0.45s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    .success-icon {
+      width: 70px; height: 70px; border-radius: 50%; background: rgba(255,140,0,0.15); border: 2px solid rgba(255,180,0,0.7);
+      display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 32px; color: #5aaeee;
+    }
+    .success-title { color: #ffe0a0; font-size: 24px; margin-bottom: 10px; font-weight: 700; }
+    .success-sub { color: rgba(255,220,160,0.65); font-size: 15px; margin-bottom: 32px; }
+    #continue-btn {
+      background: linear-gradient(180deg, #00c8be 0%, #008a82 60%, #005a55 100%);
+      border: none; border-bottom: 5px solid #002a27; border-radius: 10px; color: #fff;
+      padding: 14px 40px; font-size: 17px; cursor: pointer; font-family: inherit; font-weight: 800;
+      transition: all 0.12s; width: 100%; box-shadow: 0 6px 0 #002a27, 0 8px 16px rgba(0,0,0,0.4); text-shadow: 0 1px 3px rgba(0,0,0,0.4);
+      touch-action: manipulation;
+    }
+    #continue-btn:active { transform: translateY(5px); box-shadow: 0 1px 0 #002a27; border-bottom-width: 1px; }
+
+    /* ===== נגן אודיו ===== */
     .audio-riddle {
       background: linear-gradient(145deg, rgba(40,80,140,0.4), rgba(15,35,70,0.6));
       border: 1px solid rgba(80,150,220,0.5); border-radius: 12px; padding: 18px 20px; margin-bottom: 24px;
@@ -230,13 +286,6 @@
     }
     .audio-time { font-size: 11px; color: rgba(255,255,255,0.4); margin-top: 5px; text-align: left; }
 
-    /* ===== אנימציות עזר ===== */
-    @keyframes shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-10px)} 40%{transform:translateX(10px)} 60%{transform:translateX(-6px)} 80%{transform:translateX(6px)} }
-    .shaking { animation: shake 0.55s ease; }
-    @keyframes twinkle { 0%,100%{opacity:.25;transform:scale(1)} 50%{opacity:1;transform:scale(1.5)} }
-    @keyframes popIn { 0%{transform:scale(.75);opacity:0} 100%{transform:scale(1);opacity:1} }
-    @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-5px)} }
-
     /* ===== פסנתר ===== */
     .rotate-device-msg { font-size: 14px; color: #ff9500; margin-bottom: 10px; text-align: center; display: none; }
     @media (max-width: 600px) { .rotate-device-msg { display: block; } }
@@ -260,8 +309,7 @@
       background: rgba(0,0,0,0.85); align-items: center; justify-content: center;
     }
     .modal-overlay.show { display: flex; animation: fadeIn 0.25s ease-out; }
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
+    
     .modal-card {
       background: #160a00; border: 1px solid #ff9500; border-radius: 12px;
       padding: 28px 24px; width: 90%; max-width: 420px; position: relative;
@@ -398,10 +446,19 @@
     </div>
   </div>
 
+  <div class="code-box tf-wrap" id="tf-box" style="display:none">
+    <div class="code-section-label"><hr/><span>✓✗ נכון או לא נכון</span><hr/></div>
+    <p class="tf-title">סמנו נכון או לא נכון לכל משפט, ואז לחצו על אישור</p>
+    <div class="tf-questions" id="tf-questions"></div>
+    <button class="tf-submit" onclick="submitTF()">אישור «</button>
+    <div class="tf-error" id="tf-error">✗ תשובה שגויה — בדקו שוב!</div>
+  </div>
+
   <div class="finish-wrap" id="finish-box" style="display:none">
     <div class="finish-trophy">🏆</div>
-    <div class="finish-title" id="finish-title-text">כל הכבוד! סיימתם את המירוץ!</div>
-    <div class="finish-sub" id="finish-sub-text">אתם מדהימים — השלמתם את המירוץ העולמי בהצלחה!</div>
+    <div class="finish-title" id="finish-title-text">כל הכבוד צוות!</div>
+    <div class="finish-sub" id="finish-sub-text">עברתם את כל המדינות, והצלחתם בכל המשימות! הגיע הזמן לטוס חזרה לישראל! הצוות הראשון שיחצה את קו הגמר יזכה במיליון! פיתחו את המעטפה האחרונה, שם תחכה לכם משימת הסיום!</div>
+    <button class="submit-btn" style="margin-top: 35px;" onclick="location.href='?page=opening'">התחל מירוץ חדש ⟳</button>
   </div>
 </div>
 
@@ -444,7 +501,15 @@
         <span class="slider"></span>
       </label>
     </div>
+  </div>
+</div>
 
+<div id="success-overlay">
+  <div class="success-card">
+    <div class="success-icon">✓</div>
+    <h2 class="success-title">כל הכבוד!</h2>
+    <p class="success-sub" id="success-sub">קוד נכון! ממשיכים לשלב הבא...</p>
+    <button id="continue-btn" onclick="doContinue()">המשך «</button>
   </div>
 </div>
 
@@ -455,7 +520,7 @@
 const PAGES = {
   opening: {
     step: 1, bg: "radial-gradient(ellipse at 25% 15%, #1a0800 0%, #080e00 40%, #001a18 100%)",
-    ambient: "", /* שים פה קובץ סאונד במידה ויש */
+    ambient: "", 
     title: "המירוץ העולמי - מתחילים!",
     desc: "המירוץ העולמי יוצא לדרך בעונה חדשה ומפתיעה והפעם – אתם המתחרים! שימו לב! מוכנים? צפו בסרטון והתחילו לשחק!",
     youtube: "FlTe_-Wxf6k", code: "3682", next: "london", type: "code",
@@ -467,7 +532,7 @@ const PAGES = {
   },
   london: {
     step: 2, bg: "radial-gradient(ellipse at 25% 15%, #001122 0%, #08111a 40%, #000a11 100%)",
-    ambient: "", /* לדוגמה: 'london-bg.mp3' */
+    ambient: "", 
     title: "ברוכים הבאים לאנגליה!",
     desc: "כל הכבוד! הגעתם ליעד הראשון שלכם במירוץ.\n\nפתחו את המעטפה השנייה.\n\nצפו בסרטון והזינו למטה את קוד הרכבת התחתית.",
     youtube: "tOnHapIZFi4", code: "bond", next: "crossroads", type: "code",
@@ -642,11 +707,15 @@ function getPageId() {
   const urlParams = new URLSearchParams(location.search);
   const p = urlParams.get('page');
   if (p && PAGES[p]) {
+    // מחיקת השמירה האוטומטית אם השחקן ניגש ידנית לפתיחה
     if (p === 'opening') localStorage.removeItem('puzzles_world_race_page');
     return p;
   }
+  
+  // טעינה מהזיכרון המקומי
   const savedPage = localStorage.getItem('puzzles_world_race_page');
   if (savedPage && PAGES[savedPage]) return savedPage;
+  
   return 'opening';
 }
 
@@ -689,7 +758,9 @@ function loadPage(id) {
   const page  = PAGES[id];
   if (!page) return;
 
+  // שמירה לזיכרון הדפדפן
   localStorage.setItem('puzzles_world_race_page', id);
+
   const url = id === 'opening' ? location.pathname : `${location.pathname}?page=${id}`;
   history.pushState({ page: id }, '', url);
 
@@ -756,8 +827,11 @@ function loadPage(id) {
   }
 
   document.getElementById('piano-section').style.display = page.piano ? '' : 'none';
+  
+  // הסתרת כל האלמנטים לפני שמחליטים מה להציג
   document.getElementById('code-box').style.display       = 'none';
   document.getElementById('crossroads-box').style.display = 'none';
+  document.getElementById('tf-box').style.display         = 'none';
   document.getElementById('finish-box').style.display     = 'none';
 
   if (page.type === 'code') {
@@ -767,6 +841,9 @@ function loadPage(id) {
     document.getElementById('code-input').classList.remove('error');
   } else if (page.type === 'crossroads') {
     document.getElementById('crossroads-box').style.display = '';
+  } else if (page.type === 'truefalse') {
+    buildTF(page.questions);
+    document.getElementById('tf-box').style.display = '';
   } else if (page.type === 'finish') {
     document.getElementById('finish-box').style.display = '';
     playVictoryEffects();
@@ -868,7 +945,6 @@ function playError() {
   try { const c=getAC(); [220,180].forEach((f,i)=>{ const o=c.createOscillator(),g=c.createGain(); o.type='sawtooth'; o.connect(g); g.connect(c.destination); o.frequency.value=f; g.gain.setValueAtTime(0.18,c.currentTime+i*0.13); g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+i*0.13+0.15); o.start(c.currentTime+i*0.13); o.stop(c.currentTime+i*0.13+0.16); }); } catch(e) {}
 }
 
-// סאונד חותמת דרכון
 function playStampSound() {
   if (navigator.vibrate) navigator.vibrate([30, 80]);
   try { 
@@ -921,9 +997,8 @@ function submitCode() {
         box.classList.remove('stamp-approved');
         pendingNext = page.next;
         loadPage(pendingNext); 
-      }, 1000); // ממתין שנייה כדי שיראו את החותמת ואז עובר אוטומטית
+      }, 1000);
     } else {
-      // אם האנימציות מבוטלות, פשוט עובר מיד
       pendingNext = page.next;
       loadPage(pendingNext);
     }
@@ -950,13 +1025,73 @@ function goChoice(choice) {
   loadPage(choice === 'A' ? page.choiceA : page.choiceB);
 }
 
-// ===== אודיו חידה (תמיכה בהשהיה וניגון מאותו מקור סאונד של הפסנתר ללא חיווי ויזואלי) =====
+function showSuccess() {
+  document.getElementById('success-overlay').classList.add('show');
+}
+
+function doContinue() {
+  document.getElementById('success-overlay').classList.remove('show');
+  if (pendingNext) loadPage(pendingNext);
+}
+
+// ===== נכון / לא נכון (נשאר ברקע למקרה שתצטרך, אבל כרגע לא מופעל כחלק מהמסלול) =====
+let tfAnswers = [];
+
+function buildTF(questions) {
+  tfAnswers = new Array(questions.length).fill(null);
+  const container = document.getElementById('tf-questions');
+  container.innerHTML = '';
+  questions.forEach((q, i) => {
+    const row = document.createElement('div');
+    row.className = 'tf-row';
+    row.innerHTML = `
+      <div class="tf-row-num">${i + 1}</div>
+      <div class="tf-row-label">${q.label}</div>
+      <div class="tf-btn-group">
+        <button class="tf-btn correct-btn" onclick="selectTF(${i}, true, this)">✓ נכון</button>
+        <button class="tf-btn wrong-btn"   onclick="selectTF(${i}, false, this)">✗ לא נכון</button>
+      </div>`;
+    container.appendChild(row);
+  });
+  document.getElementById('tf-error').style.display = 'none';
+}
+
+function selectTF(idx, val, btn) {
+  if (navigator.vibrate) navigator.vibrate(10);
+  tfAnswers[idx] = val;
+  const row = btn.closest('.tf-row');
+  row.querySelectorAll('.tf-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+}
+
+function submitTF() {
+  playClick();
+  const page = PAGES[currentPage];
+  if (tfAnswers.some(a => a === null)) {
+    playError();
+    document.getElementById('tf-error').style.display = 'block';
+    document.getElementById('tf-error').textContent = '✗ ענו על כל המשפטים לפני האישור!';
+    return;
+  }
+  const correct = page.questions.every((q, i) => q.answer === tfAnswers[i]);
+  if (correct) {
+    playStampSound();
+    pendingNext = page.next;
+    showSuccess();
+  } else {
+    playError();
+    document.getElementById('tf-error').style.display = 'block';
+    document.getElementById('tf-error').textContent = '✗ תשובה שגויה — בדקו שוב!';
+  }
+}
+
+// ===== אודיו חידה =====
 let riddlePlaying = false;
 let riddleInterval = null;
 let riddleElapsed = 0; 
 let riddleStartTime = 0;
 let notesPlayed = [false, false, false, false];
-const RIDDLE_NOTES = [65.41, 110.00, 220.00, 123.47]; 
+const RIDDLE_NOTES = [123.47, 130.81, 174.61, 146.83]; 
 
 function toggleRiddle() {
   if (navigator.vibrate) navigator.vibrate(15);
@@ -1062,7 +1197,7 @@ window.addEventListener('touchend', () => { isDraggingBar = false; });
   }
 })();
 
-// ===== פסנתר 3D וסאונד אחיד =====
+// ===== פסנתר 3D =====
 (function(){
   const NOTES = [
     {n:'C2', f:65.41,  b:false}, {n:'C#2',f:69.30,  b:true}, {n:'D2', f:73.42,  b:false}, {n:'D#2',f:77.78,  b:true}, 
