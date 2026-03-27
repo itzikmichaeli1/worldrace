@@ -10,7 +10,6 @@
     body {
       min-height: 100vh;
       background-color: #080800;
-      /* הרקע הדינמי ידרס על ידי ה-JS, אבל זה הדיפולט */
       background-image: radial-gradient(ellipse at 25% 15%, #1a0800 0%, #080e00 40%, #001a18 100%);
       background-attachment: fixed;
       transition: background-image 1.5s ease;
@@ -20,10 +19,31 @@
       touch-action: manipulation;
     }
 
+    /* ===== הגדרות נגישות ===== */
+    body.a11y-high-contrast {
+      background-image: none !important;
+      background-color: #000000 !important;
+    }
+    body.a11y-high-contrast * {
+      box-shadow: none !important;
+      text-shadow: none !important;
+      border-color: #ffffff !important;
+    }
+    body.a11y-large-text {
+      font-size: 120% !important;
+    }
+    body.a11y-large-text .page-title { font-size: clamp(26px, 6vw, 42px) !important; }
+    body.a11y-large-text .code-input { font-size: 28px !important; }
+    
+    body.a11y-no-animations * {
+      animation: none !important;
+      transition: none !important;
+    }
+
     #stars { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
     .star { position: absolute; border-radius: 50%; animation: twinkle ease-in-out infinite; }
 
-    /* פס התקדמות גלובלי */
+    /* פס התקדמות */
     #global-progress-wrap {
       position: fixed; top: 0; left: 0; right: 0; height: 5px;
       background: rgba(255,255,255,0.1); z-index: 1000;
@@ -40,107 +60,112 @@
       padding: 44px 20px 100px;
     }
 
-    /* אנימציית מעבר עמודים */
     .fade-transition { animation: fadePage 0.5s ease-out forwards; }
     @keyframes fadePage {
       0% { opacity: 0; transform: translateY(15px); }
       100% { opacity: 1; transform: translateY(0); }
     }
 
+    /* ===== כפתורים צפים (רמזים, נגישות, סאונד) ===== */
+    #mute-btn {
+      position: fixed; top: 15px; left: 15px; z-index: 1000;
+      width: 44px; height: 44px; border-radius: 50%;
+      background: rgba(20,10,0,0.8); border: 1px solid #ff9500;
+      color: #fff; font-size: 20px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.5); transition: 0.2s;
+    }
+    #mute-btn:hover { transform: scale(1.1); }
+
+    #floating-hint-btn {
+      position: fixed; bottom: 20px; left: 20px; z-index: 100;
+      width: 56px; height: 56px; border-radius: 50%;
+      background: linear-gradient(135deg, #ffda44, #ff9500);
+      border: 2px solid #fff; box-shadow: 0 4px 15px rgba(255,150,0,0.5);
+      font-size: 26px; cursor: pointer; display: none; 
+      transition: transform 0.2s, box-shadow 0.2s;
+      align-items: center; justify-content: center; touch-action: manipulation;
+    }
+    #floating-hint-btn:hover { transform: scale(1.1); box-shadow: 0 6px 20px rgba(255,150,0,0.7); }
+
+    #floating-a11y-btn {
+      position: fixed; bottom: 20px; right: 20px; z-index: 100;
+      width: 50px; height: 50px; border-radius: 50%;
+      background: #005a9c; border: 2px solid #fff;
+      box-shadow: 0 4px 15px rgba(0,90,156,0.5);
+      font-size: 22px; cursor: pointer; display: flex; 
+      transition: transform 0.2s, box-shadow 0.2s;
+      align-items: center; justify-content: center; touch-action: manipulation;
+    }
+    #floating-a11y-btn:hover { transform: scale(1.1); }
+
     /* ===== כותרת ===== */
     .page-header {
-      text-align: center; margin-bottom: 36px;
-      padding: 28px 24px 24px;
-      background: rgba(20,10,0,0.65);
-      border-radius: 16px;
-      border: 1px solid rgba(255,140,0,0.3);
-      position: relative; overflow: hidden;
+      text-align: center; margin-bottom: 36px; padding: 28px 24px 24px;
+      background: rgba(20,10,0,0.65); border-radius: 16px;
+      border: 1px solid rgba(255,140,0,0.3); position: relative; overflow: hidden;
       box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     }
     .page-header::before {
       content: ''; position: absolute; top: 0; left: 20%; right: 20%; height: 2px;
       background: linear-gradient(90deg, transparent, rgba(255,160,0,0.9), rgba(0,210,190,0.6), transparent);
     }
-    .site-label {
-      font-size: 11px; letter-spacing: 5px;
-      color: rgba(0,200,190,0.65); margin-bottom: 14px;
-    }
-    .page-title {
-      color: #ffe0a0; font-size: clamp(22px, 5vw, 34px);
-      font-weight: 800; line-height: 1.3; margin-bottom: 8px;
-    }
+    .site-label { font-size: 11px; letter-spacing: 5px; color: rgba(0,200,190,0.65); margin-bottom: 14px; }
+    .page-title { color: #ffe0a0; font-size: clamp(22px, 5vw, 34px); font-weight: 800; line-height: 1.3; margin-bottom: 8px; }
     .title-divider {
-      width: 70px; height: 3px;
-      background: linear-gradient(90deg, rgba(255,140,0,0.9), rgba(0,210,190,0.7));
+      width: 70px; height: 3px; background: linear-gradient(90deg, rgba(255,140,0,0.9), rgba(0,210,190,0.7));
       margin: 16px auto 18px; border-radius: 2px;
     }
-    .page-desc {
-      color: rgba(255,230,180,0.78); font-size: 15.5px;
-      line-height: 2.1; white-space: pre-wrap;
-      max-width: 560px; margin: 0 auto;
-    }
+    .page-desc { color: rgba(255,230,180,0.78); font-size: 15.5px; line-height: 2.1; white-space: pre-wrap; max-width: 560px; margin: 0 auto; }
 
     /* ===== יוטיוב ===== */
     .youtube-wrap {
-      position: relative; padding-bottom: 56.25%; height: 0;
-      border-radius: 12px; overflow: hidden;
-      border: 2px solid rgba(255,140,0,0.45);
-      margin-bottom: 28px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+      position: relative; padding-bottom: 56.25%; height: 0; border-radius: 12px; overflow: hidden;
+      border: 2px solid rgba(255,140,0,0.45); margin-bottom: 28px; box-shadow: 0 10px 25px rgba(0,0,0,0.6);
     }
     .youtube-wrap iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: none; }
 
-    /* ===== תיבת קוד ===== */
+    /* ===== תיבת קוד + חותמת ===== */
     .code-box {
-      background: rgba(20,8,0,0.72);
-      border: 1.5px solid rgba(255,120,0,0.45);
-      border-radius: 14px; margin-top: 10px;
-      position: relative; overflow: hidden;
-      padding: 32px 24px 28px; text-align: center;
+      background: rgba(20,8,0,0.72); border: 1.5px solid rgba(255,120,0,0.45); border-radius: 14px; margin-top: 10px;
+      position: relative; overflow: hidden; padding: 32px 24px 28px; text-align: center;
     }
     .code-box::before {
       content: ''; position: absolute; top: 0; left: 15%; right: 15%; height: 2px;
       background: linear-gradient(90deg, transparent, rgba(255,160,0,0.8), rgba(0,210,190,0.5), transparent);
     }
-    .code-section-label {
-      display: flex; align-items: center;
-      justify-content: center; gap: 10px; margin-bottom: 20px;
+    .code-box::after {
+      content: 'אושר'; position: absolute; top: 50%; left: 50%; z-index: 10;
+      transform: translate(-50%, -50%) scale(5) rotate(-15deg);
+      font-size: 50px; font-weight: 900; color: rgba(0, 200, 100, 0.9);
+      border: 6px solid rgba(0, 200, 100, 0.9); border-radius: 15px; padding: 10px 30px;
+      opacity: 0; pointer-events: none; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
+    .code-box.stamp-approved::after { transform: translate(-50%, -50%) scale(1) rotate(-15deg); opacity: 1; }
+
+    .code-section-label { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 20px; }
     .code-section-label hr { flex: 1; border: none; border-top: 1px solid rgba(255,140,0,0.2); }
     .code-section-label span { font-size: 13px; letter-spacing: 3px; color: rgba(0,200,190,0.75); white-space: nowrap; }
     .code-instruction { font-size: 15px; color: rgba(255,230,180,0.9); margin-bottom: 22px; font-weight: 500; }
     .code-input-wrap { display: inline-flex; flex-direction: column; align-items: center; gap: 14px; }
-    .code-glow-ring {
-      border-radius: 10px; padding: 3px;
-      background: linear-gradient(135deg, rgba(255,100,0,0.25), rgba(0,180,170,0.15));
-      transition: background 0.3s;
-    }
+    .code-glow-ring { border-radius: 10px; padding: 3px; background: linear-gradient(135deg, rgba(255,100,0,0.25), rgba(0,180,170,0.15)); transition: background 0.3s; }
     .code-glow-ring.focused { background: linear-gradient(135deg, rgba(255,160,0,0.7), rgba(0,210,190,0.5)); }
     .code-input {
-      display: block; background: rgba(30,10,0,0.9);
-      border: none; border-radius: 8px; padding: 16px 24px;
-      color: #ffe8c0; font-size: 22px; outline: none;
-      direction: ltr; letter-spacing: 6px; text-align: center;
-      width: 260px; transition: background 0.2s;
-      caret-color: #ff9500; font-family: inherit;
+      display: block; background: rgba(30,10,0,0.9); border: none; border-radius: 8px; padding: 16px 24px;
+      color: #ffe8c0; font-size: 22px; outline: none; direction: ltr; letter-spacing: 6px; text-align: center;
+      width: 260px; transition: background 0.2s; caret-color: #ff9500; font-family: inherit;
     }
     .code-input.error { background: rgba(80,10,0,0.9); color: #ffaaaa; }
     .code-hint { font-size: 13px; color: rgba(0,200,190,0.6); animation: bounce 1.5s ease-in-out infinite; }
     .submit-btn {
       background: linear-gradient(180deg, #ff9500 0%, #d96000 60%, #a84000 100%);
-      border: none; border-bottom: 5px solid #6a2800; border-radius: 10px;
-      color: #fff; padding: 14px 40px; font-size: 16px; cursor: pointer;
+      border: none; border-bottom: 5px solid #6a2800; border-radius: 10px; color: #fff; padding: 14px 40px; font-size: 16px; cursor: pointer;
       font-family: inherit; font-weight: 800; letter-spacing: 1px; width: 260px;
-      text-shadow: 0 1px 3px rgba(0,0,0,0.4);
-      box-shadow: 0 6px 0 #6a2800, 0 8px 16px rgba(0,0,0,0.35);
+      text-shadow: 0 1px 3px rgba(0,0,0,0.4); box-shadow: 0 6px 0 #6a2800, 0 8px 16px rgba(0,0,0,0.35);
       transition: all 0.12s; touch-action: manipulation;
     }
     .submit-btn:hover { filter: brightness(1.1); }
-    .submit-btn:active {
-      transform: translateY(5px);
-      box-shadow: 0 1px 0 #6a2800, 0 2px 6px rgba(0,0,0,0.3);
-      border-bottom-width: 1px;
-    }
+    .submit-btn:active { transform: translateY(5px); box-shadow: 0 1px 0 #6a2800, 0 2px 6px rgba(0,0,0,0.3); border-bottom-width: 1px; }
     .error-msg {
       display: none; margin-top: 16px; background: rgba(180,20,0,0.25);
       border: 1px solid rgba(255,80,50,0.45); border-radius: 8px; padding: 10px 20px;
@@ -177,32 +202,7 @@
       100% { top: 100vh; transform: rotate(720deg) scale(0.5); }
     }
 
-    /* ===== חלון הצלחה ===== */
-    #success-overlay {
-      display: none; position: fixed; inset: 0; z-index: 200;
-      background: rgba(2,6,20,0.88); align-items: center; justify-content: center;
-    }
-    #success-overlay.show { display: flex; }
-    .success-card {
-      background: rgba(15,6,0,0.98); border: 1px solid rgba(255,160,0,0.6); border-radius: 16px; padding: 48px 56px;
-      text-align: center; max-width: 380px; animation: popIn 0.45s cubic-bezier(0.34,1.56,0.64,1);
-    }
-    .success-icon {
-      width: 70px; height: 70px; border-radius: 50%; background: rgba(255,140,0,0.15); border: 2px solid rgba(255,180,0,0.7);
-      display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 32px; color: #5aaeee;
-    }
-    .success-title { color: #ffe0a0; font-size: 24px; margin-bottom: 10px; font-weight: 700; }
-    .success-sub { color: rgba(255,220,160,0.65); font-size: 15px; margin-bottom: 32px; }
-    #continue-btn {
-      background: linear-gradient(180deg, #00c8be 0%, #008a82 60%, #005a55 100%);
-      border: none; border-bottom: 5px solid #002a27; border-radius: 10px; color: #fff;
-      padding: 14px 40px; font-size: 17px; cursor: pointer; font-family: inherit; font-weight: 800;
-      transition: all 0.12s; width: 100%; box-shadow: 0 6px 0 #002a27, 0 8px 16px rgba(0,0,0,0.4); text-shadow: 0 1px 3px rgba(0,0,0,0.4);
-      touch-action: manipulation;
-    }
-    #continue-btn:active { transform: translateY(5px); box-shadow: 0 1px 0 #002a27; border-bottom-width: 1px; }
-
-    /* ===== נגן אודיו ===== */
+    /* ===== נגן אודיו מעודכן ===== */
     .audio-riddle {
       background: linear-gradient(145deg, rgba(40,80,140,0.4), rgba(15,35,70,0.6));
       border: 1px solid rgba(80,150,220,0.5); border-radius: 12px; padding: 18px 20px; margin-bottom: 24px;
@@ -254,34 +254,26 @@
       border: 1px solid #c85a00; animation: floatBadge 2.5s ease-in-out infinite; cursor: default;
     }
 
-    /* ===== מערכת רמזים ===== */
-    #floating-hint-btn {
-      position: fixed; bottom: 20px; left: 20px; z-index: 100;
-      width: 56px; height: 56px; border-radius: 50%;
-      background: linear-gradient(135deg, #ffda44, #ff9500);
-      border: 2px solid #fff; box-shadow: 0 4px 15px rgba(255,150,0,0.5);
-      font-size: 26px; cursor: pointer; display: none; 
-      transition: transform 0.2s, box-shadow 0.2s; align-items: center; justify-content: center; touch-action: manipulation;
-    }
-    #floating-hint-btn:hover { transform: scale(1.1); box-shadow: 0 6px 20px rgba(255,150,0,0.7); }
-    #hints-overlay {
+    /* ===== חלונות צפים (רמזים + נגישות) ===== */
+    .modal-overlay {
       display: none; position: fixed; inset: 0; z-index: 200;
       background: rgba(0,0,0,0.85); align-items: center; justify-content: center;
     }
-    #hints-overlay.show { display: flex; animation: fadeIn 0.25s ease-out; }
+    .modal-overlay.show { display: flex; animation: fadeIn 0.25s ease-out; }
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-    .hints-card {
+    .modal-card {
       background: #160a00; border: 1px solid #ff9500; border-radius: 12px;
       padding: 28px 24px; width: 90%; max-width: 420px; position: relative;
       color: #fff; text-align: right; box-shadow: 0 15px 30px rgba(0,0,0,0.8); max-height: 90vh; overflow-y: auto;
     }
-    .close-hints-btn {
+    .close-modal-btn {
       position: absolute; top: 12px; left: 12px; background: transparent; border: none; color: #aaa; font-size: 24px; cursor: pointer; transition: 0.2s; touch-action: manipulation;
     }
-    .close-hints-btn:hover { color: #fff; transform: scale(1.1); }
-    .hints-title { text-align: center; color: #ffcc00; margin-bottom: 24px; font-weight: 800; font-size: 22px; }
+    .close-modal-btn:hover { color: #fff; transform: scale(1.1); }
+    .modal-title { text-align: center; color: #ffcc00; margin-bottom: 24px; font-weight: 800; font-size: 22px; }
     
+    /* תפריט רמזים ספציפי */
     .hint-item { margin-bottom: 14px; }
     .hint-btn {
       width: 100%; background: linear-gradient(180deg, #2a1500, #1a0a00);
@@ -311,13 +303,28 @@
       border-right: 4px solid #ff9500; color: #eee; white-space: pre-wrap; margin-top: 8px;
     }
     .hint-text.solution-text { border-right-color: #ff4444; font-weight: bold; color: #ffcccc; }
+
+    /* תפריט נגישות ספציפי */
+    .a11y-toggle-row { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; margin-bottom: 10px; }
+    .a11y-toggle-label { font-size: 16px; font-weight: bold; }
+    .switch { position: relative; display: inline-block; width: 50px; height: 26px; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #444; transition: .4s; border-radius: 34px; }
+    .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
+    input:checked + .slider { background-color: #005a9c; }
+    input:checked + .slider:before { transform: translateX(24px); }
+
   </style>
 </head>
 <body>
 
+<audio id="ambient-audio" loop preload="auto" style="display:none;"></audio>
+
 <div id="global-progress-wrap">
   <div id="global-progress-fill"></div>
 </div>
+
+<button id="mute-btn" onclick="toggleMute()" title="השתק/הפעל אווירה">🔊</button>
 
 <div id="stars"></div>
 
@@ -398,22 +405,46 @@
   </div>
 </div>
 
-<button id="floating-hint-btn" onclick="openHintsModal()">💡</button>
+<button id="floating-hint-btn" onclick="openHintsModal()" title="רמזים">💡</button>
+<button id="floating-a11y-btn" onclick="openA11yModal()" title="תפריט נגישות">♿</button>
 
-<div id="hints-overlay">
-  <div class="hints-card">
-    <button class="close-hints-btn" onclick="closeHintsModal()">✖</button>
-    <h2 class="hints-title">צריכים עזרה?</h2>
+<div id="hints-overlay" class="modal-overlay">
+  <div class="modal-card">
+    <button class="close-modal-btn" onclick="closeHintsModal()">✖</button>
+    <h2 class="modal-title">צריכים עזרה?</h2>
     <div id="hints-container"></div>
   </div>
 </div>
 
-<div id="success-overlay">
-  <div class="success-card">
-    <div class="success-icon">✓</div>
-    <h2 class="success-title">כל הכבוד!</h2>
-    <p class="success-sub" id="success-sub">קוד נכון! ממשיכים לשלב הבא...</p>
-    <button id="continue-btn" onclick="doContinue()">המשך «</button>
+<div id="a11y-overlay" class="modal-overlay">
+  <div class="modal-card">
+    <button class="close-modal-btn" onclick="closeA11yModal()">✖</button>
+    <h2 class="modal-title">הגדרות נגישות</h2>
+    
+    <div class="a11y-toggle-row">
+      <span class="a11y-toggle-label">טקסט מוגדל</span>
+      <label class="switch">
+        <input type="checkbox" id="toggle-large-text" onchange="toggleA11y('a11y-large-text', this.checked)">
+        <span class="slider"></span>
+      </label>
+    </div>
+    
+    <div class="a11y-toggle-row">
+      <span class="a11y-toggle-label">ניגודיות גבוהה (רקע שחור)</span>
+      <label class="switch">
+        <input type="checkbox" id="toggle-high-contrast" onchange="toggleA11y('a11y-high-contrast', this.checked)">
+        <span class="slider"></span>
+      </label>
+    </div>
+    
+    <div class="a11y-toggle-row">
+      <span class="a11y-toggle-label">ביטול אנימציות</span>
+      <label class="switch">
+        <input type="checkbox" id="toggle-no-animations" onchange="toggleA11y('a11y-no-animations', this.checked)">
+        <span class="slider"></span>
+      </label>
+    </div>
+
   </div>
 </div>
 
@@ -424,6 +455,7 @@
 const PAGES = {
   opening: {
     step: 1, bg: "radial-gradient(ellipse at 25% 15%, #1a0800 0%, #080e00 40%, #001a18 100%)",
+    ambient: "", /* שים פה קובץ סאונד במידה ויש */
     title: "המירוץ העולמי - מתחילים!",
     desc: "המירוץ העולמי יוצא לדרך בעונה חדשה ומפתיעה והפעם – אתם המתחרים! שימו לב! מוכנים? צפו בסרטון והתחילו לשחק!",
     youtube: "FlTe_-Wxf6k", code: "3682", next: "london", type: "code",
@@ -435,6 +467,7 @@ const PAGES = {
   },
   london: {
     step: 2, bg: "radial-gradient(ellipse at 25% 15%, #001122 0%, #08111a 40%, #000a11 100%)",
+    ambient: "", /* לדוגמה: 'london-bg.mp3' */
     title: "ברוכים הבאים לאנגליה!",
     desc: "כל הכבוד! הגעתם ליעד הראשון שלכם במירוץ.\n\nפתחו את המעטפה השנייה.\n\nצפו בסרטון והזינו למטה את קוד הרכבת התחתית.",
     youtube: "tOnHapIZFi4", code: "bond", next: "crossroads", type: "code",
@@ -446,12 +479,14 @@ const PAGES = {
   },
   crossroads: {
     step: 3, bg: "radial-gradient(ellipse at 25% 15%, #1a001a 0%, #0d001a 40%, #050011 100%)",
+    ambient: "",
     title: "כל הכבוד! הגעתם ליעד!",
     desc: "במשימת צומת עליכם לבחור אחת מ-2 משימות.\n\nפתחו את המעטפה השלישית ובחרו: 'חבל על הזמן' או 'זמן להופעה'",
     youtube: null, type: "crossroads", choiceA: "time-first", choiceB: "show-first"
   },
   "time-first": {
     step: 4, bg: "radial-gradient(ellipse at 25% 15%, #1a001a 0%, #0d001a 40%, #050011 100%)",
+    ambient: "",
     title: "חבל על הזמן",
     desc: "במשימת הצומת בחרתם ב'חבל על הזמן'.\nבהצלחה!",
     youtube: "GE6oODAEQ-U", code: "435", next: "show-second", type: "code",
@@ -463,6 +498,7 @@ const PAGES = {
   },
   "show-first": {
     step: 4, bg: "radial-gradient(ellipse at 25% 15%, #1a001a 0%, #0d001a 40%, #050011 100%)",
+    ambient: "",
     title: "זמן להופעה", synthRiddle: true, piano: true,
     desc: "במשימת הצומת בחרתם\nב'זמן להופעה' בהצלחה!",
     youtube: "mnIEuzaG238", code: "4731", next: "time-second", type: "code",
@@ -474,6 +510,7 @@ const PAGES = {
   },
   "show-second": {
     step: 5, bg: "radial-gradient(ellipse at 25% 15%, #1a001a 0%, #0d001a 40%, #050011 100%)",
+    ambient: "",
     title: "סיבוב פרסה!", synthRiddle: true, piano: true,
     desc: "כנראה שהמתחרים האחרים רואים בכם איום – קיבלתם סיבוב פרסה! כעת עליכם לבצע את משימת הצומת השנייה – 'זמן להופעה'! בהצלחה!",
     youtube: "mnIEuzaG238", code: "4731", next: "boarding", type: "code",
@@ -485,6 +522,7 @@ const PAGES = {
   },
   "time-second": {
     step: 5, bg: "radial-gradient(ellipse at 25% 15%, #1a001a 0%, #0d001a 40%, #050011 100%)",
+    ambient: "",
     title: "סיבוב פרסה!",
     desc: "כנראה שאתם מהווים איום על המשתתפים האחרים, משום שקיבלתם סיבוב פרסה! כעת עליכם לבצע גם את משימת הצומת השנייה – 'חבל על הזמן'!",
     youtube: "GE6oODAEQ-U", code: "435", next: "boarding", type: "code",
@@ -496,6 +534,7 @@ const PAGES = {
   },
   boarding: {
     step: 6, bg: "radial-gradient(ellipse at 25% 15%, #001a22 0%, #000d1a 40%, #000511 100%)",
+    ambient: "",
     title: "כל הכבוד!",
     desc: "עברתם את שני הצדדים של הצומת, וכעת אתם יכולים לקבל את המעטפה עם הרמז הבא! פתחו את המעטפה הרביעית, והזינו כאן את קוד הטיסה ליעד הבא שלכם",
     youtube: null, code: "386", next: "zoo", type: "code",
@@ -507,6 +546,7 @@ const PAGES = {
   },
   zoo: {
     step: 7, bg: "radial-gradient(ellipse at 25% 15%, #002200 0%, #001100 40%, #000500 100%)",
+    ambient: "",
     title: "כל הכבוד!",
     desc: "פיתחו את המעטפה החמישית! על מנת לקבל את הרמז ליעד הבא, הזינו כאן את קוד משימת גן החיות",
     youtube: "SkKxiszzO9E", code: "5441", next: "museum", type: "code",
@@ -518,6 +558,7 @@ const PAGES = {
   },
   museum: {
     step: 8, bg: "radial-gradient(ellipse at 25% 15%, #220a00 0%, #110500 40%, #0a0200 100%)",
+    ambient: "",
     title: "כל הכבוד!",
     desc: "פיתחו את המעטפה השישית, והזינו למטה את קוד הפורטרטים",
     youtube: "xqGth1DhDd4", code: "235", next: "tajmahal", type: "code",
@@ -529,6 +570,7 @@ const PAGES = {
   },
   tajmahal: {
     step: 9, bg: "radial-gradient(ellipse at 25% 15%, #221100 0%, #110800 40%, #0a0500 100%)",
+    ambient: "",
     title: "כל הכבוד צוות!",
     desc: "ממתינה לכם משימה נוספת כאן במוזיאון לאמנות. פיתחו את המעטפה השביעית. אם עמדתם במשימה, הזינו כאן את שם המדינה הבאה עליכם להגיע",
     youtube: null, code: "הודו", next: "airport", type: "code",
@@ -540,6 +582,7 @@ const PAGES = {
   },
   airport: {
     step: 10, bg: "radial-gradient(ellipse at 25% 15%, #000a22 0%, #000511 40%, #00020a 100%)",
+    ambient: "",
     title: "כל הכבוד צוות!",
     desc: "היעד הבא שלכם הוא דרמסאלה, הודו! אך תחילה, הסיעו את עצמכם אל שדה התעופה, ופיתחו את המעטפה השמינית",
     youtube: "PwEocvwT9vo", code: "3254", next: "guru", type: "code",
@@ -551,6 +594,7 @@ const PAGES = {
   },
   guru: {
     step: 11, bg: "radial-gradient(ellipse at 25% 15%, #2a1100 0%, #150800 40%, #0a0400 100%)",
+    ambient: "",
     title: "כל הכבוד!",
     desc: "ניחשתם נכון! ברוכים הבאים לדראמסלה, הודו.\n\nשימו לב! נראה שאחת הקבוצות המתחרות ניסתה לחבל לכם בהתקדמות והרסה את ה-QR קוד שבמעטפה. למזלכם, הפקת המירוץ שמה לב לזה ודאגה להעלות את המסר מהגורו ישירות לכאן.\n\nצפו בסרטון והזינו כאן את קוד הגורו:",
     youtube: "jnxgqrVLbIg", code: "41", next: "market", type: "code",
@@ -562,6 +606,7 @@ const PAGES = {
   },
   market: {
     step: 12, bg: "radial-gradient(ellipse at 25% 15%, #220511 0%, #110208 40%, #0a0105 100%)",
+    ambient: "",
     title: "כל הכבוד!",
     desc: "פיתחו את המעטפה העשירית",
     youtube: "wef_7pKbPMg", code: "385", next: "finish", type: "code",
@@ -573,6 +618,7 @@ const PAGES = {
   },
   finish: {
     step: 13, bg: "radial-gradient(ellipse at 25% 15%, #2a2200 0%, #151100 40%, #0a0800 100%)",
+    ambient: "",
     title: "כל הכבוד צוות!",
     desc: "עברתם את כל המדינות, והצלחתם בכל המשימות! הגיע הזמן לטוס חזרה לישראל! הצוות הראשון שיחצה את קו הגמר יזכה במיליון! פיתחו את המעטפה האחרונה, שם תחכה לכם משימת הסיום!",
     youtube: "_3-OT6sc12Y",
@@ -586,25 +632,56 @@ const PAGES = {
 };
 
 // ================================================================
-//  לוגיקת ניווט ושמירת התקדמות
+//  לוגיקת ניווט, שמירת התקדמות, וסאונד אווירה
 // ================================================================
 let currentPage = null;
 let pendingNext  = null;
+let isMuted = false;
 
 function getPageId() {
   const urlParams = new URLSearchParams(location.search);
   const p = urlParams.get('page');
   if (p && PAGES[p]) {
-    // אם המשתמש נכנס במפורש עם ?page=opening נאפס לו את השמירה
     if (p === 'opening') localStorage.removeItem('puzzles_world_race_page');
     return p;
   }
-  
-  // קריאה מהזיכרון המקומי
   const savedPage = localStorage.getItem('puzzles_world_race_page');
   if (savedPage && PAGES[savedPage]) return savedPage;
-
   return 'opening';
+}
+
+function initA11y() {
+  const settings = ['large-text', 'high-contrast', 'no-animations'];
+  settings.forEach(setting => {
+    const val = localStorage.getItem(`a11y-${setting}`) === 'true';
+    if(val) {
+      document.body.classList.add(`a11y-${setting}`);
+      const checkbox = document.getElementById(`toggle-${setting}`);
+      if(checkbox) checkbox.checked = true;
+    }
+  });
+}
+
+function toggleA11y(className, isChecked) {
+  if (navigator.vibrate) navigator.vibrate(10);
+  if(isChecked) {
+    document.body.classList.add(className);
+    localStorage.setItem(className, 'true');
+  } else {
+    document.body.classList.remove(className);
+    localStorage.setItem(className, 'false');
+  }
+}
+
+function toggleMute() {
+  if (navigator.vibrate) navigator.vibrate(10);
+  isMuted = !isMuted;
+  const bgAudio = document.getElementById('ambient-audio');
+  bgAudio.muted = isMuted;
+  document.getElementById('mute-btn').innerText = isMuted ? '🔇' : '🔊';
+  if(!isMuted && bgAudio.src) {
+     bgAudio.play().catch(e => console.log("Audio autoplay prevented"));
+  }
 }
 
 function loadPage(id) {
@@ -612,9 +689,7 @@ function loadPage(id) {
   const page  = PAGES[id];
   if (!page) return;
 
-  // שמירה לזיכרון הדפדפן
   localStorage.setItem('puzzles_world_race_page', id);
-
   const url = id === 'opening' ? location.pathname : `${location.pathname}?page=${id}`;
   history.pushState({ page: id }, '', url);
 
@@ -622,18 +697,31 @@ function loadPage(id) {
   document.getElementById('page-title').textContent = page.title;
   document.getElementById('page-desc').textContent  = page.desc;
 
-  // מד התקדמות מחושב לפי step (13 שלבים סך הכל)
   const step = page.step || 1;
   document.getElementById('global-progress-fill').style.width = ((step / 13) * 100) + '%';
   
-  // רקע דינמי
-  document.body.style.backgroundImage = page.bg || "radial-gradient(ellipse at 25% 15%, #1a0800 0%, #080e00 40%, #001a18 100%)";
+  if(!document.body.classList.contains('a11y-high-contrast')) {
+    document.body.style.backgroundImage = page.bg || "radial-gradient(ellipse at 25% 15%, #1a0800 0%, #080e00 40%, #001a18 100%)";
+  }
 
-  // טריגר לאנימציית מעבר (Fade In)
+  // ניהול סאונד רקע (אמביינט)
+  const bgAudio = document.getElementById('ambient-audio');
+  if(page.ambient) {
+    if(!bgAudio.src.endsWith(page.ambient)) {
+       bgAudio.src = page.ambient;
+    }
+    if(!isMuted) bgAudio.play().catch(e => console.log("Audio play prevented by browser"));
+  } else {
+    bgAudio.pause();
+    bgAudio.src = '';
+  }
+
   const appDiv = document.getElementById('app');
-  appDiv.classList.remove('fade-transition');
-  void appDiv.offsetWidth; // Reflow
-  appDiv.classList.add('fade-transition');
+  if(!document.body.classList.contains('a11y-no-animations')) {
+    appDiv.classList.remove('fade-transition');
+    void appDiv.offsetWidth; 
+    appDiv.classList.add('fade-transition');
+  }
 
   const yw = document.getElementById('youtube-wrap');
   if (page.youtube) {
@@ -644,7 +732,6 @@ function loadPage(id) {
     yw.style.display = 'none';
   }
 
-  // הצגת/הסתרת כפתור הרמזים בהתאם למידע בעמוד הנוכחי
   const hintBtn = document.getElementById('floating-hint-btn');
   if (page.hints || page.solution) {
     hintBtn.style.display = 'flex';
@@ -652,7 +739,6 @@ function loadPage(id) {
     hintBtn.style.display = 'none';
   }
 
-  // אתחול ומחיקת אודיו חידה במידה ועברנו עמוד
   const ar = document.getElementById('audio-riddle');
   if (page.synthRiddle) {
     ar.style.display = 'flex';
@@ -670,7 +756,6 @@ function loadPage(id) {
   }
 
   document.getElementById('piano-section').style.display = page.piano ? '' : 'none';
-
   document.getElementById('code-box').style.display       = 'none';
   document.getElementById('crossroads-box').style.display = 'none';
   document.getElementById('finish-box').style.display     = 'none';
@@ -716,10 +801,19 @@ function closeHintsModal() {
   document.getElementById('hints-overlay').classList.remove('show');
 }
 
+function openA11yModal() {
+  if (navigator.vibrate) navigator.vibrate(15);
+  document.getElementById('a11y-overlay').classList.add('show');
+}
+
+function closeA11yModal() {
+  if (navigator.vibrate) navigator.vibrate(10);
+  document.getElementById('a11y-overlay').classList.remove('show');
+}
+
 function createHintElement(title, text, isSolution) {
   const div = document.createElement('div');
   div.className = 'hint-item';
-  
   const btnClass = isSolution ? 'hint-btn solution-btn' : 'hint-btn';
   const icon = isSolution ? '🗝️' : '🔒';
   const confirmClass = isSolution ? 'hint-confirm solution-confirm' : 'hint-confirm';
@@ -760,7 +854,7 @@ function revealHint(btn) {
   confirmDiv.nextElementSibling.style.display = 'block';
 }
 
-// ===== צלילי מערכת (עם תמיכה בטריגר של חגיגת סיום) =====
+// ===== צלילי מערכת (כולל חותמת) =====
 const AudioCtx = window.AudioContext || window.webkitAudioContext;
 let _ac = null;
 function getAC() { if (!_ac) _ac = new AudioCtx(); return _ac; }
@@ -773,14 +867,24 @@ function playError() {
   if (navigator.vibrate) navigator.vibrate([50, 50, 50]);
   try { const c=getAC(); [220,180].forEach((f,i)=>{ const o=c.createOscillator(),g=c.createGain(); o.type='sawtooth'; o.connect(g); g.connect(c.destination); o.frequency.value=f; g.gain.setValueAtTime(0.18,c.currentTime+i*0.13); g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+i*0.13+0.15); o.start(c.currentTime+i*0.13); o.stop(c.currentTime+i*0.13+0.16); }); } catch(e) {}
 }
-function playSuccess() {
-  if (navigator.vibrate) navigator.vibrate(30);
-  try { const c=getAC(); [523,659,784,1047].forEach((f,i)=>{ const o=c.createOscillator(),g=c.createGain(); o.connect(g); g.connect(c.destination); o.frequency.value=f; g.gain.setValueAtTime(0.13,c.currentTime+i*0.1); g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+i*0.1+0.22); o.start(c.currentTime+i*0.1); o.stop(c.currentTime+i*0.1+0.22); }); } catch(e) {}
+
+// סאונד חותמת דרכון
+function playStampSound() {
+  if (navigator.vibrate) navigator.vibrate([30, 80]);
+  try { 
+    const c=getAC(), o=c.createOscillator(), g=c.createGain(); 
+    o.frequency.setValueAtTime(150, c.currentTime);
+    o.frequency.exponentialRampToValueAtTime(40, c.currentTime+0.1);
+    o.connect(g); g.connect(c.destination);
+    g.gain.setValueAtTime(0.5, c.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.01, c.currentTime+0.15);
+    o.start(); o.stop(c.currentTime+0.2);
+  } catch(e){}
 }
 
 function playVictoryEffects() {
+  if (document.body.classList.contains('a11y-no-animations')) return;
   if (navigator.vibrate) navigator.vibrate([100, 50, 100, 50, 200]);
-  // קונפטי
   for(let i=0; i<80; i++){
       let conf = document.createElement('div');
       conf.className = 'confetti';
@@ -790,7 +894,6 @@ function playVictoryEffects() {
       document.body.appendChild(conf);
       setTimeout(()=>conf.remove(), 4500);
   }
-  // סאונד מיוחד לניצחון
   try {
     const c = getAC();
     [523.25, 659.25, 783.99, 1046.50, 1318.51].forEach((f, i) => {
@@ -809,18 +912,31 @@ function submitCode() {
   const page = PAGES[currentPage];
   const val  = document.getElementById('code-input').value.trim().toUpperCase();
   if (val === page.code.toUpperCase()) {
-    playSuccess();
+    playStampSound();
     const box = document.getElementById('code-box');
-    box.style.boxShadow = '0 0 40px rgba(0,255,180,0.45)';
-    setTimeout(() => { box.style.boxShadow = ''; }, 700);
-    pendingNext = page.next;
-    setTimeout(showSuccess, 500);
+    
+    if(!document.body.classList.contains('a11y-no-animations')) {
+      box.classList.add('stamp-approved');
+      setTimeout(() => { 
+        box.classList.remove('stamp-approved');
+        pendingNext = page.next;
+        loadPage(pendingNext); 
+      }, 1000); // ממתין שנייה כדי שיראו את החותמת ואז עובר אוטומטית
+    } else {
+      // אם האנימציות מבוטלות, פשוט עובר מיד
+      pendingNext = page.next;
+      loadPage(pendingNext);
+    }
   } else {
     playError();
     const inp = document.getElementById('code-input');
-    inp.classList.add('error', 'shaking');
+    if(!document.body.classList.contains('a11y-no-animations')) {
+      inp.classList.add('error', 'shaking');
+      setTimeout(() => inp.classList.remove('shaking'), 600);
+    } else {
+      inp.classList.add('error');
+    }
     document.getElementById('error-msg').style.display = 'block';
-    setTimeout(() => inp.classList.remove('shaking'), 600);
   }
 }
 
@@ -834,22 +950,12 @@ function goChoice(choice) {
   loadPage(choice === 'A' ? page.choiceA : page.choiceB);
 }
 
-function showSuccess() {
-  document.getElementById('success-overlay').classList.add('show');
-}
-
-function doContinue() {
-  document.getElementById('success-overlay').classList.remove('show');
-  if (pendingNext) loadPage(pendingNext);
-}
-
 // ===== אודיו חידה (תמיכה בהשהיה וניגון מאותו מקור סאונד של הפסנתר ללא חיווי ויזואלי) =====
 let riddlePlaying = false;
 let riddleInterval = null;
 let riddleElapsed = 0; 
 let riddleStartTime = 0;
 let notesPlayed = [false, false, false, false];
-// התווים לפי הרמז המעודכן: C, A, A, B. תדרים תואמים: C2, A2, A3, B2.
 const RIDDLE_NOTES = [65.41, 110.00, 220.00, 123.47]; 
 
 function toggleRiddle() {
@@ -1076,7 +1182,7 @@ function playPianoNote(freq, keyEl, isBlack, fromRiddle = false) {
     if(keyEl) isBlack = keyEl.dataset.isBlack === 'true';
   }
 
-  if(!keyEl) return;
+  if(!keyEl || document.body.classList.contains('a11y-no-animations')) return;
 
   if(isBlack){
     keyEl.style.transform = 'translateY(4px) rotateX(3deg)';
@@ -1102,6 +1208,8 @@ window.onpopstate = e => {
   loadPage(id);
 };
 
+// אתחול הגדרות הנגישות וטעינת העמוד
+initA11y();
 loadPage(getPageId());
 </script>
 </body>
