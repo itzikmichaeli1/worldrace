@@ -285,23 +285,35 @@
     }
     .audio-time { font-size: 11px; color: rgba(255,255,255,0.4); margin-top: 5px; text-align: left; }
 
-    /* ===== אנימציות ===== */
-    @keyframes shake {
-      0%,100%{transform:translateX(0)} 20%{transform:translateX(-10px)} 40%{transform:translateX(10px)} 60%{transform:translateX(-6px)} 80%{transform:translateX(6px)}
-    }
-    .shaking { animation: shake 0.55s ease; }
-    @keyframes twinkle { 0%,100%{opacity:.25;transform:scale(1)} 50%{opacity:1;transform:scale(1.5)} }
-    @keyframes popIn { 0%{transform:scale(.75);opacity:0} 100%{transform:scale(1);opacity:1} }
-    @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-5px)} }
-
     /* ===== עיצוב תיבת הפסנתר המרכזית וכפתור תווים ===== */
+    .rotate-device-msg {
+      font-size: 14px;
+      color: #ff9500;
+      margin-bottom: 10px;
+      text-align: center;
+      display: none;
+    }
+    @media (max-width: 600px) {
+      .rotate-device-msg {
+        display: block;
+      }
+    }
+    .piano-scroll-wrapper {
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      padding: 10px 0;
+      direction: ltr; /* תמיד משמאל לימין בשביל הפסנתר */
+    }
     .piano-chassis {
       background: linear-gradient(145deg, #2a0a00, #110000);
       border: 2px solid #5a2a00;
       border-radius: 10px;
       padding: 20px 15px;
       box-shadow: 0 15px 30px rgba(0,0,0,0.6), inset 0 5px 15px rgba(0,0,0,0.8);
-      display: inline-block;
+      margin: 0 auto;
+      display: block;
+      width: max-content;
       position: relative;
     }
     .piano-felt {
@@ -327,7 +339,7 @@
       text-shadow: 0 1px 0 rgba(255,255,255,0.3);
       border: 1px solid #c85a00;
       animation: floatBadge 2.5s ease-in-out infinite;
-      cursor: pointer;
+      cursor: default;
     }
     @keyframes floatBadge {
       0%, 100% { transform: translateY(0); }
@@ -433,9 +445,12 @@
   </div>
 
   <div id="piano-section" style="display:none; margin-bottom:24px; text-align:center;">
-    <div class="piano-chassis">
-      <div class="piano-felt"></div>
-      <div id="piano-keys" style="display:flex; position:relative; height:130px; justify-content:center; user-select:none;"></div>
+    <div class="rotate-device-msg">📱 לחוויית נגינה טובה יותר, מומלץ לסובב את המכשיר לרוחב</div>
+    <div class="piano-scroll-wrapper">
+      <div class="piano-chassis">
+        <div class="piano-felt"></div>
+        <div id="piano-keys" style="display:flex; position:relative; height:130px; justify-content:center; user-select:none;"></div>
+      </div>
     </div>
     <div>
       <div class="piano-hint-badge">לחצו על התווים לנגינה</div>
@@ -485,8 +500,8 @@
 
   <div class="finish-wrap" id="finish-box" style="display:none">
     <div class="finish-trophy">🏆</div>
-    <div class="finish-title">כל הכבוד! סיימתם את המירוץ!</div>
-    <div class="finish-sub">אתם מדהימים — השלמתם את המירוץ העולמי בהצלחה!</div>
+    <div class="finish-title" id="finish-title-text">כל הכבוד! סיימתם את המירוץ!</div>
+    <div class="finish-sub" id="finish-sub-text">אתם מדהימים — השלמתם את המירוץ העולמי בהצלחה!</div>
   </div>
 </div>
 
@@ -700,12 +715,13 @@ const PAGES = {
     title: "כל הכבוד צוות!",
     desc: "עברתם את כל המדינות, והצלחתם בכל המשימות! הגיע הזמן לטוס חזרה לישראל! הצוות הראשון שיחצה את קו הגמר יזכה במיליון! פיתחו את המעטפה האחרונה, שם תחכה לכם משימת הסיום!",
     youtube: "_3-OT6sc12Y",
-    type: "finish",
-    hints: [
-      "פתרו את השאלות העולמיות. העזרו בגוגל או נסו לנחש.\nשימו לב שכל תשובה (נכון או לא נכון) נותנת סמל. העזרו במקרא הסמלים על מנת לקבל משפט.",
-      "אם תענו נכון על כל השאלות תקבלו סמלים שירכיבו משפט שיגיד מה לעשות עם הפנס האולטרה סגול. האירו במקום המתאים והפתרון יחשף."
-    ],
-    solution: "התשובות לשאלות הן: נכון, לא נכון, נכון, נכון, נכון, לא נכון, נכון, לא נכון.\nהמשפט המתקבל הוא \"הרימו את הדופן הימנית הפנימית של קופסת המשחק\".\nאם תבדקו במקום זה, תמצאו את המפתח לקופסא האחרונה במשחק."
+    type: "finish"
+  },
+  yoga: {
+    title: "יוגה עם הגורו",
+    desc: "[ טקסט עמוד יוגה — החליפו בתוכן האמיתי ]",
+    youtube: null,
+    type: "info"
   }
 };
 
@@ -780,6 +796,9 @@ function loadPage(id) {
     document.getElementById('code-input').classList.remove('error');
   } else if (page.type === 'crossroads') {
     document.getElementById('crossroads-box').style.display = '';
+  } else if (page.type === 'truefalse') {
+    buildTF(page.questions);
+    document.getElementById('tf-box').style.display = '';
   } else if (page.type === 'finish') {
     document.getElementById('finish-box').style.display = '';
   }
@@ -906,7 +925,7 @@ function doContinue() {
   if (pendingNext) loadPage(pendingNext);
 }
 
-// ===== נכון / לא נכון (מקורי - לא בשימוש כרגע) =====
+// ===== נכון / לא נכון =====
 let tfAnswers = [];
 
 function buildTF(questions) {
@@ -1007,7 +1026,6 @@ function toggleRiddle() {
     timeDisplay.textContent = `0:${String(secs).padStart(2, '0')} / 0:15`;
 
     RIDDLE_NOTES.forEach((freq, index) => {
-      // גדול מ- ולא שווה, כדי שגרירה לאפס תאפס גם את התו הראשון ותשמיע אותו
       if (!notesPlayed[index] && riddleElapsed > index * noteInterval) {
         notesPlayed[index] = true;
         // שולחים fromRiddle = true כדי למנוע את החיווי הוויזואלי
@@ -1034,7 +1052,6 @@ function handleSeek(e) {
   riddleElapsed = p * 15000;
   riddleStartTime = Date.now() - riddleElapsed;
   
-  // בודק מחדש אילו תווים היו אמורים להתנגן עד לנקודה הזו, גדול מ- כדי שהתחלה באפס תאפס
   notesPlayed = RIDDLE_NOTES.map((freq, i) => riddleElapsed > i * 3750);
   
   document.getElementById('riddle-fill').style.width = (p * 100) + '%';
@@ -1072,7 +1089,7 @@ window.addEventListener('touchend', () => { isDraggingBar = false; });
 
 // ===== פסנתר 3D וסאונד אחיד =====
 (function(){
-  // הפסנתר מתחיל מהתו C2 (דו)
+  // הפסנתר מתחיל מהתו C2 (דו) ככה שיש שני תווים שחורים מצד שמאל, בדיוק כמו בפסנתר אמיתי
   const NOTES = [
     {n:'C2', f:65.41,  b:false}, {n:'C#2',f:69.30,  b:true}, {n:'D2', f:73.42,  b:false}, {n:'D#2',f:77.78,  b:true}, 
     {n:'E2', f:82.41,  b:false}, {n:'F2', f:87.31,  b:false}, {n:'F#2',f:92.50,  b:true}, {n:'G2', f:98.00,  b:false}, 
