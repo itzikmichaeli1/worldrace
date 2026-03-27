@@ -21,7 +21,6 @@
       touch-action: manipulation;
     }
 
-    /* טקסטורת חספוס (אופציה 4) - עושה את האתר פחות דיגיטלי ויותר "חדר בריחה" */
     body::after {
       content: '';
       position: fixed; inset: 0; z-index: 0; pointer-events: none;
@@ -35,7 +34,7 @@
 
     /* ===== הגדרות נגישות ===== */
     body.a11y-high-contrast { background-image: none !important; background-color: #000000 !important; }
-    body.a11y-high-contrast::after { display: none !important; } /* הסרת טקסטורה בניגודיות גבוהה */
+    body.a11y-high-contrast::after { display: none !important; } 
     body.a11y-high-contrast * { box-shadow: none !important; text-shadow: none !important; border-color: #ffffff !important; }
     body.a11y-large-text { font-size: 120% !important; }
     body.a11y-large-text .page-title { font-size: clamp(26px, 6vw, 42px) !important; }
@@ -45,15 +44,15 @@
     #stars { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
     .star { position: absolute; border-radius: 50%; animation: twinkle ease-in-out infinite; }
 
-    /* פס התקדמות + מטוס (אופציה 1) */
-    #global-progress-wrap { position: fixed; top: 0; left: 0; right: 0; height: 5px; background: rgba(255,255,255,0.1); z-index: 1000; }
+    /* פס התקדמות + מטוס - כוונן כדי שלא ייחתך */
+    #global-progress-wrap { position: fixed; top: 0; left: 0; right: 0; height: 5px; background: rgba(255,255,255,0.1); z-index: 1000; overflow: visible; }
     #global-progress-fill { 
       height: 100%; width: 0%; background: linear-gradient(90deg, #ff9500, #00c8be); 
       transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); position: relative; 
     }
     #global-progress-fill::after {
-      content: '✈️'; position: absolute; left: -12px; top: -10px; font-size: 18px;
-      transform: scaleX(-1); /* הופך את המטוס שייטוס שמאלה (RTL) */
+      content: '✈️'; position: absolute; left: 0px; top: -6px; font-size: 16px; line-height: 1;
+      transform: scaleX(-1); 
       text-shadow: 0 2px 4px rgba(0,0,0,0.5);
     }
 
@@ -95,7 +94,6 @@
     .code-box::before { content: ''; position: absolute; top: 0; left: 15%; right: 15%; height: 2px; background: linear-gradient(90deg, transparent, rgba(255,160,0,0.8), rgba(0,210,190,0.5), transparent); }
     .code-box::after {
       content: 'APPROVED'; position: absolute; top: 50%; left: 50%; z-index: 10; 
-      /* משתמש במשתנה CSS לזווית אקראית (מוגדר ב-JS) */
       transform: translate(-50%, -50%) scale(5) rotate(var(--stamp-rot, -15deg));
       font-size: 20px; font-weight: 900; color: rgba(0, 200, 100, 0.95); border: 6px solid rgba(0, 200, 100, 0.95); border-radius: 50%; 
       width: 140px; height: 140px; display: flex; align-items: center; justify-content: center; letter-spacing: 1px; opacity: 0; pointer-events: none; 
@@ -121,6 +119,7 @@
     .code-hint { font-size: 14px; font-weight: bold; color: rgba(0,200,190,0.7); margin-top: 10px; animation: bounceHint 1.2s ease-in-out infinite; }
     @keyframes bounceHint { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
 
+    /* כפתור ואפקט אימות נתונים */
     .submit-btn {
       margin-top: 15px; background: linear-gradient(180deg, #ff9500 0%, #d96000 60%, #a84000 100%);
       border: none; border-bottom: 5px solid #6a2800; border-radius: 10px; color: #fff; padding: 14px 40px; font-size: 16px; cursor: pointer;
@@ -128,6 +127,17 @@
     }
     .submit-btn:hover { filter: brightness(1.1); }
     .submit-btn:active { transform: translateY(5px); box-shadow: 0 1px 0 #6a2800, 0 2px 6px rgba(0,0,0,0.3); border-bottom-width: 1px; }
+    
+    .verifying-state {
+      animation: pulseVerify 0.6s infinite ease-in-out;
+      pointer-events: none;
+    }
+    @keyframes pulseVerify {
+      0% { opacity: 0.8; transform: scale(0.98); }
+      50% { opacity: 1; transform: scale(1.02); filter: brightness(1.2); }
+      100% { opacity: 0.8; transform: scale(0.98); }
+    }
+
     .error-msg { display: none; margin-top: 16px; background: rgba(180,20,0,0.25); border: 1px solid rgba(255,80,50,0.45); border-radius: 8px; padding: 10px 20px; color: rgba(255,160,140,0.95); font-size: 14px; }
 
     .crossroads-wrap { margin-top: 10px; text-align: center; padding: 28px 16px 32px; background: rgba(20,8,0,0.72); border: 1.5px solid rgba(255,120,0,0.4); border-radius: 14px; position: relative; overflow: hidden; }
@@ -751,7 +761,7 @@ function revealHint(btn) {
   confirmDiv.nextElementSibling.style.display = 'block';
 }
 
-// ===== צלילי מערכת וחותמת משופרת =====
+// ===== צלילי מערכת וחותמת משופרת (אופציה מלודית) =====
 const AudioCtx = window.AudioContext || window.webkitAudioContext;
 let _ac = null;
 function getAC() { if (!_ac) _ac = new AudioCtx(); return _ac; }
@@ -765,60 +775,48 @@ function playError() {
   try { const c=getAC(); [220,180].forEach((f,i)=>{ const o=c.createOscillator(),g=c.createGain(); o.type='sawtooth'; o.connect(g); g.connect(c.destination); o.frequency.value=f; g.gain.setValueAtTime(0.18,c.currentTime+i*0.13); g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+i*0.13+0.15); o.start(c.currentTime+i*0.13); o.stop(c.currentTime+i*0.13+0.16); }); } catch(e) {}
 }
 
+// סאונד חותמת - אקורד ניצחון ממושך ("כוכב נולד")
 function playStampSound() {
-  if (navigator.vibrate) navigator.vibrate([60, 100, 200]); 
+  if (navigator.vibrate) navigator.vibrate([100, 200, 300]); 
   try { 
     const ctx = getAC();
     const now = ctx.currentTime;
+    
+    // אקורד עשיר ודרמטי
+    const freqs = [261.63, 329.63, 392.00, 493.88, 587.33]; 
 
-    [800, 1200, 2500].forEach(freq => {
+    freqs.forEach((freq, i) => {
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
-      osc.type = 'square';
-      osc.frequency.setValueAtTime(freq, now);
-      osc.frequency.exponentialRampToValueAtTime(freq * 0.5, now + 0.3);
-      osc.connect(gain); gain.connect(ctx.destination);
+      osc.type = i % 2 === 0 ? 'triangle' : 'sine'; 
+      osc.frequency.value = freq;
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
       gain.gain.setValueAtTime(0, now);
-      gain.gain.linearRampToValueAtTime(0.5, now + 0.01);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
-      osc.start(now); osc.stop(now + 0.6);
+      gain.gain.linearRampToValueAtTime(0.3 / freqs.length, now + 0.2); 
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 4.0); 
+
+      osc.start(now);
+      osc.stop(now + 4.5);
     });
 
-    const bass = ctx.createOscillator();
+    const bassOsc = ctx.createOscillator();
     const bassGain = ctx.createGain();
-    bass.type = 'triangle';
-    bass.frequency.setValueAtTime(180, now);
-    bass.frequency.exponentialRampToValueAtTime(30, now + 0.15);
-    bass.connect(bassGain); bassGain.connect(ctx.destination);
+    bassOsc.type = 'sine';
+    bassOsc.frequency.setValueAtTime(100, now);
+    bassOsc.frequency.exponentialRampToValueAtTime(30, now + 1.5);
+    bassOsc.connect(bassGain);
+    bassGain.connect(ctx.destination);
+    
     bassGain.gain.setValueAtTime(0, now);
-    bassGain.gain.linearRampToValueAtTime(2.0, now + 0.02);
-    bassGain.gain.exponentialRampToValueAtTime(0.001, now + 4.0); 
-    bass.start(now); bass.stop(now + 4.5);
-
-    const bufferSize = ctx.sampleRate * 0.5; 
-    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-    const data = buffer.getChannelData(0);
-    for (let i = 0; i < bufferSize; i++) {
-      data[i] = Math.random() * 2 - 1;
-    }
-    const noise = ctx.createBufferSource();
-    noise.buffer = buffer;
+    bassGain.gain.linearRampToValueAtTime(0.5, now + 0.3);
+    bassGain.gain.exponentialRampToValueAtTime(0.001, now + 3.0);
     
-    const bandpass = ctx.createBiquadFilter();
-    bandpass.type = 'bandpass';
-    bandpass.frequency.value = 500; 
+    bassOsc.start(now);
+    bassOsc.stop(now + 3.5);
 
-    const noiseGain = ctx.createGain();
-    noiseGain.gain.setValueAtTime(0, now);
-    noiseGain.gain.linearRampToValueAtTime(1.5, now + 0.05); 
-    noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
-
-    noise.connect(bandpass);
-    bandpass.connect(noiseGain);
-    noiseGain.connect(ctx.destination);
-    
-    noise.start(now);
-    noise.stop(now + 0.5);
   } catch(e){}
 }
 
@@ -855,13 +853,11 @@ function submitCode() {
   
   // אפקט ההשהייה (Suspense)
   btn.innerHTML = 'מאמת נתונים... ⏳';
-  btn.style.pointerEvents = 'none';
-  btn.style.filter = 'brightness(0.8)';
+  btn.classList.add('verifying-state');
   
   setTimeout(() => {
     btn.innerHTML = 'המשך לשלב הבא «';
-    btn.style.pointerEvents = 'auto';
-    btn.style.filter = '';
+    btn.classList.remove('verifying-state');
     
     if (val === page.code.toUpperCase()) {
       playStampSound();
@@ -893,7 +889,7 @@ function submitCode() {
       }
       document.getElementById('error-msg').style.display = 'block';
     }
-  }, 600); // חצי שנייה של מתח
+  }, 1500); // 1.5 שניות של מתח
 }
 
 function clearError() {
@@ -1164,7 +1160,7 @@ window.onpopstate = e => {
   loadPage(id);
 };
 
-// אתחול הגדרות הנגישות וטעינת העמוד (ללא שמירה אוטומטית שדורסת כתובת)
+// אתחול הגדרות הנגישות וטעינת העמוד
 initA11y();
 loadPage(getPageId());
 </script>
