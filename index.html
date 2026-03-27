@@ -10,7 +10,6 @@
     body {
       min-height: 100vh;
       background-color: #080800;
-      /* הרקע הדינמי ידרס על ידי ה-JS, אבל זה הדיפולט */
       background-image: radial-gradient(ellipse at 25% 15%, #1a0800 0%, #080e00 40%, #001a18 100%);
       background-attachment: fixed;
       transition: background-image 1.5s ease;
@@ -127,7 +126,7 @@
     }
     .youtube-wrap iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: none; }
 
-    /* ===== תיבת קוד + חותמת עגולה APPROVED ===== */
+    /* ===== תיבת קוד + חותמת עגולה מואטת (Slow Motion) ===== */
     .code-box {
       background: rgba(20,8,0,0.72); border: 1.5px solid rgba(255,120,0,0.45); border-radius: 14px; margin-top: 10px;
       position: relative; overflow: hidden; padding: 32px 24px 28px; text-align: center;
@@ -142,8 +141,9 @@
       font-size: 20px; font-weight: 900; color: rgba(0, 200, 100, 0.95);
       border: 6px solid rgba(0, 200, 100, 0.95); border-radius: 50%; 
       width: 140px; height: 140px; display: flex; align-items: center; justify-content: center;
-      letter-spacing: 1px;
-      opacity: 0; pointer-events: none; transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      letter-spacing: 1px; opacity: 0; pointer-events: none; 
+      /* כאן האנימציה הואטה ל-0.55 שניות לקבלת אימפקט כבד יותר */
+      transition: all 0.55s cubic-bezier(0.2, 0.8, 0.2, 1.1);
     }
     .code-box.stamp-approved::after { transform: translate(-50%, -50%) scale(1) rotate(-15deg); opacity: 1; }
 
@@ -160,9 +160,13 @@
       width: 260px; transition: background 0.2s; caret-color: #ff9500; font-family: inherit;
     }
     .code-input.error { background: rgba(80,10,0,0.9); color: #ffaaaa; }
-    .code-hint { font-size: 13px; color: rgba(0,200,190,0.6); animation: bounce 1.5s ease-in-out infinite; }
+    
+    /* אנימציית החץ המקפץ מתחת לתיבה */
+    .code-hint { font-size: 14px; font-weight: bold; color: rgba(0,200,190,0.7); margin-top: 10px; animation: bounceHint 1.2s ease-in-out infinite; }
+    @keyframes bounceHint { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+
     .submit-btn {
-      background: linear-gradient(180deg, #ff9500 0%, #d96000 60%, #a84000 100%);
+      margin-top: 15px; background: linear-gradient(180deg, #ff9500 0%, #d96000 60%, #a84000 100%);
       border: none; border-bottom: 5px solid #6a2800; border-radius: 10px; color: #fff; padding: 14px 40px; font-size: 16px; cursor: pointer;
       font-family: inherit; font-weight: 800; letter-spacing: 1px; width: 260px;
       text-shadow: 0 1px 3px rgba(0,0,0,0.4); box-shadow: 0 6px 0 #6a2800, 0 8px 16px rgba(0,0,0,0.35);
@@ -206,31 +210,6 @@
       100% { top: 100vh; transform: rotate(720deg) scale(0.5); }
     }
 
-    /* ===== חלון הצלחה ===== */
-    #success-overlay {
-      display: none; position: fixed; inset: 0; z-index: 200;
-      background: rgba(2,6,20,0.88); align-items: center; justify-content: center;
-    }
-    #success-overlay.show { display: flex; }
-    .success-card {
-      background: rgba(15,6,0,0.98); border: 1px solid rgba(255,160,0,0.6); border-radius: 16px; padding: 48px 56px;
-      text-align: center; max-width: 380px; animation: popIn 0.45s cubic-bezier(0.34,1.56,0.64,1);
-    }
-    .success-icon {
-      width: 70px; height: 70px; border-radius: 50%; background: rgba(255,140,0,0.15); border: 2px solid rgba(255,180,0,0.7);
-      display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 32px; color: #5aaeee;
-    }
-    .success-title { color: #ffe0a0; font-size: 24px; margin-bottom: 10px; font-weight: 700; }
-    .success-sub { color: rgba(255,220,160,0.65); font-size: 15px; margin-bottom: 32px; }
-    #continue-btn {
-      background: linear-gradient(180deg, #00c8be 0%, #008a82 60%, #005a55 100%);
-      border: none; border-bottom: 5px solid #002a27; border-radius: 10px; color: #fff;
-      padding: 14px 40px; font-size: 17px; cursor: pointer; font-family: inherit; font-weight: 800;
-      transition: all 0.12s; width: 100%; box-shadow: 0 6px 0 #002a27, 0 8px 16px rgba(0,0,0,0.4); text-shadow: 0 1px 3px rgba(0,0,0,0.4);
-      touch-action: manipulation;
-    }
-    #continue-btn:active { transform: translateY(5px); box-shadow: 0 1px 0 #002a27; border-bottom-width: 1px; }
-
     /* ===== נגן אודיו ===== */
     .audio-riddle {
       background: linear-gradient(145deg, rgba(40,80,140,0.4), rgba(15,35,70,0.6));
@@ -264,7 +243,6 @@
     .shaking { animation: shake 0.55s ease; }
     @keyframes twinkle { 0%,100%{opacity:.25;transform:scale(1)} 50%{opacity:1;transform:scale(1.5)} }
     @keyframes popIn { 0%{transform:scale(.75);opacity:0} 100%{transform:scale(1);opacity:1} }
-    @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-5px)} }
 
     /* ===== פסנתר ===== */
     .rotate-device-msg { font-size: 14px; color: #ff9500; margin-bottom: 10px; text-align: center; display: none; }
@@ -468,15 +446,6 @@
         <span class="slider"></span>
       </label>
     </div>
-  </div>
-</div>
-
-<div id="success-overlay">
-  <div class="success-card">
-    <div class="success-icon">✓</div>
-    <h2 class="success-title">כל הכבוד!</h2>
-    <p class="success-sub" id="success-sub">קוד נכון! ממשיכים לשלב הבא...</p>
-    <button id="continue-btn" onclick="doContinue()">המשך «</button>
   </div>
 </div>
 
@@ -763,9 +732,17 @@ function loadPage(id) {
   window.scrollTo(0, 0);
 }
 
+// ===== חיוויי סאונד לממשק (UI Sounds) =====
+function playHintOpen() { try { const c=getAC(), o=c.createOscillator(), g=c.createGain(); o.type='sine'; o.frequency.setValueAtTime(880, c.currentTime); o.connect(g); g.connect(c.destination); g.gain.setValueAtTime(0, c.currentTime); g.gain.linearRampToValueAtTime(0.1, c.currentTime+0.05); g.gain.exponentialRampToValueAtTime(0.001, c.currentTime+1); o.start(); o.stop(c.currentTime+1.1); } catch(e){} }
+function playHintClick() { try { const c=getAC(), o=c.createOscillator(), g=c.createGain(); o.type='square'; o.frequency.setValueAtTime(300, c.currentTime); o.frequency.exponentialRampToValueAtTime(50, c.currentTime+0.05); o.connect(g); g.connect(c.destination); g.gain.setValueAtTime(0, c.currentTime); g.gain.linearRampToValueAtTime(0.1, c.currentTime+0.01); g.gain.exponentialRampToValueAtTime(0.001, c.currentTime+0.05); o.start(); o.stop(c.currentTime+0.06); } catch(e){} }
+function playHintReveal() { try { const c=getAC(); const now=c.currentTime; [1046.5, 1318.51, 1567.98].forEach((f, i) => { const o=c.createOscillator(), g=c.createGain(); o.type='triangle'; o.frequency.value=f; o.connect(g); g.connect(c.destination); g.gain.setValueAtTime(0, now); g.gain.setValueAtTime(0, now + i*0.05); g.gain.linearRampToValueAtTime(0.1, now + i*0.05 + 0.05); g.gain.exponentialRampToValueAtTime(0.001, now + 1.5); o.start(now); o.stop(now + 1.6); }); } catch(e){} }
+function playHintClose() { try { const c=getAC(), o=c.createOscillator(), g=c.createGain(); o.type='sine'; o.frequency.setValueAtTime(400, c.currentTime); o.frequency.exponentialRampToValueAtTime(100, c.currentTime+0.15); o.connect(g); g.connect(c.destination); g.gain.setValueAtTime(0, c.currentTime); g.gain.linearRampToValueAtTime(0.1, c.currentTime+0.02); g.gain.exponentialRampToValueAtTime(0.001, c.currentTime+0.2); o.start(); o.stop(c.currentTime+0.25); } catch(e){} }
+
+
 // ===== מערכת רמזים דינמית =====
 function openHintsModal() {
   if (navigator.vibrate) navigator.vibrate(15);
+  playHintOpen();
   const page = PAGES[currentPage];
   if (!page || (!page.hints && !page.solution)) return;
   
@@ -786,16 +763,19 @@ function openHintsModal() {
 
 function closeHintsModal() {
   if (navigator.vibrate) navigator.vibrate(10);
+  playHintClose();
   document.getElementById('hints-overlay').classList.remove('show');
 }
 
 function openA11yModal() {
   if (navigator.vibrate) navigator.vibrate(15);
+  playHintOpen();
   document.getElementById('a11y-overlay').classList.add('show');
 }
 
 function closeA11yModal() {
   if (navigator.vibrate) navigator.vibrate(10);
+  playHintClose();
   document.getElementById('a11y-overlay').classList.remove('show');
 }
 
@@ -824,12 +804,14 @@ function createHintElement(title, text, isSolution) {
 
 function showHintConfirm(btn) {
   if (navigator.vibrate) navigator.vibrate(15);
+  playHintClick();
   btn.style.display = 'none';
   btn.nextElementSibling.style.display = 'block';
 }
 
 function cancelHint(btn) {
   if (navigator.vibrate) navigator.vibrate(10);
+  playHintClose();
   const confirmDiv = btn.closest('.hint-confirm');
   confirmDiv.style.display = 'none';
   confirmDiv.previousElementSibling.style.display = 'block';
@@ -837,12 +819,13 @@ function cancelHint(btn) {
 
 function revealHint(btn) {
   if (navigator.vibrate) navigator.vibrate(25);
+  playHintReveal();
   const confirmDiv = btn.closest('.hint-confirm');
   confirmDiv.style.display = 'none';
   confirmDiv.nextElementSibling.style.display = 'block';
 }
 
-// ===== צלילי מערכת וחותמת מציאותית (אופציה 1: מכת פלדה) =====
+// ===== צלילי מערכת וחותמת משופרת (מנוע סאונד מותאם) =====
 const AudioCtx = window.AudioContext || window.webkitAudioContext;
 let _ac = null;
 function getAC() { if (!_ac) _ac = new AudioCtx(); return _ac; }
@@ -856,9 +839,9 @@ function playError() {
   try { const c=getAC(); [220,180].forEach((f,i)=>{ const o=c.createOscillator(),g=c.createGain(); o.type='sawtooth'; o.connect(g); g.connect(c.destination); o.frequency.value=f; g.gain.setValueAtTime(0.18,c.currentTime+i*0.13); g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+i*0.13+0.15); o.start(c.currentTime+i*0.13); o.stop(c.currentTime+i*0.13+0.16); }); } catch(e) {}
 }
 
-// סאונד חותמת - אופציה 1: מכת פלדה מסיבית + באס מהדהד 
+// סאונד חותמת עוצמתי (אופציה 1 - מכת פלדה) עם הדהוד (Decay) ארוך של 4 שניות שזולג לעמוד הבא
 function playStampSound() {
-  if (navigator.vibrate) navigator.vibrate([60, 100, 200]); 
+  if (navigator.vibrate) navigator.vibrate([60, 100]); 
   try { 
     const ctx = getAC();
     const now = ctx.currentTime;
@@ -877,7 +860,7 @@ function playStampSound() {
       osc.start(now); osc.stop(now + 0.6);
     });
 
-    // 2. באס עוצמתי ומהדהד (זולג לעמוד הבא)
+    // 2. באס עוצמתי ומהדהד שזולג קדימה (4.0 שניות של דעיכה)
     const bass = ctx.createOscillator();
     const bassGain = ctx.createGain();
     bass.type = 'triangle';
@@ -886,16 +869,14 @@ function playStampSound() {
     bass.connect(bassGain); bassGain.connect(ctx.destination);
     bassGain.gain.setValueAtTime(0, now);
     bassGain.gain.linearRampToValueAtTime(2.0, now + 0.02);
-    bassGain.gain.exponentialRampToValueAtTime(0.001, now + 4.0); // הדהוד ארוך
+    bassGain.gain.exponentialRampToValueAtTime(0.001, now + 4.0);
     bass.start(now); bass.stop(now + 4.5);
 
     // 3. רעש חיכוך נייר/דיו
     const bufferSize = ctx.sampleRate * 0.5; 
     const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
     const data = buffer.getChannelData(0);
-    for (let i = 0; i < bufferSize; i++) {
-      data[i] = Math.random() * 2 - 1;
-    }
+    for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
     const noise = ctx.createBufferSource();
     noise.buffer = buffer;
     
@@ -956,7 +937,7 @@ function submitCode() {
         box.classList.remove('stamp-approved');
         pendingNext = page.next;
         loadPage(pendingNext); 
-      }, 900); // ממתין 0.9 שניות - מספיק לראות את האנימציה לפני שהעמוד מתחלף והסאונד ממשיך להדהד
+      }, 1300); // ממתין 1.3 שניות - כדי לתת לחותמת האיטית את הזמן לרדת ולהראות לפני המעבר
     } else {
       pendingNext = page.next;
       loadPage(pendingNext);
