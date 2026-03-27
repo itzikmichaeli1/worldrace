@@ -264,7 +264,6 @@
     .shaking { animation: shake 0.55s ease; }
     @keyframes twinkle { 0%,100%{opacity:.25;transform:scale(1)} 50%{opacity:1;transform:scale(1.5)} }
     @keyframes popIn { 0%{transform:scale(.75);opacity:0} 100%{transform:scale(1);opacity:1} }
-    @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-5px)} }
 
     /* ===== פסנתר ===== */
     .rotate-device-msg { font-size: 14px; color: #ff9500; margin-bottom: 10px; text-align: center; display: none; }
@@ -280,7 +279,7 @@
       display: inline-block; margin-top: 22px; padding: 8px 20px; background: linear-gradient(180deg, #ffb74d 0%, #f57c00 100%);
       color: #3e2000; font-size: 15px; font-weight: 800; border-radius: 25px;
       box-shadow: 0 4px 8px rgba(0,0,0,0.6), inset 0 2px 2px rgba(255,255,255,0.4); text-shadow: 0 1px 0 rgba(255,255,255,0.3);
-      border: 1px solid #c85a00; animation: floatBadge 2.5s ease-in-out infinite; cursor: default;
+      border: 1px solid #c85a00; cursor: default;
     }
 
     /* ===== חלונות צפים (רמזים + נגישות) ===== */
@@ -332,7 +331,7 @@
     }
     .hint-text.solution-text { border-right-color: #ff4444; font-weight: bold; color: #ffcccc; }
 
-    /* תפריט נגישות ספציפי */
+    /* תפריט נגישות ספציפי וסליידרים */
     .a11y-toggle-row { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; margin-bottom: 10px; }
     .a11y-toggle-label { font-size: 16px; font-weight: bold; }
     .switch { position: relative; display: inline-block; width: 50px; height: 26px; }
@@ -341,14 +340,23 @@
     .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
     input:checked + .slider { background-color: #005a9c; }
     input:checked + .slider:before { transform: translateX(24px); }
+    
+    /* סליידר ווליום */
+    input[type=range] { -webkit-appearance: none; width: 120px; background: transparent; margin: 0; }
+    input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 18px; width: 18px; border-radius: 50%; background: #ff9500; cursor: pointer; margin-top: -7px; }
+    input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 4px; cursor: pointer; background: #555; border-radius: 2px; }
 
   </style>
 </head>
 <body>
 
+<audio id="ambient-audio" loop preload="auto" style="display:none;"></audio>
+
 <div id="global-progress-wrap">
   <div id="global-progress-fill"></div>
 </div>
+
+<button id="mute-btn" onclick="toggleMute()" title="השתק/הפעל אווירה">🔊</button>
 
 <div id="stars"></div>
 
@@ -446,6 +454,11 @@
     <h2 class="modal-title">הגדרות ונגישות</h2>
     
     <div class="a11y-toggle-row">
+      <span class="a11y-toggle-label">עוצמת רעשי רקע</span>
+      <input type="range" id="ambient-volume" min="0" max="1" step="0.1" value="1" onchange="changeVolume(this.value)" oninput="changeVolume(this.value)">
+    </div>
+
+    <div class="a11y-toggle-row">
       <span class="a11y-toggle-label">טקסט מוגדל</span>
       <label class="switch">
         <input type="checkbox" id="toggle-large-text" onchange="toggleA11y('a11y-large-text', this.checked)">
@@ -471,15 +484,6 @@
   </div>
 </div>
 
-<div id="success-overlay">
-  <div class="success-card">
-    <div class="success-icon">✓</div>
-    <h2 class="success-title">כל הכבוד!</h2>
-    <p class="success-sub" id="success-sub">קוד נכון! ממשיכים לשלב הבא...</p>
-    <button id="continue-btn" onclick="doContinue()">המשך «</button>
-  </div>
-</div>
-
 <script>
 // ================================================================
 //  מבנה המשחק המלא: הכל נשאר בדיוק במקום
@@ -487,6 +491,7 @@
 const PAGES = {
   opening: {
     step: 1, bg: "radial-gradient(ellipse at 25% 15%, #1a0800 0%, #080e00 40%, #001a18 100%)",
+    ambient: "", 
     title: "המירוץ העולמי - מתחילים!",
     desc: "המירוץ העולמי יוצא לדרך בעונה חדשה ומפתיעה והפעם – אתם המתחרים! שימו לב! מוכנים? צפו בסרטון והתחילו לשחק!",
     youtube: "FlTe_-Wxf6k", code: "3682", next: "london", type: "code",
@@ -498,6 +503,7 @@ const PAGES = {
   },
   london: {
     step: 2, bg: "radial-gradient(ellipse at 25% 15%, #001122 0%, #08111a 40%, #000a11 100%)",
+    ambient: "", 
     title: "ברוכים הבאים לאנגליה!",
     desc: "כל הכבוד! הגעתם ליעד הראשון שלכם במירוץ.\n\nפתחו את המעטפה השנייה.\n\nצפו בסרטון והזינו למטה את קוד הרכבת התחתית.",
     youtube: "tOnHapIZFi4", code: "bond", next: "crossroads", type: "code",
@@ -509,12 +515,14 @@ const PAGES = {
   },
   crossroads: {
     step: 3, bg: "radial-gradient(ellipse at 25% 15%, #1a001a 0%, #0d001a 40%, #050011 100%)",
+    ambient: "",
     title: "כל הכבוד! הגעתם ליעד!",
     desc: "במשימת צומת עליכם לבחור אחת מ-2 משימות.\n\nפתחו את המעטפה השלישית ובחרו: 'חבל על הזמן' או 'זמן להופעה'",
     youtube: null, type: "crossroads", choiceA: "time-first", choiceB: "show-first"
   },
   "time-first": {
     step: 4, bg: "radial-gradient(ellipse at 25% 15%, #1a001a 0%, #0d001a 40%, #050011 100%)",
+    ambient: "",
     title: "חבל על הזמן",
     desc: "במשימת הצומת בחרתם ב'חבל על הזמן'.\nבהצלחה!",
     youtube: "GE6oODAEQ-U", code: "435", next: "show-second", type: "code",
@@ -526,6 +534,7 @@ const PAGES = {
   },
   "show-first": {
     step: 4, bg: "radial-gradient(ellipse at 25% 15%, #1a001a 0%, #0d001a 40%, #050011 100%)",
+    ambient: "",
     title: "זמן להופעה", synthRiddle: true, piano: true,
     desc: "במשימת הצומת בחרתם\nב'זמן להופעה' בהצלחה!",
     youtube: "mnIEuzaG238", code: "4731", next: "time-second", type: "code",
@@ -537,6 +546,7 @@ const PAGES = {
   },
   "show-second": {
     step: 5, bg: "radial-gradient(ellipse at 25% 15%, #1a001a 0%, #0d001a 40%, #050011 100%)",
+    ambient: "",
     title: "סיבוב פרסה!", synthRiddle: true, piano: true,
     desc: "כנראה שהמתחרים האחרים רואים בכם איום – קיבלתם סיבוב פרסה! כעת עליכם לבצע את משימת הצומת השנייה – 'זמן להופעה'! בהצלחה!",
     youtube: "mnIEuzaG238", code: "4731", next: "boarding", type: "code",
@@ -548,6 +558,7 @@ const PAGES = {
   },
   "time-second": {
     step: 5, bg: "radial-gradient(ellipse at 25% 15%, #1a001a 0%, #0d001a 40%, #050011 100%)",
+    ambient: "",
     title: "סיבוב פרסה!",
     desc: "כנראה שאתם מהווים איום על המשתתפים האחרים, משום שקיבלתם סיבוב פרסה! כעת עליכם לבצע גם את משימת הצומת השנייה – 'חבל על הזמן'!",
     youtube: "GE6oODAEQ-U", code: "435", next: "boarding", type: "code",
@@ -559,6 +570,7 @@ const PAGES = {
   },
   boarding: {
     step: 6, bg: "radial-gradient(ellipse at 25% 15%, #001a22 0%, #000d1a 40%, #000511 100%)",
+    ambient: "",
     title: "כל הכבוד!",
     desc: "עברתם את שני הצדדים של הצומת, וכעת אתם יכולים לקבל את המעטפה עם הרמז הבא! פתחו את המעטפה הרביעית, והזינו כאן את קוד הטיסה ליעד הבא שלכם",
     youtube: null, code: "386", next: "zoo", type: "code",
@@ -570,6 +582,7 @@ const PAGES = {
   },
   zoo: {
     step: 7, bg: "radial-gradient(ellipse at 25% 15%, #002200 0%, #001100 40%, #000500 100%)",
+    ambient: "",
     title: "כל הכבוד!",
     desc: "פיתחו את המעטפה החמישית! על מנת לקבל את הרמז ליעד הבא, הזינו כאן את קוד משימת גן החיות",
     youtube: "SkKxiszzO9E", code: "5441", next: "museum", type: "code",
@@ -581,6 +594,7 @@ const PAGES = {
   },
   museum: {
     step: 8, bg: "radial-gradient(ellipse at 25% 15%, #220a00 0%, #110500 40%, #0a0200 100%)",
+    ambient: "",
     title: "כל הכבוד!",
     desc: "פיתחו את המעטפה השישית, והזינו למטה את קוד הפורטרטים",
     youtube: "xqGth1DhDd4", code: "235", next: "tajmahal", type: "code",
@@ -592,6 +606,7 @@ const PAGES = {
   },
   tajmahal: {
     step: 9, bg: "radial-gradient(ellipse at 25% 15%, #221100 0%, #110800 40%, #0a0500 100%)",
+    ambient: "",
     title: "כל הכבוד צוות!",
     desc: "ממתינה לכם משימה נוספת כאן במוזיאון לאמנות. פיתחו את המעטפה השביעית. אם עמדתם במשימה, הזינו כאן את שם המדינה הבאה עליכם להגיע",
     youtube: null, code: "הודו", next: "airport", type: "code",
@@ -603,6 +618,7 @@ const PAGES = {
   },
   airport: {
     step: 10, bg: "radial-gradient(ellipse at 25% 15%, #000a22 0%, #000511 40%, #00020a 100%)",
+    ambient: "",
     title: "כל הכבוד צוות!",
     desc: "היעד הבא שלכם הוא דרמסאלה, הודו! אך תחילה, הסיעו את עצמכם אל שדה התעופה, ופיתחו את המעטפה השמינית",
     youtube: "PwEocvwT9vo", code: "3254", next: "guru", type: "code",
@@ -614,6 +630,7 @@ const PAGES = {
   },
   guru: {
     step: 11, bg: "radial-gradient(ellipse at 25% 15%, #2a1100 0%, #150800 40%, #0a0400 100%)",
+    ambient: "",
     title: "כל הכבוד!",
     desc: "ניחשתם נכון! ברוכים הבאים לדראמסלה, הודו.\n\nשימו לב! נראה שאחת הקבוצות המתחרות ניסתה לחבל לכם בהתקדמות והרסה את ה-QR קוד שבמעטפה. למזלכם, הפקת המירוץ שמה לב לזה ודאגה להעלות את המסר מהגורו ישירות לכאן.\n\nצפו בסרטון והזינו כאן את קוד הגורו:",
     youtube: "jnxgqrVLbIg", code: "41", next: "market", type: "code",
@@ -625,6 +642,7 @@ const PAGES = {
   },
   market: {
     step: 12, bg: "radial-gradient(ellipse at 25% 15%, #220511 0%, #110208 40%, #0a0105 100%)",
+    ambient: "",
     title: "כל הכבוד!",
     desc: "פיתחו את המעטפה העשירית",
     youtube: "wef_7pKbPMg", code: "385", next: "finish", type: "code",
@@ -636,6 +654,7 @@ const PAGES = {
   },
   finish: {
     step: 13, bg: "radial-gradient(ellipse at 25% 15%, #2a2200 0%, #151100 40%, #0a0800 100%)",
+    ambient: "",
     title: "כל הכבוד צוות!",
     desc: "עברתם את כל המדינות, והצלחתם בכל המשימות! הגיע הזמן לטוס חזרה לישראל! הצוות הראשון שיחצה את קו הגמר יזכה במיליון! פיתחו את המעטפה האחרונה, שם תחכה לכם משימת הסיום!",
     youtube: "_3-OT6sc12Y",
@@ -683,6 +702,27 @@ function toggleA11y(className, isChecked) {
   }
 }
 
+// שליטה על הווליום
+function changeVolume(val) {
+  const bgAudio = document.getElementById('ambient-audio');
+  bgAudio.volume = val;
+  bgAudio.muted = false;
+  isMuted = false;
+  document.getElementById('mute-btn').innerText = val == 0 ? '🔇' : '🔊';
+  if(val > 0 && bgAudio.paused && bgAudio.src) {
+     bgAudio.play().catch(e=>{});
+  }
+}
+
+function toggleMute() {
+  if (navigator.vibrate) navigator.vibrate(10);
+  const bgAudio = document.getElementById('ambient-audio');
+  isMuted = !isMuted;
+  bgAudio.muted = isMuted;
+  document.getElementById('mute-btn').innerText = isMuted ? '🔇' : '🔊';
+  if(!isMuted && bgAudio.src) bgAudio.play().catch(e=>{});
+}
+
 function loadPage(id) {
   currentPage = id;
   const page  = PAGES[id];
@@ -700,6 +740,18 @@ function loadPage(id) {
   
   if(!document.body.classList.contains('a11y-high-contrast')) {
     document.body.style.backgroundImage = page.bg || "radial-gradient(ellipse at 25% 15%, #1a0800 0%, #080e00 40%, #001a18 100%)";
+  }
+
+  // ניהול סאונד רקע (אמביינט)
+  const bgAudio = document.getElementById('ambient-audio');
+  if(page.ambient) {
+    if(!bgAudio.src.endsWith(page.ambient)) {
+       bgAudio.src = page.ambient;
+    }
+    if(!isMuted && bgAudio.volume > 0) bgAudio.play().catch(e => console.log("Audio play prevented by browser"));
+  } else {
+    bgAudio.pause();
+    bgAudio.src = '';
   }
 
   const appDiv = document.getElementById('app');
@@ -763,9 +815,32 @@ function loadPage(id) {
   window.scrollTo(0, 0);
 }
 
+// ===== UI SOUNDS (רמזים ונגישות) =====
+function playHintOpen() {
+  try { const c=getAC(), o=c.createOscillator(), g=c.createGain(); o.type='sine'; o.frequency.setValueAtTime(880, c.currentTime); o.connect(g); g.connect(c.destination); g.gain.setValueAtTime(0, c.currentTime); g.gain.linearRampToValueAtTime(0.1, c.currentTime+0.05); g.gain.exponentialRampToValueAtTime(0.001, c.currentTime+1); o.start(); o.stop(c.currentTime+1.1); } catch(e){}
+}
+function playHintClick() {
+  try { const c=getAC(), o=c.createOscillator(), g=c.createGain(); o.type='square'; o.frequency.setValueAtTime(300, c.currentTime); o.frequency.exponentialRampToValueAtTime(50, c.currentTime+0.05); o.connect(g); g.connect(c.destination); g.gain.setValueAtTime(0, c.currentTime); g.gain.linearRampToValueAtTime(0.1, c.currentTime+0.01); g.gain.exponentialRampToValueAtTime(0.001, c.currentTime+0.05); o.start(); o.stop(c.currentTime+0.06); } catch(e){}
+}
+function playHintReveal() {
+  try { 
+    const c=getAC(); const now=c.currentTime;
+    [1046.5, 1318.51, 1567.98].forEach((f, i) => { // אקורד נעים לחשיפת סוד
+      const o=c.createOscillator(), g=c.createGain(); o.type='triangle'; o.frequency.value=f; o.connect(g); g.connect(c.destination);
+      g.gain.setValueAtTime(0, now); g.gain.setValueAtTime(0, now + i*0.05); 
+      g.gain.linearRampToValueAtTime(0.1, now + i*0.05 + 0.05); g.gain.exponentialRampToValueAtTime(0.001, now + 1.5);
+      o.start(now); o.stop(now + 1.6);
+    });
+  } catch(e){}
+}
+function playHintClose() {
+  try { const c=getAC(), o=c.createOscillator(), g=c.createGain(); o.type='sine'; o.frequency.setValueAtTime(400, c.currentTime); o.frequency.exponentialRampToValueAtTime(100, c.currentTime+0.15); o.connect(g); g.connect(c.destination); g.gain.setValueAtTime(0, c.currentTime); g.gain.linearRampToValueAtTime(0.1, c.currentTime+0.02); g.gain.exponentialRampToValueAtTime(0.001, c.currentTime+0.2); o.start(); o.stop(c.currentTime+0.25); } catch(e){}
+}
+
 // ===== מערכת רמזים דינמית =====
 function openHintsModal() {
   if (navigator.vibrate) navigator.vibrate(15);
+  playHintOpen();
   const page = PAGES[currentPage];
   if (!page || (!page.hints && !page.solution)) return;
   
@@ -786,16 +861,19 @@ function openHintsModal() {
 
 function closeHintsModal() {
   if (navigator.vibrate) navigator.vibrate(10);
+  playHintClose();
   document.getElementById('hints-overlay').classList.remove('show');
 }
 
 function openA11yModal() {
   if (navigator.vibrate) navigator.vibrate(15);
+  playHintClick();
   document.getElementById('a11y-overlay').classList.add('show');
 }
 
 function closeA11yModal() {
   if (navigator.vibrate) navigator.vibrate(10);
+  playHintClose();
   document.getElementById('a11y-overlay').classList.remove('show');
 }
 
@@ -824,12 +902,14 @@ function createHintElement(title, text, isSolution) {
 
 function showHintConfirm(btn) {
   if (navigator.vibrate) navigator.vibrate(15);
+  playHintClick();
   btn.style.display = 'none';
   btn.nextElementSibling.style.display = 'block';
 }
 
 function cancelHint(btn) {
   if (navigator.vibrate) navigator.vibrate(10);
+  playHintClose();
   const confirmDiv = btn.closest('.hint-confirm');
   confirmDiv.style.display = 'none';
   confirmDiv.previousElementSibling.style.display = 'block';
@@ -837,12 +917,13 @@ function cancelHint(btn) {
 
 function revealHint(btn) {
   if (navigator.vibrate) navigator.vibrate(25);
+  playHintReveal();
   const confirmDiv = btn.closest('.hint-confirm');
   confirmDiv.style.display = 'none';
   confirmDiv.nextElementSibling.style.display = 'block';
 }
 
-// ===== צלילי מערכת וחותמת משופרת (מנוע סאונד מותאם) =====
+// ===== צלילי מערכת והחותמת העוצמתית =====
 const AudioCtx = window.AudioContext || window.webkitAudioContext;
 let _ac = null;
 function getAC() { if (!_ac) _ac = new AudioCtx(); return _ac; }
@@ -856,58 +937,75 @@ function playError() {
   try { const c=getAC(); [220,180].forEach((f,i)=>{ const o=c.createOscillator(),g=c.createGain(); o.type='sawtooth'; o.connect(g); g.connect(c.destination); o.frequency.value=f; g.gain.setValueAtTime(0.18,c.currentTime+i*0.13); g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+i*0.13+0.15); o.start(c.currentTime+i*0.13); o.stop(c.currentTime+i*0.13+0.16); }); } catch(e) {}
 }
 
-// סאונד חותמת עוצמתי עם "בום" מהיר והדהוד ארוך (Reverb / Decay)
 function playStampSound() {
-  if (navigator.vibrate) navigator.vibrate([60, 100]); 
+  if (navigator.vibrate) navigator.vibrate([60, 100, 200]); 
   try { 
     const ctx = getAC();
     const now = ctx.currentTime;
 
-    // 1. תדר באס לבום עם הדהוד (Decay) של 3 שניות שזולג לעמוד הבא
-    const osc = ctx.createOscillator();
-    const oscGain = ctx.createGain();
-    osc.type = 'sine';
-    
-    // מכת הבאס נוחתת מתדר בינוני לתדר סאב-באס נמוך מאוד
-    osc.frequency.setValueAtTime(200, now);
-    osc.frequency.exponentialRampToValueAtTime(20, now + 0.3); 
-    
-    osc.connect(oscGain);
-    oscGain.connect(ctx.destination);
-    
-    // עיצוב העוצמה (Attack, Punch, long Decay)
-    oscGain.gain.setValueAtTime(0, now);
-    oscGain.gain.linearRampToValueAtTime(1.5, now + 0.02); // מכה חזקה וקצרה
-    oscGain.gain.exponentialRampToValueAtTime(0.001, now + 3.0); // הדהוד ארוך שימשיך לעמוד הבא
+    // 1. קליק מתכתי לפני המכה (Ka-Chunk)
+    const clickOsc = ctx.createOscillator();
+    const clickGain = ctx.createGain();
+    clickOsc.type = 'square';
+    clickOsc.frequency.setValueAtTime(800, now);
+    clickOsc.frequency.exponentialRampToValueAtTime(50, now + 0.1);
+    clickOsc.connect(clickGain);
+    clickGain.connect(ctx.destination);
+    clickGain.gain.setValueAtTime(0, now);
+    clickGain.gain.linearRampToValueAtTime(0.5, now + 0.01);
+    clickGain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+    clickOsc.start(now);
+    clickOsc.stop(now + 0.2);
 
-    osc.start(now);
-    osc.stop(now + 3.5);
+    // 2. בום עמוק ומהדהד שזולג קדימה (4.5 שניות של דעיכה)
+    const bassOsc = ctx.createOscillator();
+    const subOsc = ctx.createOscillator();
+    const boomGain = ctx.createGain();
+    
+    bassOsc.type = 'triangle';
+    subOsc.type = 'sine';
+    
+    bassOsc.frequency.setValueAtTime(150, now + 0.05);
+    bassOsc.frequency.exponentialRampToValueAtTime(20, now + 0.4);
+    subOsc.frequency.setValueAtTime(100, now + 0.05);
+    subOsc.frequency.exponentialRampToValueAtTime(10, now + 0.5);
 
-    // 2. רעש לבן המדמה את הפגיעה של החותמת והחיכוך בדף
-    const bufferSize = ctx.sampleRate * 0.5; // חצי שנייה של רעש
+    bassOsc.connect(boomGain);
+    subOsc.connect(boomGain);
+    boomGain.connect(ctx.destination);
+
+    boomGain.gain.setValueAtTime(0, now);
+    boomGain.gain.setValueAtTime(0, now + 0.05); // שבריר שנייה דיליי כדי לשמוע את הקליק
+    boomGain.gain.linearRampToValueAtTime(2.0, now + 0.08); // מכה עוצמתית
+    boomGain.gain.exponentialRampToValueAtTime(0.001, now + 4.5); // דעיכה ארוכה לעמוד הבא
+
+    bassOsc.start(now); bassOsc.stop(now + 5);
+    subOsc.start(now); subOsc.stop(now + 5);
+
+    // 3. רעש נייר ודיו נמעך
+    const bufferSize = ctx.sampleRate * 0.8; 
     const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
     const data = buffer.getChannelData(0);
-    for (let i = 0; i < bufferSize; i++) {
-      data[i] = Math.random() * 2 - 1;
-    }
+    for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
     const noise = ctx.createBufferSource();
     noise.buffer = buffer;
     
     const bandpass = ctx.createBiquadFilter();
     bandpass.type = 'bandpass';
-    bandpass.frequency.value = 800; // תדר שמדמה שפשוף של נייר עבה
+    bandpass.frequency.value = 500; 
 
     const noiseGain = ctx.createGain();
     noiseGain.gain.setValueAtTime(0, now);
-    noiseGain.gain.linearRampToValueAtTime(1.2, now + 0.02); // מכה חזקה
-    noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.4); // דעיכה קצת יותר ארוכה לפגיעה הפיזית
+    noiseGain.gain.setValueAtTime(0, now + 0.05);
+    noiseGain.gain.linearRampToValueAtTime(1.5, now + 0.07); 
+    noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
 
     noise.connect(bandpass);
     bandpass.connect(noiseGain);
     noiseGain.connect(ctx.destination);
     
-    noise.start(now);
-    noise.stop(now + 0.5);
+    noise.start(now + 0.05);
+    noise.stop(now + 1.0);
   } catch(e){}
 }
 
@@ -950,7 +1048,7 @@ function submitCode() {
         box.classList.remove('stamp-approved');
         pendingNext = page.next;
         loadPage(pendingNext); 
-      }, 900); // ממתין 0.9 שניות - מספיק לראות את האנימציה לפני שהעמוד מתחלף והסאונד ממשיך
+      }, 900); // ממתין 0.9 שניות לפני המעבר - סאונד ההד ימשיך לעמוד הבא
     } else {
       pendingNext = page.next;
       loadPage(pendingNext);
@@ -1236,7 +1334,7 @@ window.onpopstate = e => {
   loadPage(id);
 };
 
-// אתחול הגדרות הנגישות וטעינת העמוד (ללא שמירה אוטומטית שדורסת כתובת)
+// אתחול הגדרות הנגישות וטעינת העמוד
 initA11y();
 loadPage(getPageId());
 </script>
