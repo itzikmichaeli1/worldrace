@@ -802,102 +802,115 @@ function resetGame() {
 
 // צליל מעטפה נפתחת (רשרוש קל)
 function playHintOpen() { 
-  try { 
-    const ctx=getAC(); if(ctx.state==='suspended')ctx.resume(); const now=ctx.currentTime; 
-    const buffer=ctx.createBuffer(1,ctx.sampleRate*0.2,ctx.sampleRate); const data=buffer.getChannelData(0); 
-    for(let i=0;i<buffer.length;i++)data[i]=Math.random()*2-1; 
-    const noise=ctx.createBufferSource(); noise.buffer=buffer; 
-    const filter=ctx.createBiquadFilter(); filter.type='highpass'; filter.frequency.value=1500; 
-    const gain=ctx.createGain(); gain.gain.setValueAtTime(0,now); gain.gain.linearRampToValueAtTime(0.2,now+0.05); gain.gain.exponentialRampToValueAtTime(0.01,now+0.2); 
-    noise.connect(filter); filter.connect(gain); gain.connect(ctx.destination); noise.start(now); noise.stop(now+0.2); 
-  } catch(e){} 
+  if (document.body.classList.contains('a11y-no-animations')) return;
+  try {
+    const ctx = getAC();
+    if(ctx.state === 'suspended') ctx.resume();
+    const now = ctx.currentTime;
+    
+    const bufferSize = ctx.sampleRate * 0.4;
+    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+    const noise = ctx.createBufferSource(); noise.buffer = buffer;
+    const filter = ctx.createBiquadFilter(); filter.type = 'highpass'; filter.frequency.value = 2000;
+    const gain = ctx.createGain(); gain.gain.setValueAtTime(0, now); gain.gain.linearRampToValueAtTime(0.3, now + 0.1); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+    noise.connect(filter); filter.connect(gain); gain.connect(ctx.destination);
+    noise.start(now); noise.stop(now + 0.4);
+  } catch(e){}
 }
+
+function playHintClick() { try { const c=getAC(); if(c.state === 'suspended') c.resume(); const o=c.createOscillator(), g=c.createGain(); o.type='square'; o.frequency.setValueAtTime(300, c.currentTime); o.frequency.exponentialRampToValueAtTime(50, c.currentTime+0.05); o.connect(g); g.connect(c.destination); g.gain.setValueAtTime(0, c.currentTime); g.gain.linearRampToValueAtTime(0.1, c.currentTime+0.01); g.gain.exponentialRampToValueAtTime(0.001, c.currentTime+0.05); o.start(); o.stop(c.currentTime+0.06); } catch(e){} }
 
 // צליל מעטפה נקרעת (חשיפת רמז)
 function playHintReveal() { 
-  try { 
-    const ctx=getAC(); if(ctx.state==='suspended')ctx.resume(); const now=ctx.currentTime; 
-    const buffer=ctx.createBuffer(1,ctx.sampleRate*0.4,ctx.sampleRate); const data=buffer.getChannelData(0); 
-    for(let i=0;i<buffer.length;i++)data[i]=Math.random()*2-1; 
-    const noise=ctx.createBufferSource(); noise.buffer=buffer; 
-    const filter=ctx.createBiquadFilter(); filter.type='bandpass'; filter.frequency.setValueAtTime(1000,now); filter.frequency.linearRampToValueAtTime(3000,now+0.2); 
-    const gain=ctx.createGain(); gain.gain.setValueAtTime(0,now); gain.gain.linearRampToValueAtTime(0.5,now+0.05); gain.gain.exponentialRampToValueAtTime(0.01,now+0.3); 
-    noise.connect(filter); filter.connect(gain); gain.connect(ctx.destination); noise.start(now); noise.stop(now+0.4); 
-  } catch(e){} 
+  if (document.body.classList.contains('a11y-no-animations')) return;
+  try {
+    const ctx = getAC();
+    if(ctx.state === 'suspended') ctx.resume();
+    const now = ctx.currentTime;
+    
+    const bufferSize = ctx.sampleRate * 0.5;
+    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+    const noise = ctx.createBufferSource(); noise.buffer = buffer;
+    const filter = ctx.createBiquadFilter(); filter.type = 'bandpass'; filter.frequency.setValueAtTime(1000, now); filter.frequency.linearRampToValueAtTime(3000, now + 0.3);
+    const gain = ctx.createGain(); gain.gain.setValueAtTime(0, now); gain.gain.linearRampToValueAtTime(0.6, now + 0.05); gain.gain.linearRampToValueAtTime(0.2, now + 0.15); gain.gain.linearRampToValueAtTime(0.5, now + 0.2); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.45);
+    noise.connect(filter); filter.connect(gain); gain.connect(ctx.destination);
+    noise.start(now); noise.stop(now + 0.5);
+    
+    const osc = ctx.createOscillator(); const oscGain = ctx.createGain();
+    osc.type = 'sine'; osc.frequency.value = 1200;
+    osc.connect(oscGain); oscGain.connect(ctx.destination);
+    oscGain.gain.setValueAtTime(0, now); oscGain.gain.setValueAtTime(0, now + 0.3); oscGain.gain.linearRampToValueAtTime(0.1, now + 0.35); oscGain.gain.exponentialRampToValueAtTime(0.001, now + 1.0);
+    osc.start(now); osc.stop(now + 1.2);
+  } catch(e){}
 }
 
-// צליל מעטפה נסגרת (רשרוש קצרצר)
 function playHintClose() { 
   try { 
-    const ctx=getAC(); if(ctx.state==='suspended')ctx.resume(); const now=ctx.currentTime; 
-    const buffer=ctx.createBuffer(1,ctx.sampleRate*0.1,ctx.sampleRate); const data=buffer.getChannelData(0); 
-    for(let i=0;i<buffer.length;i++)data[i]=Math.random()*2-1; 
-    const noise=ctx.createBufferSource(); noise.buffer=buffer; 
-    const filter=ctx.createBiquadFilter(); filter.type='highpass'; filter.frequency.value=2000; 
-    const gain=ctx.createGain(); gain.gain.setValueAtTime(0,now); gain.gain.linearRampToValueAtTime(0.1,now+0.02); gain.gain.exponentialRampToValueAtTime(0.01,now+0.1); 
-    noise.connect(filter); filter.connect(gain); gain.connect(ctx.destination); noise.start(now); noise.stop(now+0.1); 
+    const ctx=getAC(); if(ctx.state === 'suspended') ctx.resume(); const now=ctx.currentTime; 
+    const buffer = ctx.createBuffer(1, ctx.sampleRate*0.2, ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < buffer.length; i++) data[i] = Math.random() * 2 - 1;
+    const noise = ctx.createBufferSource(); noise.buffer = buffer;
+    const filter = ctx.createBiquadFilter(); filter.type = 'lowpass'; filter.frequency.value = 1500;
+    const gain = ctx.createGain(); gain.gain.setValueAtTime(0, now); gain.gain.linearRampToValueAtTime(0.2, now+0.05); gain.gain.exponentialRampToValueAtTime(0.01, now+0.15);
+    noise.connect(filter); filter.connect(gain); gain.connect(ctx.destination);
+    noise.start(now); noise.stop(now+0.2);
   } catch(e){} 
 }
 
-// צליל פתיחת הדרכון (מכה עמומה + רשרוש)
+function playTypeSound() { if (navigator.vibrate) navigator.vibrate(5); try { const ctx=getAC(); if(ctx.state === 'suspended') ctx.resume(); const now=ctx.currentTime; const osc=ctx.createOscillator(); const gain=ctx.createGain(); osc.type='sine'; osc.frequency.setValueAtTime(600, now); osc.frequency.exponentialRampToValueAtTime(300, now+0.05); osc.connect(gain); gain.connect(ctx.destination); gain.gain.setValueAtTime(0, now); gain.gain.linearRampToValueAtTime(0.08, now+0.01); gain.gain.exponentialRampToValueAtTime(0.001, now+0.05); osc.start(now); osc.stop(now+0.06); } catch(e){} }
+
+// סאונד מכה + דפים נפתחים לדרכון
 function playPassportSound() {
-  try {
-    const ctx=getAC(); if(ctx.state==='suspended')ctx.resume(); const now=ctx.currentTime;
-    const osc=ctx.createOscillator(); const gain=ctx.createGain();
-    osc.type='sine'; osc.frequency.setValueAtTime(150,now); osc.frequency.exponentialRampToValueAtTime(40,now+0.1);
-    osc.connect(gain); gain.connect(ctx.destination);
-    gain.gain.setValueAtTime(0,now); gain.gain.linearRampToValueAtTime(0.5,now+0.01); gain.gain.exponentialRampToValueAtTime(0.01,now+0.15);
-    osc.start(now); osc.stop(now+0.2);
-  } catch(e){}
-}
-
-function playHintClick() { try { const c=getAC(); if(c.state==='suspended')c.resume(); const o=c.createOscillator(), g=c.createGain(); o.type='square'; o.frequency.setValueAtTime(300, c.currentTime); o.frequency.exponentialRampToValueAtTime(50, c.currentTime+0.05); o.connect(g); g.connect(c.destination); g.gain.setValueAtTime(0, c.currentTime); g.gain.linearRampToValueAtTime(0.1, c.currentTime+0.01); g.gain.exponentialRampToValueAtTime(0.001, c.currentTime+0.05); o.start(); o.stop(c.currentTime+0.06); } catch(e){} }
-function playClick() { if (navigator.vibrate) navigator.vibrate(15); try { const c=getAC(); if(c.state==='suspended')c.resume(); const o=c.createOscillator(),g=c.createGain(); o.connect(g); g.connect(c.destination); o.frequency.value=700; g.gain.setValueAtTime(0.1,c.currentTime); g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+0.07); o.start(); o.stop(c.currentTime+0.07); } catch(e) {} }
-function playError() { if (navigator.vibrate) navigator.vibrate([50, 50, 50]); try { const c=getAC(); if(c.state==='suspended')c.resume(); [220,180].forEach((f,i)=>{ const o=c.createOscillator(),g=c.createGain(); o.type='sawtooth'; o.connect(g); g.connect(c.destination); o.frequency.value=f; g.gain.setValueAtTime(0.18,c.currentTime+i*0.13); g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+i*0.13+0.15); o.start(c.currentTime+i*0.13); o.stop(c.currentTime+i*0.13+0.16); }); } catch(e) {} }
-function playTypeSound() { if (navigator.vibrate) navigator.vibrate(5); try { const ctx=getAC(); if(ctx.state==='suspended')ctx.resume(); const now=ctx.currentTime; const osc=ctx.createOscillator(); const gain=ctx.createGain(); osc.type='sine'; osc.frequency.setValueAtTime(600, now); osc.frequency.exponentialRampToValueAtTime(300, now+0.05); osc.connect(gain); gain.connect(ctx.destination); gain.gain.setValueAtTime(0, now); gain.gain.linearRampToValueAtTime(0.08, now+0.01); gain.gain.exponentialRampToValueAtTime(0.001, now+0.05); osc.start(now); osc.stop(now+0.06); } catch(e){} }
-
-function playStampSound() {
-  if (navigator.vibrate) navigator.vibrate([100, 200, 300]); 
-  try { 
-    const ctx = getAC(); if(ctx.state==='suspended')ctx.resume();
-    const now = ctx.currentTime;
-    const freqs = [261.63, 329.63, 392.00, 493.88, 587.33]; 
-    freqs.forEach((freq, i) => {
-      const osc = ctx.createOscillator(); const gain = ctx.createGain();
-      osc.type = i % 2 === 0 ? 'triangle' : 'sine'; osc.frequency.value = freq;
-      osc.connect(gain); gain.connect(ctx.destination);
-      gain.gain.setValueAtTime(0, now); gain.gain.linearRampToValueAtTime(0.3 / freqs.length, now + 0.2); gain.gain.exponentialRampToValueAtTime(0.001, now + 4.0); 
-      osc.start(now); osc.stop(now + 4.5);
-    });
-    const bassOsc = ctx.createOscillator(); const bassGain = ctx.createGain();
-    bassOsc.type = 'sine'; bassOsc.frequency.setValueAtTime(100, now); bassOsc.frequency.exponentialRampToValueAtTime(30, now + 1.5);
-    bassOsc.connect(bassGain); bassGain.connect(ctx.destination);
-    bassGain.gain.setValueAtTime(0, now); bassGain.gain.linearRampToValueAtTime(0.5, now + 0.3); bassGain.gain.exponentialRampToValueAtTime(0.001, now + 3.0);
-    bassOsc.start(now); bassOsc.stop(now + 3.5);
-  } catch(e){}
-}
-
-function playVictoryEffects() {
   if (document.body.classList.contains('a11y-no-animations')) return;
-  if (navigator.vibrate) navigator.vibrate([100, 50, 100, 50, 200]);
-  for(let i=0; i<80; i++){
-      let conf = document.createElement('div'); conf.className = 'confetti'; conf.style.left = Math.random() * 100 + 'vw'; conf.style.backgroundColor = ['#ff9500', '#00c8be', '#ffcc00', '#ff4444', '#ffffff'][Math.floor(Math.random()*5)]; conf.style.animationDelay = (Math.random() * 2) + 's'; document.body.appendChild(conf); setTimeout(()=>conf.remove(), 4500);
-  }
   try {
-    const c = getAC(); if(c.state==='suspended')c.resume();
-    [523.25, 659.25, 783.99, 1046.50, 1318.51].forEach((f, i) => {
-      const o = c.createOscillator(), g = c.createGain();
-      o.connect(g); g.connect(c.destination); o.frequency.value = f;
-      g.gain.setValueAtTime(0.15, c.currentTime + i*0.12); g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + i*0.12 + 0.6);
-      o.start(c.currentTime + i*0.12); o.stop(c.currentTime + i*0.12 + 0.6);
-    });
-  } catch(e){}
+    const ctx = getAC();
+    if(ctx.state === 'suspended') ctx.resume();
+    const now = ctx.currentTime;
+    
+    // מכה
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(150, now);
+    osc.frequency.exponentialRampToValueAtTime(40, now + 0.1);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    gain.gain.setValueAtTime(0, now);
+    gain.gain.linearRampToValueAtTime(0.5, now + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+    osc.start(now);
+    osc.stop(now + 0.2);
+    
+    // רשרוש דפים
+    const bufferSize = ctx.sampleRate * 0.15;
+    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) { data[i] = Math.random() * 2 - 1; }
+    const noise = ctx.createBufferSource();
+    noise.buffer = buffer;
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'highpass';
+    filter.frequency.value = 1000;
+    const noiseGain = ctx.createGain();
+    noiseGain.gain.setValueAtTime(0.2, now);
+    noiseGain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+    noise.connect(filter);
+    filter.connect(noiseGain);
+    noiseGain.connect(ctx.destination);
+    noise.start(now);
+    noise.stop(now + 0.2);
+  } catch(e) {}
 }
 
 // ===== מערכת רמזים =====
 function openHintsModal() {
   if (navigator.vibrate) navigator.vibrate(15);
-  playHintOpen();
+  playHintOpen(); // רשרוש נייר
   const page = PAGES[currentPage];
   if (!page || (!page.hints && !page.solution)) return;
   
@@ -960,6 +973,7 @@ function createHintElement(title, text, isSolution) {
 function showHintConfirm(btn) {
   if (navigator.vibrate) navigator.vibrate(15);
   playHintClick();
+
   const allItems = document.querySelectorAll('#hints-container .hint-item');
   allItems.forEach(item => {
     const tBtn = item.querySelector('.hint-btn');
@@ -971,6 +985,7 @@ function showHintConfirm(btn) {
       xDiv.style.display = 'none';
     }
   });
+
   btn.style.display = 'none';
   btn.nextElementSibling.style.display = 'block';
 }
@@ -985,7 +1000,7 @@ function cancelHint(btn) {
 
 function revealHint(btn) {
   if (navigator.vibrate) navigator.vibrate(25);
-  playHintReveal();
+  playHintReveal(); // קריעת מעטפה
   
   hintsUsed++;
   localStorage.setItem('puzzleHintsUsed', hintsUsed);
@@ -1007,13 +1022,89 @@ function revealHint(btn) {
   confirmDiv.nextElementSibling.style.display = 'block';
 }
 
-// ===== מנגנון הליבה =====
+// ===== חותמת ואימות =====
+function playError() {
+  if (navigator.vibrate) navigator.vibrate([50, 50, 50]);
+  try { const c=getAC(); if(c.state==='suspended') c.resume(); [220,180].forEach((f,i)=>{ const o=c.createOscillator(),g=c.createGain(); o.type='sawtooth'; o.connect(g); g.connect(c.destination); o.frequency.value=f; g.gain.setValueAtTime(0.18,c.currentTime+i*0.13); g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+i*0.13+0.15); o.start(c.currentTime+i*0.13); o.stop(c.currentTime+i*0.13+0.16); }); } catch(e) {}
+}
+
+function playStampSound() {
+  if (navigator.vibrate) navigator.vibrate([100, 200, 300]); 
+  try { 
+    const ctx = getAC();
+    if(ctx.state==='suspended') ctx.resume();
+    const now = ctx.currentTime;
+    
+    const freqs = [261.63, 329.63, 392.00, 493.88, 587.33]; 
+
+    freqs.forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = i % 2 === 0 ? 'triangle' : 'sine'; 
+      osc.frequency.value = freq;
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      gain.gain.setValueAtTime(0, now);
+      gain.gain.linearRampToValueAtTime(0.3 / freqs.length, now + 0.2); 
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 4.0); 
+
+      osc.start(now);
+      osc.stop(now + 4.5);
+    });
+
+    const bassOsc = ctx.createOscillator();
+    const bassGain = ctx.createGain();
+    bassOsc.type = 'sine';
+    bassOsc.frequency.setValueAtTime(100, now);
+    bassOsc.frequency.exponentialRampToValueAtTime(30, now + 1.5);
+    bassOsc.connect(bassGain);
+    bassGain.connect(ctx.destination);
+    
+    bassGain.gain.setValueAtTime(0, now);
+    bassGain.gain.linearRampToValueAtTime(0.5, now + 0.3);
+    bassGain.gain.exponentialRampToValueAtTime(0.001, now + 3.0);
+    
+    bassOsc.start(now);
+    bassOsc.stop(now + 3.5);
+
+  } catch(e){}
+}
+
+function playVictoryEffects() {
+  if (document.body.classList.contains('a11y-no-animations')) return;
+  if (navigator.vibrate) navigator.vibrate([100, 50, 100, 50, 200]);
+  for(let i=0; i<80; i++){
+      let conf = document.createElement('div');
+      conf.className = 'confetti';
+      conf.style.left = Math.random() * 100 + 'vw';
+      conf.style.backgroundColor = ['#ff9500', '#00c8be', '#ffcc00', '#ff4444', '#ffffff'][Math.floor(Math.random()*5)];
+      conf.style.animationDelay = (Math.random() * 2) + 's';
+      document.body.appendChild(conf);
+      setTimeout(()=>conf.remove(), 4500);
+  }
+  try {
+    const c = getAC();
+    if(c.state==='suspended') c.resume();
+    [523.25, 659.25, 783.99, 1046.50, 1318.51].forEach((f, i) => {
+      const o = c.createOscillator(), g = c.createGain();
+      o.connect(g); g.connect(c.destination);
+      o.frequency.value = f;
+      g.gain.setValueAtTime(0.15, c.currentTime + i*0.12);
+      g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + i*0.12 + 0.6);
+      o.start(c.currentTime + i*0.12); o.stop(c.currentTime + i*0.12 + 0.6);
+    });
+  } catch(e){}
+}
+
 function submitCode() {
   playClick();
   const page = PAGES[currentPage];
   const val  = document.getElementById('code-input').value.trim().toUpperCase();
   const btn = document.querySelector('.submit-btn');
   
+  // אפקט ההשהייה (Suspense)
   btn.innerHTML = 'מאמת נתונים... ⏳';
   btn.classList.add('verifying-state');
   
@@ -1024,6 +1115,7 @@ function submitCode() {
     if (val === page.code.toUpperCase()) {
       playStampSound();
       const box = document.getElementById('code-box');
+      
       const randomRot = Math.floor(Math.random() * 40) - 20; 
       box.style.setProperty('--stamp-rot', randomRot + 'deg');
       
