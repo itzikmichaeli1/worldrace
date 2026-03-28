@@ -96,7 +96,7 @@
     }
     .page-header::before { content: ''; position: absolute; top: 0; left: 20%; right: 20%; height: 2px; background: linear-gradient(90deg, transparent, rgba(255,160,0,0.9), rgba(0,210,190,0.6), transparent); }
     .site-label { font-size: 11px; letter-spacing: 5px; color: rgba(0,200,190,0.65); margin-bottom: 14px; }
-    .page-title { color: #ffe0a0; font-size: clamp(22px, 5vw, 34px); font-weight: 800; line-height: 1.3; margin-bottom: 8px; }
+    .page-title { color: #ffe0a0; font-size: clamp(22px, 5vw, 34px); font-weight: 800; line-height: 1.3; margin-bottom: 8px; min-height: 44px; }
     .title-divider { width: 70px; height: 3px; background: linear-gradient(90deg, rgba(255,140,0,0.9), rgba(0,210,190,0.7)); margin: 16px auto 18px; border-radius: 2px; }
     
     /* אנימציית ההחלקה העדינה לטקסט */
@@ -250,7 +250,7 @@
     .envelope-open-anim { animation: envOpen 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
     @keyframes envOpen { 0% { transform: scaleY(0); opacity: 0; } 100% { transform: scaleY(1); opacity: 1; } }
 
-    /* רשת הדרכון ועיצוב חותמת */
+    /* רשת הדרכון ועיצוב חותמת - ללא ספוילרים! */
     .map-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
     .map-btn { background: #221100; border: 1px solid #00c8be; color: #ffe8c0; padding: 10px; border-radius: 8px; font-family: inherit; font-size: 13.5px; cursor: pointer; transition: 0.2s; font-weight: bold; text-align: right; position: relative;}
     .map-btn:hover { background: #00c8be; color: #000; }
@@ -363,7 +363,7 @@
       <div class="stat-row">🔥 השלב המאתגר ביותר: <span id="stat-hardest"></span></div>
     </div>
 
-    <button class="submit-btn" style="margin-top: 10px;" onclick="resetGame()">התחילו משחק חדש ⟳</button>
+    <button class="submit-btn" style="margin-top: 10px;" onclick="promptResetGame()">התחילו משחק חדש ⟳</button>
   </div>
 </div>
 
@@ -655,6 +655,45 @@ function formatTime(ms) {
   return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
 }
 
+// ===== אפקט לוח המראות לכותרות העמודים (Split-flap Terminal) =====
+function terminalTextEffect(elementId, finalStr) {
+  const el = document.getElementById(elementId);
+  if (document.body.classList.contains('a11y-no-animations')) {
+    el.textContent = finalStr;
+    return;
+  }
+  const chars = "אבגדהוזחטיכלמנסעפצקרשתABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  let frame = 0;
+  const duration = 20; // מהירות האפקט
+  
+  function update() {
+    let displayStr = "";
+    let allDone = true;
+    for (let i = 0; i < finalStr.length; i++) {
+      if (finalStr[i] === ' ' || finalStr[i] === '!' || finalStr[i] === '-' || finalStr[i] === ':') {
+         displayStr += finalStr[i];
+         continue;
+      }
+      const lockFrame = (i * (duration / finalStr.length));
+      if (frame >= lockFrame) {
+        displayStr += finalStr[i];
+      } else {
+        displayStr += chars[Math.floor(Math.random() * chars.length)];
+        allDone = false;
+      }
+    }
+    el.textContent = displayStr;
+    
+    if (!allDone && frame < duration * 2) {
+      frame++;
+      setTimeout(update, 30);
+    } else {
+      el.textContent = finalStr;
+    }
+  }
+  update();
+}
+
 function loadPage(id) {
   saveCurrentStageTime();
   
@@ -674,7 +713,9 @@ function loadPage(id) {
   history.pushState({ page: id }, '', url);
 
   document.title = page.title + ' — פאזלס חדרי בריחה';
-  document.getElementById('page-title').textContent = page.title;
+  
+  // הפעלת אפקט לוח הטיסות על הכותרת!
+  terminalTextEffect('page-title', page.title);
   
   document.getElementById('global-progress-fill').style.width = ((step / 13) * 100) + '%';
   
@@ -761,7 +802,7 @@ function loadPage(id) {
   
   window.scrollTo(0, 0);
   
-  // הפעלת אנימציית החלקה רכה לטקסט (במקום מכונת כתיבה)
+  // הפעלת אנימציית החלקה רכה לטקסט התיאור
   const descEl = document.getElementById('page-desc');
   descEl.innerHTML = page.desc;
   if(!document.body.classList.contains('a11y-no-animations')) {
@@ -776,7 +817,7 @@ function loadPage(id) {
 // ===== ניהול דרכון חכם ומוגן מספוילרים =====
 function openMapModal() {
   if (navigator.vibrate) navigator.vibrate(15);
-  playHintOpen();
+  playPassportSound(); // סאונד חותמת דרכון במקום הפיפ הרגיל!
   
   const mapBtns = document.querySelectorAll('.map-btn');
   let stepCounter = 1;
@@ -849,12 +890,51 @@ function playHintReveal() { try { const c=getAC(); const now=c.currentTime; [104
 function playHintClose() { try { const c=getAC(), o=c.createOscillator(), g=c.createGain(); o.type='sine'; o.frequency.setValueAtTime(400, c.currentTime); o.frequency.exponentialRampToValueAtTime(100, c.currentTime+0.15); o.connect(g); g.connect(c.destination); g.gain.setValueAtTime(0, c.currentTime); g.gain.linearRampToValueAtTime(0.1, c.currentTime+0.02); g.gain.exponentialRampToValueAtTime(0.001, c.currentTime+0.2); o.start(); o.stop(c.currentTime+0.25); } catch(e){} }
 function playTypeSound() { if (navigator.vibrate) navigator.vibrate(5); try { const ctx=getAC(); const now=ctx.currentTime; const osc=ctx.createOscillator(); const gain=ctx.createGain(); osc.type='sine'; osc.frequency.setValueAtTime(600, now); osc.frequency.exponentialRampToValueAtTime(300, now+0.05); osc.connect(gain); gain.connect(ctx.destination); gain.gain.setValueAtTime(0, now); gain.gain.linearRampToValueAtTime(0.08, now+0.01); gain.gain.exponentialRampToValueAtTime(0.001, now+0.05); osc.start(now); osc.stop(now+0.06); } catch(e){} }
 
+// סאונד חותמת דרכון פיזית
+function playPassportSound() {
+  if (document.body.classList.contains('a11y-no-animations')) return;
+  try {
+    const ctx = getAC();
+    const now = ctx.currentTime;
+    
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(150, now);
+    osc.frequency.exponentialRampToValueAtTime(40, now + 0.1);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    gain.gain.setValueAtTime(0, now);
+    gain.gain.linearRampToValueAtTime(0.5, now + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+    osc.start(now);
+    osc.stop(now + 0.2);
+    
+    const bufferSize = ctx.sampleRate * 0.1;
+    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) { data[i] = Math.random() * 2 - 1; }
+    const noise = ctx.createBufferSource();
+    noise.buffer = buffer;
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'highpass';
+    filter.frequency.value = 1000;
+    const noiseGain = ctx.createGain();
+    noiseGain.gain.setValueAtTime(0.2, now);
+    noiseGain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+    noise.connect(filter);
+    filter.connect(noiseGain);
+    noiseGain.connect(ctx.destination);
+    noise.start(now);
+    noise.stop(now + 0.15);
+  } catch(e) {}
+}
+
 // סאונד מטוס חולף (Swoosh) במעבר עמוד
 function playSwooshSound() {
   try {
     const ctx = getAC();
     const now = ctx.currentTime;
-    
     const bufferSize = ctx.sampleRate * 1.0;
     const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
     const data = buffer.getChannelData(0);
@@ -862,12 +942,10 @@ function playSwooshSound() {
     
     const noise = ctx.createBufferSource();
     noise.buffer = buffer;
-    
     const bandpass = ctx.createBiquadFilter();
     bandpass.type = 'bandpass';
     bandpass.frequency.setValueAtTime(2000, now);
     bandpass.frequency.exponentialRampToValueAtTime(300, now + 0.8);
-    
     const gain = ctx.createGain();
     gain.gain.setValueAtTime(0, now);
     gain.gain.linearRampToValueAtTime(0.4, now + 0.3);
@@ -876,7 +954,6 @@ function playSwooshSound() {
     noise.connect(bandpass);
     bandpass.connect(gain);
     gain.connect(ctx.destination);
-    
     noise.start(now);
     noise.stop(now + 1.0);
   } catch(e){}
@@ -1004,15 +1081,7 @@ function revealHint(btn) {
   hintTextDiv.classList.add('envelope-open-anim');
 }
 
-// ===== צלילי מערכת וחותמת משופרת =====
-const AudioCtx = window.AudioContext || window.webkitAudioContext;
-let _ac = null;
-function getAC() { if (!_ac) _ac = new AudioCtx(); return _ac; }
-
-function playClick() {
-  if (navigator.vibrate) navigator.vibrate(15);
-  try { const c=getAC(),o=c.createOscillator(),g=c.createGain(); o.connect(g); g.connect(c.destination); o.frequency.value=700; g.gain.setValueAtTime(0.1,c.currentTime); g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+0.07); o.start(); o.stop(c.currentTime+0.07); } catch(e) {}
-}
+// ===== חותמת "כוכב נולד" המפורסמת =====
 function playError() {
   if (navigator.vibrate) navigator.vibrate([50, 50, 50]);
   try { const c=getAC(); [220,180].forEach((f,i)=>{ const o=c.createOscillator(),g=c.createGain(); o.type='sawtooth'; o.connect(g); g.connect(c.destination); o.frequency.value=f; g.gain.setValueAtTime(0.18,c.currentTime+i*0.13); g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+i*0.13+0.15); o.start(c.currentTime+i*0.13); o.stop(c.currentTime+i*0.13+0.16); }); } catch(e) {}
@@ -1092,6 +1161,7 @@ function submitCode() {
   const val  = document.getElementById('code-input').value.trim().toUpperCase();
   const btn = document.querySelector('.submit-btn');
   
+  // אפקט ההשהייה (Suspense)
   btn.innerHTML = 'מאמת נתונים... ⏳';
   btn.classList.add('verifying-state');
   
@@ -1111,7 +1181,7 @@ function submitCode() {
         setTimeout(() => { 
           box.classList.remove('stamp-approved');
           pendingNext = page.next;
-          playSwooshSound(); // סאונד המטוס טס במעבר עמוד!
+          playSwooshSound(); // סאונד המטוס חולף במעבר עמוד!
           loadPage(pendingNext); 
         }, 2000); 
       } else {
