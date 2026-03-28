@@ -748,27 +748,37 @@ function loadPage(id) {
   }
 }
 
-// ===== ניהול דרכון (שחזור) =====
+// ===== ניהול דרכון (שחזור) עם מניעת ספוילרים כירורגית =====
 function openMapModal() {
   if (navigator.vibrate) navigator.vibrate(15);
   playHintOpen();
   
   const mapBtns = document.querySelectorAll('.map-btn');
+  let stepCounter = 1;
+  
   mapBtns.forEach(btn => {
     const targetPageId = btn.getAttribute('data-page');
     const targetStep = PAGES[targetPageId].step;
     
+    if (!btn.hasAttribute('data-original-text')) {
+      btn.setAttribute('data-original-text', btn.innerHTML);
+    }
+    
     if (targetStep > maxStep) {
       btn.classList.add('locked');
       btn.onclick = null;
+      btn.innerHTML = 'יעד מסווג (' + stepCounter + ')';
     } else {
       btn.classList.remove('locked');
       btn.onclick = () => jumpTo(targetPageId);
+      btn.innerHTML = btn.getAttribute('data-original-text');
     }
+    stepCounter++;
   });
 
   document.getElementById('map-overlay').classList.add('show');
 }
+
 function closeMapModal() {
   if (navigator.vibrate) navigator.vibrate(10);
   playHintClose();
@@ -800,40 +810,6 @@ function playHintClick() { try { const c=getAC(), o=c.createOscillator(), g=c.cr
 function playHintReveal() { try { const c=getAC(); const now=c.currentTime; [1046.5, 1318.51, 1567.98].forEach((f, i) => { const o=c.createOscillator(), g=c.createGain(); o.type='triangle'; o.frequency.value=f; o.connect(g); g.connect(c.destination); g.gain.setValueAtTime(0, now); g.gain.setValueAtTime(0, now + i*0.05); g.gain.linearRampToValueAtTime(0.1, now + i*0.05 + 0.05); g.gain.exponentialRampToValueAtTime(0.001, now + 1.5); o.start(now); o.stop(now + 1.6); }); } catch(e){} }
 function playHintClose() { try { const c=getAC(), o=c.createOscillator(), g=c.createGain(); o.type='sine'; o.frequency.setValueAtTime(400, c.currentTime); o.frequency.exponentialRampToValueAtTime(100, c.currentTime+0.15); o.connect(g); g.connect(c.destination); g.gain.setValueAtTime(0, c.currentTime); g.gain.linearRampToValueAtTime(0.1, c.currentTime+0.02); g.gain.exponentialRampToValueAtTime(0.001, c.currentTime+0.2); o.start(); o.stop(c.currentTime+0.25); } catch(e){} }
 function playTypeSound() { if (navigator.vibrate) navigator.vibrate(5); try { const ctx=getAC(); const now=ctx.currentTime; const osc=ctx.createOscillator(); const gain=ctx.createGain(); osc.type='sine'; osc.frequency.setValueAtTime(600, now); osc.frequency.exponentialRampToValueAtTime(300, now+0.05); osc.connect(gain); gain.connect(ctx.destination); gain.gain.setValueAtTime(0, now); gain.gain.linearRampToValueAtTime(0.08, now+0.01); gain.gain.exponentialRampToValueAtTime(0.001, now+0.05); osc.start(now); osc.stop(now+0.06); } catch(e){} }
-
-// סאונד מטוס חולף (Swoosh) במעבר עמוד
-function playSwooshSound() {
-  try {
-    const ctx = getAC();
-    const now = ctx.currentTime;
-    
-    // רעש רוח מתגבר ויורד
-    const bufferSize = ctx.sampleRate * 1.0;
-    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-    const data = buffer.getChannelData(0);
-    for (let i = 0; i < bufferSize; i++) { data[i] = Math.random() * 2 - 1; }
-    
-    const noise = ctx.createBufferSource();
-    noise.buffer = buffer;
-    
-    const bandpass = ctx.createBiquadFilter();
-    bandpass.type = 'bandpass';
-    bandpass.frequency.setValueAtTime(2000, now);
-    bandpass.frequency.exponentialRampToValueAtTime(300, now + 0.8);
-    
-    const gain = ctx.createGain();
-    gain.gain.setValueAtTime(0, now);
-    gain.gain.linearRampToValueAtTime(0.4, now + 0.3);
-    gain.gain.linearRampToValueAtTime(0.001, now + 0.9);
-    
-    noise.connect(bandpass);
-    bandpass.connect(gain);
-    gain.connect(ctx.destination);
-    
-    noise.start(now);
-    noise.stop(now + 1.0);
-  } catch(e){}
-}
 
 // ===== מערכת רמזים דינמית =====
 function openHintsModal() {
@@ -1059,7 +1035,6 @@ function submitCode() {
         setTimeout(() => { 
           box.classList.remove('stamp-approved');
           pendingNext = page.next;
-          playSwooshSound(); // סאונד המטוס טס במעבר עמוד!
           loadPage(pendingNext); 
         }, 2000); 
       } else {
