@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
   <title>המירוץ העולמי - פאזלס חדרי בריחה</title>
   <style>
+    /* הוספתי את הפונט VT323 לטובת לוח הטיסות */
     @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;800&family=Rubik:wght@500;700;900&family=VT323&display=swap');
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -220,7 +221,7 @@
     .piano-instruction { font-size: 16px; color: #ffcc00; font-weight: 700; margin-bottom: 12px; letter-spacing: 0.5px; animation: pulseText 2s infinite; text-align: center; position: relative; z-index: 2; }
     @keyframes pulseText { 0%, 100% { opacity: 0.8; } 50% { opacity: 1; text-shadow: 0 0 8px rgba(255,200,0,0.6); } }
 
-    /* ===== חלונות צפים ===== */
+    /* ===== חלונות צפים ורמזים מדורגים ===== */
     .modal-overlay { display: none; position: fixed; inset: 0; z-index: 200; background: rgba(0,0,0,0.85); align-items: center; justify-content: center; }
     .modal-overlay.show { display: flex; animation: fadeIn 0.25s ease-out; }
     .modal-card { background: #160a00; border: 1px solid #ff9500; border-radius: 12px; padding: 28px 24px; width: 90%; max-width: 420px; position: relative; color: #fff; text-align: right; box-shadow: 0 15px 30px rgba(0,0,0,0.8); max-height: 90vh; overflow-y: auto; }
@@ -229,10 +230,18 @@
     .modal-title { text-align: center; color: #ffcc00; margin-bottom: 24px; font-weight: 800; font-size: 22px; }
     
     .hint-item { margin-bottom: 14px; }
-    .hint-btn { width: 100%; background: linear-gradient(180deg, #2a1500, #1a0a00); border: 1px solid #ff9500; color: #ffe8c0; padding: 14px; border-radius: 8px; cursor: pointer; font-size: 16px; font-family: inherit; font-weight: bold; transition: 0.2s; text-align: right; box-shadow: 0 4px 6px rgba(0,0,0,0.3); touch-action: manipulation; }
-    .hint-btn:hover { background: linear-gradient(180deg, #3a2000, #2a1500); transform: translateY(-2px); }
-    .hint-btn.solution-btn { border-color: #ff4444; color: #ffaaaa; background: linear-gradient(180deg, #3a0a0a, #1a0000); }
-    .hint-btn.solution-btn:hover { background: linear-gradient(180deg, #4a1010, #2a0000); }
+    .hint-btn { width: 100%; padding: 14px; border-radius: 8px; cursor: pointer; font-size: 16px; font-family: inherit; font-weight: bold; transition: 0.2s; text-align: right; box-shadow: 0 4px 6px rgba(0,0,0,0.3); touch-action: manipulation; }
+    
+    /* עיצוב מדורג לרמזים! */
+    .hint-level-0 { background: linear-gradient(180deg, #3a2a00, #1a1500); border: 1px solid #ffda44; color: #ffe8c0; }
+    .hint-level-0:hover { background: linear-gradient(180deg, #4a3500, #2a2000); transform: translateY(-2px); }
+    
+    .hint-level-1 { background: linear-gradient(180deg, #4a2000, #2a1000); border: 1px solid #ff9500; color: #ffcca0; }
+    .hint-level-1:hover { background: linear-gradient(180deg, #5a2500, #3a1500); transform: translateY(-2px); }
+    
+    .hint-btn.solution-btn { border: 1px solid #ff4444; color: #ffaaaa; background: linear-gradient(180deg, #3a0a0a, #1a0000); }
+    .hint-btn.solution-btn:hover { background: linear-gradient(180deg, #4a1010, #2a0000); transform: translateY(-2px); }
+    
     .hint-confirm { display: none; background: #221100; padding: 16px; border-radius: 8px; text-align: center; border: 1px dashed #ff9500; margin-top: 8px; }
     .hint-confirm.solution-confirm { border-color: #ff4444; background: #2a0000; }
     .hint-confirm p { margin-bottom: 14px; font-size: 15px; color: #eee; }
@@ -246,14 +255,13 @@
     .btn-no { background: #555; color: #fff; }
     .btn-no:hover { background: #666; }
     .hint-text { display: none; background: rgba(255,255,255,0.05); padding: 16px; border-radius: 8px; font-size: 15px; line-height: 1.6; border-right: 4px solid #ff9500; color: #eee; white-space: pre-wrap; margin-top: 8px; }
-    .hint-text.solution-text { border-right-color: #ff4444; font-weight: bold; color: #ffcccc; }
+    .hint-text.solution-text { border-right-color: #ff4444; font-weight: bold; color: #ffcccc; background: rgba(255,0,0,0.1); }
 
-    /* רשת הדרכון (מוגן ספוילרים) */
+    /* רשת הדרכון */
     .map-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
     .map-btn { background: #221100; border: 1px solid #00c8be; color: #ffe8c0; padding: 10px; border-radius: 8px; font-family: inherit; font-size: 13.5px; cursor: pointer; transition: 0.2s; font-weight: bold; text-align: right;}
     .map-btn:hover { background: #00c8be; color: #000; }
     .map-btn.locked { background: #111; border-color: #333; color: #555; cursor: not-allowed; }
-    .map-btn.locked::before { content: '🔒 '; }
     .map-btn.locked:hover { background: #111; color: #555; transform: none; }
     @media (max-width: 400px) { .map-grid { grid-template-columns: 1fr; } }
 
@@ -269,21 +277,6 @@
   </style>
 </head>
 <body>
-
-<script>
-  function unlockAudio() {
-    const ctx = getAC();
-    if(ctx.state === 'suspended') ctx.resume();
-    document.body.removeEventListener('click', unlockAudio);
-    document.body.removeEventListener('touchstart', unlockAudio);
-  }
-  document.body.addEventListener('click', unlockAudio);
-  document.body.addEventListener('touchstart', unlockAudio);
-  
-  function safeVibrate(val) {
-    try { if (navigator.vibrate) navigator.vibrate(val); } catch(e){}
-  }
-</script>
 
 <div id="ambient-glow"></div>
 
@@ -637,7 +630,7 @@ function initA11y() {
 }
 
 function toggleA11y(className, isChecked) {
-  safeVibrate(10);
+  if (navigator.vibrate) navigator.vibrate(10);
   if(isChecked) {
     document.body.classList.add(className);
     localStorage.setItem(className, 'true');
@@ -695,7 +688,6 @@ function loadPage(id) {
 
   const appDiv = document.getElementById('app');
   if(!document.body.classList.contains('a11y-no-animations')) {
-    // מפעיל מחדש את אפקט ה-Swipe
     appDiv.classList.remove('swipe-transition');
     void appDiv.offsetWidth; 
     appDiv.classList.add('swipe-transition');
@@ -751,7 +743,6 @@ function loadPage(id) {
     document.getElementById('finish-box').style.display = '';
     playVictoryEffects();
     
-    // יצירת לוח התוצאות
     let totalMs = 0;
     let maxStageMs = 0;
     let hardestStage = 'אין נתונים';
@@ -772,22 +763,21 @@ function loadPage(id) {
   
   window.scrollTo(0, 0);
   
-  // הפעלת אנימציית החלקה רכה לטקסט (במקום מכונת כתיבה)
   const descEl = document.getElementById('page-desc');
   descEl.innerHTML = page.desc;
   if(!document.body.classList.contains('a11y-no-animations')) {
     descEl.style.animation = 'none';
-    void descEl.offsetWidth; // Trigger reflow
+    void descEl.offsetWidth; 
     descEl.style.animation = 'slideUpFade 0.8s ease-out forwards';
   } else {
     descEl.style.opacity = 1;
   }
 }
 
-// ===== ניהול דרכון חכם ומוגן מספוילרים =====
+// ===== ניהול מפה חכם מוגן ספוילרים =====
 function openMapModal() {
-  safeVibrate(15);
-  playHintOpen(); 
+  if (navigator.vibrate) navigator.vibrate(15);
+  playHintOpen();
   
   const mapBtns = document.querySelectorAll('.map-btn');
   let stepCounter = 1;
@@ -796,7 +786,6 @@ function openMapModal() {
     const targetPageId = btn.getAttribute('data-page');
     const targetStep = PAGES[targetPageId].step;
     
-    // שמירת השם המקורי
     if (!btn.hasAttribute('data-original-text')) {
       btn.setAttribute('data-original-text', btn.innerHTML);
     }
@@ -815,9 +804,8 @@ function openMapModal() {
 
   document.getElementById('map-overlay').classList.add('show');
 }
-
 function closeMapModal() {
-  safeVibrate(10);
+  if (navigator.vibrate) navigator.vibrate(10);
   playHintClose();
   document.getElementById('map-overlay').classList.remove('show');
 }
@@ -826,14 +814,12 @@ function jumpTo(pageId) {
   loadPage(pageId);
 }
 
-// ניקוי נתונים לתחילת משחק חדש עם אישור
 function promptResetGame() {
   if (confirm("פעולה זו תמחק את ההתקדמות שלכם ותתחיל משחק חדש. בטוחים?")) {
     resetGame();
   }
 }
 
-// ניקוי אוטומטי לעמוד הסיום
 function resetGame() {
   localStorage.removeItem('puzzleMaxStep');
   localStorage.removeItem('puzzleHintsUsed');
@@ -842,103 +828,148 @@ function resetGame() {
 }
 
 // ===== חיוויי סאונד לממשק =====
-function playHintOpen() { 
-  if (document.body.classList.contains('a11y-no-animations')) return;
-  try {
-    const ctx = getAC();
-    if(ctx.state === 'suspended') ctx.resume();
-    const now = ctx.currentTime;
-    const bufferSize = Math.floor(ctx.sampleRate * 0.4);
-    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-    const data = buffer.getChannelData(0);
-    for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
-    const noise = ctx.createBufferSource(); noise.buffer = buffer;
-    const filter = ctx.createBiquadFilter(); filter.type = 'highpass'; filter.frequency.value = 2000;
-    const gain = ctx.createGain(); gain.gain.setValueAtTime(0, now); gain.gain.linearRampToValueAtTime(0.3, now + 0.1); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
-    noise.connect(filter); filter.connect(gain); gain.connect(ctx.destination);
-    noise.start(now); noise.stop(now + 0.4);
-  } catch(e){}
+function playHintOpen() { try { const c=getAC(), o=c.createOscillator(), g=c.createGain(); o.type='sine'; o.frequency.setValueAtTime(880, c.currentTime); o.connect(g); g.connect(c.destination); g.gain.setValueAtTime(0, c.currentTime); g.gain.linearRampToValueAtTime(0.1, c.currentTime+0.05); g.gain.exponentialRampToValueAtTime(0.001, c.currentTime+1); o.start(); o.stop(c.currentTime+1.1); } catch(e){} }
+function playHintClick() { try { const c=getAC(), o=c.createOscillator(), g=c.createGain(); o.type='square'; o.frequency.setValueAtTime(300, c.currentTime); o.frequency.exponentialRampToValueAtTime(50, c.currentTime+0.05); o.connect(g); g.connect(c.destination); g.gain.setValueAtTime(0, c.currentTime); g.gain.linearRampToValueAtTime(0.1, c.currentTime+0.01); g.gain.exponentialRampToValueAtTime(0.001, c.currentTime+0.05); o.start(); o.stop(c.currentTime+0.06); } catch(e){} }
+function playHintReveal() { try { const c=getAC(); const now=c.currentTime; [1046.5, 1318.51, 1567.98].forEach((f, i) => { const o=c.createOscillator(), g=c.createGain(); o.type='triangle'; o.frequency.value=f; o.connect(g); g.connect(c.destination); g.gain.setValueAtTime(0, now); g.gain.setValueAtTime(0, now + i*0.05); g.gain.linearRampToValueAtTime(0.1, now + i*0.05 + 0.05); g.gain.exponentialRampToValueAtTime(0.001, now + 1.5); o.start(now); o.stop(now + 1.6); }); } catch(e){} }
+function playHintClose() { try { const c=getAC(), o=c.createOscillator(), g=c.createGain(); o.type='sine'; o.frequency.setValueAtTime(400, c.currentTime); o.frequency.exponentialRampToValueAtTime(100, c.currentTime+0.15); o.connect(g); g.connect(c.destination); g.gain.setValueAtTime(0, c.currentTime); g.gain.linearRampToValueAtTime(0.1, c.currentTime+0.02); g.gain.exponentialRampToValueAtTime(0.001, c.currentTime+0.2); o.start(); o.stop(c.currentTime+0.25); } catch(e){} }
+function playTypeSound() { if (navigator.vibrate) navigator.vibrate(5); try { const ctx=getAC(); const now=ctx.currentTime; const osc=ctx.createOscillator(); const gain=ctx.createGain(); osc.type='sine'; osc.frequency.setValueAtTime(600, now); osc.frequency.exponentialRampToValueAtTime(300, now+0.05); osc.connect(gain); gain.connect(ctx.destination); gain.gain.setValueAtTime(0, now); gain.gain.linearRampToValueAtTime(0.08, now+0.01); gain.gain.exponentialRampToValueAtTime(0.001, now+0.05); osc.start(now); osc.stop(now+0.06); } catch(e){} }
+
+// ===== מערכת רמזים דינמית ומדורגת =====
+function openHintsModal() {
+  if (navigator.vibrate) navigator.vibrate(15);
+  playHintOpen();
+  const page = PAGES[currentPage];
+  if (!page || (!page.hints && !page.solution)) return;
+  
+  const container = document.getElementById('hints-container');
+  container.innerHTML = '';
+  
+  if (page.hints) {
+    page.hints.forEach((hintText, index) => {
+      container.appendChild(createHintElement(`רמז ${index + 1}`, hintText, false, index));
+    });
+  }
+  if (page.solution) {
+    container.appendChild(createHintElement(`פיתרון סופי`, page.solution, true, 99));
+  }
+  
+  document.getElementById('hints-overlay').classList.add('show');
 }
 
-function playHintClick() { try { const c=getAC(); if(c.state==='suspended') c.resume(); const o=c.createOscillator(), g=c.createGain(); o.type='square'; o.frequency.setValueAtTime(300, c.currentTime); o.frequency.exponentialRampToValueAtTime(50, c.currentTime+0.05); o.connect(g); g.connect(c.destination); g.gain.setValueAtTime(0, c.currentTime); g.gain.linearRampToValueAtTime(0.1, c.currentTime+0.01); g.gain.exponentialRampToValueAtTime(0.001, c.currentTime+0.05); o.start(); o.stop(c.currentTime+0.06); } catch(e){} }
-
-function playHintReveal() { 
-  if (document.body.classList.contains('a11y-no-animations')) return;
-  try {
-    const ctx = getAC();
-    if(ctx.state === 'suspended') ctx.resume();
-    const now = ctx.currentTime;
-    
-    const bufferSize = Math.floor(ctx.sampleRate * 0.5);
-    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-    const data = buffer.getChannelData(0);
-    for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
-    const noise = ctx.createBufferSource(); noise.buffer = buffer;
-    const filter = ctx.createBiquadFilter(); filter.type = 'bandpass'; filter.frequency.setValueAtTime(1000, now); filter.frequency.linearRampToValueAtTime(3000, now + 0.3);
-    const gain = ctx.createGain(); gain.gain.setValueAtTime(0, now); gain.gain.linearRampToValueAtTime(0.6, now + 0.05); gain.gain.linearRampToValueAtTime(0.2, now + 0.15); gain.gain.linearRampToValueAtTime(0.5, now + 0.2); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.45);
-    noise.connect(filter); filter.connect(gain); gain.connect(ctx.destination);
-    noise.start(now); noise.stop(now + 0.5);
-    
-    const osc = ctx.createOscillator(); const oscGain = ctx.createGain();
-    osc.type = 'sine'; osc.frequency.value = 1200;
-    osc.connect(oscGain); oscGain.connect(ctx.destination);
-    oscGain.gain.setValueAtTime(0, now); oscGain.gain.setValueAtTime(0, now + 0.3); oscGain.gain.linearRampToValueAtTime(0.1, now + 0.35); oscGain.gain.exponentialRampToValueAtTime(0.001, now + 1.0);
-    osc.start(now); osc.stop(now + 1.2);
-  } catch(e){}
+function closeHintsModal() {
+  if (navigator.vibrate) navigator.vibrate(10);
+  playHintClose();
+  document.getElementById('hints-overlay').classList.remove('show');
 }
 
-function playHintClose() { 
-  try { 
-    const ctx=getAC(); if(ctx.state === 'suspended') ctx.resume(); const now=ctx.currentTime; 
-    const bufferSize = Math.floor(ctx.sampleRate * 0.2);
-    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-    const data = buffer.getChannelData(0);
-    for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
-    const noise = ctx.createBufferSource(); noise.buffer = buffer;
-    const filter = ctx.createBiquadFilter(); filter.type = 'lowpass'; filter.frequency.value = 1500;
-    const gain = ctx.createGain(); gain.gain.setValueAtTime(0, now); gain.gain.linearRampToValueAtTime(0.2, now+0.05); gain.gain.exponentialRampToValueAtTime(0.01, now+0.15);
-    noise.connect(filter); filter.connect(gain); gain.connect(ctx.destination);
-    noise.start(now); noise.stop(now+0.2);
-  } catch(e){} 
+function openA11yModal() {
+  if (navigator.vibrate) navigator.vibrate(15);
+  playHintOpen();
+  document.getElementById('a11y-overlay').classList.add('show');
 }
 
-function playTypeSound() { safeVibrate(5); try { const ctx=getAC(); if(ctx.state==='suspended') ctx.resume(); const now=ctx.currentTime; const osc=ctx.createOscillator(); const gain=ctx.createGain(); osc.type='sine'; osc.frequency.setValueAtTime(600, now); osc.frequency.exponentialRampToValueAtTime(300, now+0.05); osc.connect(gain); gain.connect(ctx.destination); gain.gain.setValueAtTime(0, now); gain.gain.linearRampToValueAtTime(0.08, now+0.01); gain.gain.exponentialRampToValueAtTime(0.001, now+0.05); osc.start(now); osc.stop(now+0.06); } catch(e){} }
-function playClick() { safeVibrate(15); try { const c=getAC(); if(c.state==='suspended')c.resume(); const o=c.createOscillator(),g=c.createGain(); o.connect(g); g.connect(c.destination); o.frequency.value=700; g.gain.setValueAtTime(0.1,c.currentTime); g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+0.07); o.start(); o.stop(c.currentTime+0.07); } catch(e) {} }
-function playError() { safeVibrate([50, 50, 50]); try { const c=getAC(); if(c.state==='suspended')c.resume(); [220,180].forEach((f,i)=>{ const o=c.createOscillator(),g=c.createGain(); o.type='sawtooth'; o.connect(g); g.connect(c.destination); o.frequency.value=f; g.gain.setValueAtTime(0.18,c.currentTime+i*0.13); g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+i*0.13+0.15); o.start(c.currentTime+i*0.13); o.stop(c.currentTime+i*0.13+0.16); }); } catch(e) {} }
+function closeA11yModal() {
+  if (navigator.vibrate) navigator.vibrate(10);
+  playHintClose();
+  document.getElementById('a11y-overlay').classList.remove('show');
+}
 
-// סאונד המטוס (Swoosh) בין שלבים - הוחזר ופועל!
-function playSwooshSound() {
-  try {
-    const ctx = getAC();
-    if(ctx.state === 'suspended') ctx.resume();
-    const now = ctx.currentTime;
-    const bufferSize = Math.floor(ctx.sampleRate * 1.0);
-    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-    const data = buffer.getChannelData(0);
-    for (let i = 0; i < bufferSize; i++) { data[i] = Math.random() * 2 - 1; }
-    const noise = ctx.createBufferSource();
-    noise.buffer = buffer;
-    const bandpass = ctx.createBiquadFilter();
-    bandpass.type = 'bandpass';
-    bandpass.frequency.setValueAtTime(2000, now);
-    bandpass.frequency.exponentialRampToValueAtTime(300, now + 0.8);
-    const gain = ctx.createGain();
-    gain.gain.setValueAtTime(0, now);
-    gain.gain.linearRampToValueAtTime(0.4, now + 0.3);
-    gain.gain.linearRampToValueAtTime(0.001, now + 0.9);
-    noise.connect(bandpass);
-    bandpass.connect(gain);
-    gain.connect(ctx.destination);
-    noise.start(now);
-    noise.stop(now + 1.0);
-  } catch(e){}
+function createHintElement(title, text, isSolution, index) {
+  const div = document.createElement('div');
+  div.className = 'hint-item';
+  
+  let btnLevelClass = isSolution ? 'solution-btn' : `hint-level-${index % 2}`;
+  const btnClass = `hint-btn ${btnLevelClass}`;
+  
+  const icon = isSolution ? '🗝️' : '🔒';
+  const confirmClass = isSolution ? 'hint-confirm solution-confirm' : 'hint-confirm';
+  const confirmText = isSolution ? 'זהירות! לחיצה כאן תגלה לכם את התשובה המלאה. בטוחים?' : 'בטוחים שאתם רוצים עזרה?';
+  const textClass = isSolution ? 'hint-text solution-text' : 'hint-text';
+
+  div.innerHTML = `
+    <button class="${btnClass}" onclick="showHintConfirm(this)">${icon} ${title}</button>
+    <div class="${confirmClass}">
+      <p>${confirmText}</p>
+      <div class="hint-confirm-btns">
+        <button class="btn-yes" onclick="revealHint(this)">כן, גלו לי</button>
+        <button class="btn-no" onclick="cancelHint(this)">לא, אמשיך לנסות</button>
+      </div>
+    </div>
+    <div class="${textClass}">${text}</div>
+  `;
+  return div;
+}
+
+function showHintConfirm(btn) {
+  if (navigator.vibrate) navigator.vibrate(15);
+  playHintClick();
+
+  const allItems = document.querySelectorAll('#hints-container .hint-item');
+  allItems.forEach(item => {
+    const tBtn = item.querySelector('.hint-btn');
+    const cDiv = item.querySelector('.hint-confirm');
+    const xDiv = item.querySelector('.hint-text');
+    if (tBtn !== btn) {
+      tBtn.style.display = 'block';
+      cDiv.style.display = 'none';
+      xDiv.style.display = 'none';
+    }
+  });
+
+  btn.style.display = 'none';
+  btn.nextElementSibling.style.display = 'block';
+}
+
+function cancelHint(btn) {
+  if (navigator.vibrate) navigator.vibrate(10);
+  playHintClose();
+  const confirmDiv = btn.closest('.hint-confirm');
+  confirmDiv.style.display = 'none';
+  confirmDiv.previousElementSibling.style.display = 'block';
+}
+
+function revealHint(btn) {
+  if (navigator.vibrate) navigator.vibrate(25);
+  playHintReveal();
+  
+  hintsUsed++;
+  localStorage.setItem('puzzleHintsUsed', hintsUsed);
+
+  const allItems = document.querySelectorAll('#hints-container .hint-item');
+  allItems.forEach(item => {
+    const tBtn = item.querySelector('.hint-btn');
+    const cDiv = item.querySelector('.hint-confirm');
+    const xDiv = item.querySelector('.hint-text');
+    if (cDiv !== btn.closest('.hint-confirm')) {
+      tBtn.style.display = 'block';
+      cDiv.style.display = 'none';
+      xDiv.style.display = 'none';
+    }
+  });
+
+  const confirmDiv = btn.closest('.hint-confirm');
+  confirmDiv.style.display = 'none';
+  confirmDiv.nextElementSibling.style.display = 'block';
+}
+
+// ===== צלילי מערכת וחותמת משופרת =====
+const AudioCtx = window.AudioContext || window.webkitAudioContext;
+let _ac = null;
+function getAC() { if (!_ac) _ac = new AudioCtx(); return _ac; }
+
+function playClick() {
+  if (navigator.vibrate) navigator.vibrate(15);
+  try { const c=getAC(),o=c.createOscillator(),g=c.createGain(); o.connect(g); g.connect(c.destination); o.frequency.value=700; g.gain.setValueAtTime(0.1,c.currentTime); g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+0.07); o.start(); o.stop(c.currentTime+0.07); } catch(e) {}
+}
+function playError() {
+  if (navigator.vibrate) navigator.vibrate([50, 50, 50]);
+  try { const c=getAC(); [220,180].forEach((f,i)=>{ const o=c.createOscillator(),g=c.createGain(); o.type='sawtooth'; o.connect(g); g.connect(c.destination); o.frequency.value=f; g.gain.setValueAtTime(0.18,c.currentTime+i*0.13); g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+i*0.13+0.15); o.start(c.currentTime+i*0.13); o.stop(c.currentTime+i*0.13+0.16); }); } catch(e) {}
 }
 
 function playStampSound() {
-  safeVibrate([100, 200, 300]); 
+  if (navigator.vibrate) navigator.vibrate([100, 200, 300]); 
   try { 
     const ctx = getAC();
-    if(ctx.state==='suspended') ctx.resume();
     const now = ctx.currentTime;
     
     const freqs = [261.63, 329.63, 392.00, 493.88, 587.33]; 
@@ -980,7 +1011,7 @@ function playStampSound() {
 
 function playVictoryEffects() {
   if (document.body.classList.contains('a11y-no-animations')) return;
-  safeVibrate([100, 50, 100, 50, 200]);
+  if (navigator.vibrate) navigator.vibrate([100, 50, 100, 50, 200]);
   for(let i=0; i<80; i++){
       let conf = document.createElement('div');
       conf.className = 'confetti';
@@ -992,7 +1023,6 @@ function playVictoryEffects() {
   }
   try {
     const c = getAC();
-    if(c.state==='suspended') c.resume();
     [523.25, 659.25, 783.99, 1046.50, 1318.51].forEach((f, i) => {
       const o = c.createOscillator(), g = c.createGain();
       o.connect(g); g.connect(c.destination);
@@ -1004,127 +1034,8 @@ function playVictoryEffects() {
   } catch(e){}
 }
 
-// ===== מערכת רמזים דינמית =====
-function openHintsModal() {
-  safeVibrate(15);
-  playHintOpen();
-  const page = PAGES[currentPage];
-  if (!page || (!page.hints && !page.solution)) return;
-  
-  const container = document.getElementById('hints-container');
-  container.innerHTML = '';
-  
-  if (page.hints) {
-    page.hints.forEach((hintText, index) => {
-      container.appendChild(createHintElement(`רמז ${index + 1}`, hintText, false));
-    });
-  }
-  if (page.solution) {
-    container.appendChild(createHintElement(`פיתרון`, page.solution, true));
-  }
-  
-  document.getElementById('hints-overlay').classList.add('show');
-}
-
-function closeHintsModal() {
-  safeVibrate(10);
-  playHintClose();
-  document.getElementById('hints-overlay').classList.remove('show');
-}
-
-function openA11yModal() {
-  safeVibrate(15);
-  playHintOpen();
-  document.getElementById('a11y-overlay').classList.add('show');
-}
-
-function closeA11yModal() {
-  safeVibrate(10);
-  playHintClose();
-  document.getElementById('a11y-overlay').classList.remove('show');
-}
-
-function createHintElement(title, text, isSolution) {
-  const div = document.createElement('div');
-  div.className = 'hint-item';
-  const btnClass = isSolution ? 'hint-btn solution-btn' : 'hint-btn';
-  const icon = isSolution ? '🗝️' : '🔒';
-  const confirmClass = isSolution ? 'hint-confirm solution-confirm' : 'hint-confirm';
-  const confirmText = isSolution ? 'זהירות! לחיצה כאן תגלה לכם את התשובה המלאה. בטוחים?' : 'בטוחים שאתם רוצים עזרה?';
-  const textClass = isSolution ? 'hint-text solution-text' : 'hint-text';
-
-  div.innerHTML = `
-    <button class="${btnClass}" onclick="showHintConfirm(this)">${icon} ${title}</button>
-    <div class="${confirmClass}">
-      <p>${confirmText}</p>
-      <div class="hint-confirm-btns">
-        <button class="btn-yes" onclick="revealHint(this)">כן, גלו לי</button>
-        <button class="btn-no" onclick="cancelHint(this)">לא, אמשיך לנסות</button>
-      </div>
-    </div>
-    <div class="${textClass}">${text}</div>
-  `;
-  return div;
-}
-
-function showHintConfirm(btn) {
-  safeVibrate(15);
-  playHintClick();
-
-  const allItems = document.querySelectorAll('#hints-container .hint-item');
-  allItems.forEach(item => {
-    const tBtn = item.querySelector('.hint-btn');
-    const cDiv = item.querySelector('.hint-confirm');
-    const xDiv = item.querySelector('.hint-text');
-    if (tBtn !== btn) {
-      tBtn.style.display = 'block';
-      cDiv.style.display = 'none';
-      xDiv.style.display = 'none';
-    }
-  });
-
-  btn.style.display = 'none';
-  btn.nextElementSibling.style.display = 'block';
-}
-
-function cancelHint(btn) {
-  safeVibrate(10);
-  playHintClose();
-  const confirmDiv = btn.closest('.hint-confirm');
-  confirmDiv.style.display = 'none';
-  confirmDiv.previousElementSibling.style.display = 'block';
-}
-
-function revealHint(btn) {
-  safeVibrate(25);
-  playHintReveal();
-  
-  // הוספת ספירת רמז
-  hintsUsed++;
-  localStorage.setItem('puzzleHintsUsed', hintsUsed);
-
-  const allItems = document.querySelectorAll('#hints-container .hint-item');
-  allItems.forEach(item => {
-    const tBtn = item.querySelector('.hint-btn');
-    const cDiv = item.querySelector('.hint-confirm');
-    const xDiv = item.querySelector('.hint-text');
-    if (cDiv !== btn.closest('.hint-confirm')) {
-      tBtn.style.display = 'block';
-      cDiv.style.display = 'none';
-      xDiv.style.display = 'none';
-    }
-  });
-
-  const confirmDiv = btn.closest('.hint-confirm');
-  confirmDiv.style.display = 'none';
-  confirmDiv.nextElementSibling.style.display = 'block';
-}
-
-// משתנה למניעת לחיצות כפולות (Anti-Spam)
-let isVerifying = false; 
-
 function submitCode() {
-  if (window.isVerifying) return; // הגנה: אם התיבה באימות, אל תבצע כלום
+  if (window.isVerifying) return; // מונע ביצוע כפול
   window.isVerifying = true; // נועל את הכפתור
 
   playClick();
@@ -1132,15 +1043,15 @@ function submitCode() {
   const val  = document.getElementById('code-input').value.trim().toUpperCase();
   const btn = document.getElementById('main-submit-btn'); 
   
-  // אפקט ההשהייה והטשטוש
+  // אפקט ההשהייה (Suspense)
   btn.innerHTML = 'מאמת נתונים... ⏳';
   btn.classList.add('verifying-state');
-  document.getElementById('app').classList.add('suspense-mode');
+  document.getElementById('app').classList.add('suspense-mode'); // טשטוש הרקע
   
   setTimeout(() => {
     btn.innerHTML = 'המשך לשלב הבא «';
     btn.classList.remove('verifying-state');
-    document.getElementById('app').classList.remove('suspense-mode');
+    document.getElementById('app').classList.remove('suspense-mode'); // הסרת הטשטוש
     
     if (val === page.code.toUpperCase()) {
       playStampSound();
@@ -1154,14 +1065,12 @@ function submitCode() {
         setTimeout(() => { 
           box.classList.remove('stamp-approved');
           pendingNext = page.next;
-          window.isVerifying = false; // שחרור כפתור
-          playSwooshSound(); // סאונד מטוס
+          window.isVerifying = false; // שחרור רגע לפני מעבר
           loadPage(pendingNext); 
         }, 2000); 
       } else {
         pendingNext = page.next;
-        window.isVerifying = false; // שחרור כפתור
-        playSwooshSound(); // סאונד מטוס
+        window.isVerifying = false; // שחרור
         loadPage(pendingNext);
       }
     } else {
@@ -1171,11 +1080,11 @@ function submitCode() {
         inp.classList.add('error', 'shaking');
         setTimeout(() => {
             inp.classList.remove('shaking');
-            window.isVerifying = false; // שחרור כפתור
+            window.isVerifying = false; // שחרור אחרי שנגמרת האנימציה
         }, 600);
       } else {
         inp.classList.add('error');
-        window.isVerifying = false; // שחרור כפתור
+        window.isVerifying = false; // שחרור מיידי
       }
       document.getElementById('error-msg').style.display = 'block';
     }
@@ -1189,7 +1098,6 @@ function clearError() {
 
 function goChoice(choice) {
   const page = PAGES[currentPage];
-  playSwooshSound(); // סאונד מטוס בבחירת מסלול
   loadPage(choice === 'A' ? page.choiceA : page.choiceB);
 }
 
@@ -1202,7 +1110,7 @@ let notesPlayed = [false, false, false, false];
 const RIDDLE_NOTES = [123.47, 130.81, 174.61, 146.83]; 
 
 function toggleRiddle() {
-  safeVibrate(15);
+  if (navigator.vibrate) navigator.vibrate(15);
   const btn = document.getElementById('riddle-play-btn');
   const fill = document.getElementById('riddle-fill');
   const timeDisplay = document.getElementById('riddle-time');
@@ -1371,7 +1279,7 @@ window.addEventListener('touchend', () => { isDraggingBar = false; });
 })();
 
 function playPianoNote(freq, keyEl, isBlack, fromRiddle = false) {
-  safeVibrate(15);
+  if (!fromRiddle && navigator.vibrate) navigator.vibrate(15);
   try {
     const ctx = getAC();
     if(ctx.state === 'suspended') ctx.resume();
