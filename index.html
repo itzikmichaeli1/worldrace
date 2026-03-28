@@ -310,7 +310,7 @@
           onblur="document.getElementById('glow-ring').classList.remove('focused')"
         />
       </div>
-      <button class="submit-btn" id="main-submit-btn" onclick="submitCode()">המשך לשלב הבא «</button>
+      <button class="submit-btn" onclick="submitCode()">המשך לשלב הבא «</button>
     </div>
     <div class="error-msg" id="error-msg">✗ קוד שגוי — נסו שוב!</div>
   </div>
@@ -605,7 +605,7 @@ function initA11y() {
 }
 
 function toggleA11y(className, isChecked) {
-  safeVibrate(10);
+  if (navigator.vibrate) navigator.vibrate(10);
   if(isChecked) {
     document.body.classList.add(className);
     localStorage.setItem(className, 'true');
@@ -750,8 +750,8 @@ function loadPage(id) {
 
 // ===== ניהול דרכון (שחזור) =====
 function openMapModal() {
-  safeVibrate(15);
-  playPassportSound(); // הוחלף לסאונד הדרכון (מכה + רשרוש נייר)
+  if (navigator.vibrate) navigator.vibrate(15);
+  playHintOpen();
   
   const mapBtns = document.querySelectorAll('.map-btn');
   mapBtns.forEach(btn => {
@@ -770,7 +770,7 @@ function openMapModal() {
   document.getElementById('map-overlay').classList.add('show');
 }
 function closeMapModal() {
-  safeVibrate(10);
+  if (navigator.vibrate) navigator.vibrate(10);
   playHintClose();
   document.getElementById('map-overlay').classList.remove('show');
 }
@@ -795,122 +795,180 @@ function resetGame() {
 }
 
 // ===== חיוויי סאונד לממשק =====
+function playHintOpen() { try { const c=getAC(), o=c.createOscillator(), g=c.createGain(); o.type='sine'; o.frequency.setValueAtTime(880, c.currentTime); o.connect(g); g.connect(c.destination); g.gain.setValueAtTime(0, c.currentTime); g.gain.linearRampToValueAtTime(0.1, c.currentTime+0.05); g.gain.exponentialRampToValueAtTime(0.001, c.currentTime+1); o.start(); o.stop(c.currentTime+1.1); } catch(e){} }
+function playHintClick() { try { const c=getAC(), o=c.createOscillator(), g=c.createGain(); o.type='square'; o.frequency.setValueAtTime(300, c.currentTime); o.frequency.exponentialRampToValueAtTime(50, c.currentTime+0.05); o.connect(g); g.connect(c.destination); g.gain.setValueAtTime(0, c.currentTime); g.gain.linearRampToValueAtTime(0.1, c.currentTime+0.01); g.gain.exponentialRampToValueAtTime(0.001, c.currentTime+0.05); o.start(); o.stop(c.currentTime+0.06); } catch(e){} }
+function playHintReveal() { try { const c=getAC(); const now=c.currentTime; [1046.5, 1318.51, 1567.98].forEach((f, i) => { const o=c.createOscillator(), g=c.createGain(); o.type='triangle'; o.frequency.value=f; o.connect(g); g.connect(c.destination); g.gain.setValueAtTime(0, now); g.gain.setValueAtTime(0, now + i*0.05); g.gain.linearRampToValueAtTime(0.1, now + i*0.05 + 0.05); g.gain.exponentialRampToValueAtTime(0.001, now + 1.5); o.start(now); o.stop(now + 1.6); }); } catch(e){} }
+function playHintClose() { try { const c=getAC(), o=c.createOscillator(), g=c.createGain(); o.type='sine'; o.frequency.setValueAtTime(400, c.currentTime); o.frequency.exponentialRampToValueAtTime(100, c.currentTime+0.15); o.connect(g); g.connect(c.destination); g.gain.setValueAtTime(0, c.currentTime); g.gain.linearRampToValueAtTime(0.1, c.currentTime+0.02); g.gain.exponentialRampToValueAtTime(0.001, c.currentTime+0.2); o.start(); o.stop(c.currentTime+0.25); } catch(e){} }
+function playTypeSound() { if (navigator.vibrate) navigator.vibrate(5); try { const ctx=getAC(); const now=ctx.currentTime; const osc=ctx.createOscillator(); const gain=ctx.createGain(); osc.type='sine'; osc.frequency.setValueAtTime(600, now); osc.frequency.exponentialRampToValueAtTime(300, now+0.05); osc.connect(gain); gain.connect(ctx.destination); gain.gain.setValueAtTime(0, now); gain.gain.linearRampToValueAtTime(0.08, now+0.01); gain.gain.exponentialRampToValueAtTime(0.001, now+0.05); osc.start(now); osc.stop(now+0.06); } catch(e){} }
 
-// צליל פתיחת הדרכון (מכה עמומה + רשרוש) - תיקון בטוח 100%
-function playPassportSound() {
-  if (document.body.classList.contains('a11y-no-animations')) return;
+// סאונד מטוס חולף (Swoosh) במעבר עמוד
+function playSwooshSound() {
   try {
     const ctx = getAC();
-    if(ctx.state === 'suspended') ctx.resume();
     const now = ctx.currentTime;
     
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(150, now);
-    osc.frequency.exponentialRampToValueAtTime(40, now + 0.1);
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-    gain.gain.setValueAtTime(0, now);
-    gain.gain.linearRampToValueAtTime(0.5, now + 0.01);
-    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
-    osc.start(now);
-    osc.stop(now + 0.2);
-    
-    // שימוש ב-Math.floor כדי למנוע קריסה!
-    const bufferSize = Math.floor(ctx.sampleRate * 0.15);
+    // רעש רוח מתגבר ויורד
+    const bufferSize = ctx.sampleRate * 1.0;
     const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
     const data = buffer.getChannelData(0);
     for (let i = 0; i < bufferSize; i++) { data[i] = Math.random() * 2 - 1; }
+    
     const noise = ctx.createBufferSource();
     noise.buffer = buffer;
-    const filter = ctx.createBiquadFilter();
-    filter.type = 'highpass';
-    filter.frequency.value = 1000;
-    const noiseGain = ctx.createGain();
-    noiseGain.gain.setValueAtTime(0.2, now);
-    noiseGain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
-    noise.connect(filter);
-    filter.connect(noiseGain);
-    noiseGain.connect(ctx.destination);
-    noise.start(now);
-    noise.stop(now + 0.2);
-  } catch(e) {}
-}
-
-// צליל מעטפה נפתחת (רשרוש קל) - תיקון בטוח 100%
-function playHintOpen() { 
-  if (document.body.classList.contains('a11y-no-animations')) return;
-  try {
-    const ctx = getAC();
-    if(ctx.state === 'suspended') ctx.resume();
-    const now = ctx.currentTime;
-    // שימוש ב-Math.floor למניעת קריסה בטלפון
-    const bufferSize = Math.floor(ctx.sampleRate * 0.3);
-    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-    const data = buffer.getChannelData(0);
-    for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
-    const noise = ctx.createBufferSource(); noise.buffer = buffer;
-    const filter = ctx.createBiquadFilter(); filter.type = 'highpass'; filter.frequency.value = 2000;
-    const gain = ctx.createGain(); gain.gain.setValueAtTime(0, now); gain.gain.linearRampToValueAtTime(0.3, now + 0.05); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
-    noise.connect(filter); filter.connect(gain); gain.connect(ctx.destination);
-    noise.start(now); noise.stop(now + 0.3);
-  } catch(e){}
-}
-
-// צליל קריעת מעטפה (חשיפת רמז) - תיקון בטוח 100%
-function playHintReveal() { 
-  if (document.body.classList.contains('a11y-no-animations')) return;
-  try {
-    const ctx = getAC();
-    if(ctx.state === 'suspended') ctx.resume();
-    const now = ctx.currentTime;
-    // שימוש ב-Math.floor למניעת קריסה בטלפון
-    const bufferSize = Math.floor(ctx.sampleRate * 0.5);
-    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-    const data = buffer.getChannelData(0);
-    for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
-    const noise = ctx.createBufferSource(); noise.buffer = buffer;
-    const filter = ctx.createBiquadFilter(); filter.type = 'bandpass'; filter.frequency.setValueAtTime(1000, now); filter.frequency.linearRampToValueAtTime(3000, now + 0.3);
-    const gain = ctx.createGain(); gain.gain.setValueAtTime(0, now); gain.gain.linearRampToValueAtTime(0.6, now + 0.05); gain.gain.linearRampToValueAtTime(0.2, now + 0.15); gain.gain.linearRampToValueAtTime(0.5, now + 0.2); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.45);
-    noise.connect(filter); filter.connect(gain); gain.connect(ctx.destination);
-    noise.start(now); noise.stop(now + 0.5);
     
-    const osc = ctx.createOscillator(); const oscGain = ctx.createGain();
-    osc.type = 'sine'; osc.frequency.value = 1200;
-    osc.connect(oscGain); oscGain.connect(ctx.destination);
-    oscGain.gain.setValueAtTime(0, now); oscGain.gain.setValueAtTime(0, now + 0.3); oscGain.gain.linearRampToValueAtTime(0.1, now + 0.35); oscGain.gain.exponentialRampToValueAtTime(0.001, now + 1.0);
-    osc.start(now); osc.stop(now + 1.2);
+    const bandpass = ctx.createBiquadFilter();
+    bandpass.type = 'bandpass';
+    bandpass.frequency.setValueAtTime(2000, now);
+    bandpass.frequency.exponentialRampToValueAtTime(300, now + 0.8);
+    
+    const gain = ctx.createGain();
+    gain.gain.setValueAtTime(0, now);
+    gain.gain.linearRampToValueAtTime(0.4, now + 0.3);
+    gain.gain.linearRampToValueAtTime(0.001, now + 0.9);
+    
+    noise.connect(bandpass);
+    bandpass.connect(gain);
+    gain.connect(ctx.destination);
+    
+    noise.start(now);
+    noise.stop(now + 1.0);
   } catch(e){}
 }
 
-// צליל סגירת מעטפה - תיקון בטוח 100%
-function playHintClose() { 
-  try { 
-    const ctx=getAC(); if(ctx.state === 'suspended') ctx.resume(); const now=ctx.currentTime; 
-    // שימוש ב-Math.floor למניעת קריסה בטלפון
-    const bufferSize = Math.floor(ctx.sampleRate * 0.2);
-    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-    const data = buffer.getChannelData(0);
-    for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
-    const noise = ctx.createBufferSource(); noise.buffer = buffer;
-    const filter = ctx.createBiquadFilter(); filter.type = 'lowpass'; filter.frequency.value = 1500;
-    const gain = ctx.createGain(); gain.gain.setValueAtTime(0, now); gain.gain.linearRampToValueAtTime(0.2, now+0.05); gain.gain.exponentialRampToValueAtTime(0.01, now+0.15);
-    noise.connect(filter); filter.connect(gain); gain.connect(ctx.destination);
-    noise.start(now); noise.stop(now+0.2);
-  } catch(e){} 
+// ===== מערכת רמזים דינמית =====
+function openHintsModal() {
+  if (navigator.vibrate) navigator.vibrate(15);
+  playHintOpen();
+  const page = PAGES[currentPage];
+  if (!page || (!page.hints && !page.solution)) return;
+  
+  const container = document.getElementById('hints-container');
+  container.innerHTML = '';
+  
+  if (page.hints) {
+    page.hints.forEach((hintText, index) => {
+      container.appendChild(createHintElement(`רמז ${index + 1}`, hintText, false));
+    });
+  }
+  if (page.solution) {
+    container.appendChild(createHintElement(`פיתרון`, page.solution, true));
+  }
+  
+  document.getElementById('hints-overlay').classList.add('show');
 }
 
-function playHintClick() { try { const c=getAC(); if(c.state==='suspended') c.resume(); const o=c.createOscillator(), g=c.createGain(); o.type='square'; o.frequency.setValueAtTime(300, c.currentTime); o.frequency.exponentialRampToValueAtTime(50, c.currentTime+0.05); o.connect(g); g.connect(c.destination); g.gain.setValueAtTime(0, c.currentTime); g.gain.linearRampToValueAtTime(0.1, c.currentTime+0.01); g.gain.exponentialRampToValueAtTime(0.001, c.currentTime+0.05); o.start(); o.stop(c.currentTime+0.06); } catch(e){} }
-function playTypeSound() { safeVibrate(5); try { const ctx=getAC(); if(ctx.state==='suspended') ctx.resume(); const now=ctx.currentTime; const osc=ctx.createOscillator(); const gain=ctx.createGain(); osc.type='sine'; osc.frequency.setValueAtTime(600, now); osc.frequency.exponentialRampToValueAtTime(300, now+0.05); osc.connect(gain); gain.connect(ctx.destination); gain.gain.setValueAtTime(0, now); gain.gain.linearRampToValueAtTime(0.08, now+0.01); gain.gain.exponentialRampToValueAtTime(0.001, now+0.05); osc.start(now); osc.stop(now+0.06); } catch(e){} }
-function playClick() { safeVibrate(15); try { const c=getAC(); if(c.state==='suspended')c.resume(); const o=c.createOscillator(),g=c.createGain(); o.connect(g); g.connect(c.destination); o.frequency.value=700; g.gain.setValueAtTime(0.1,c.currentTime); g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+0.07); o.start(); o.stop(c.currentTime+0.07); } catch(e) {} }
-function playError() { safeVibrate([50, 50, 50]); try { const c=getAC(); if(c.state==='suspended')c.resume(); [220,180].forEach((f,i)=>{ const o=c.createOscillator(),g=c.createGain(); o.type='sawtooth'; o.connect(g); g.connect(c.destination); o.frequency.value=f; g.gain.setValueAtTime(0.18,c.currentTime+i*0.13); g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+i*0.13+0.15); o.start(c.currentTime+i*0.13); o.stop(c.currentTime+i*0.13+0.16); }); } catch(e) {} }
+function closeHintsModal() {
+  if (navigator.vibrate) navigator.vibrate(10);
+  playHintClose();
+  document.getElementById('hints-overlay').classList.remove('show');
+}
+
+function openA11yModal() {
+  if (navigator.vibrate) navigator.vibrate(15);
+  playHintOpen();
+  document.getElementById('a11y-overlay').classList.add('show');
+}
+
+function closeA11yModal() {
+  if (navigator.vibrate) navigator.vibrate(10);
+  playHintClose();
+  document.getElementById('a11y-overlay').classList.remove('show');
+}
+
+function createHintElement(title, text, isSolution) {
+  const div = document.createElement('div');
+  div.className = 'hint-item';
+  const btnClass = isSolution ? 'hint-btn solution-btn' : 'hint-btn';
+  const icon = isSolution ? '🗝️' : '🔒';
+  const confirmClass = isSolution ? 'hint-confirm solution-confirm' : 'hint-confirm';
+  const confirmText = isSolution ? 'זהירות! לחיצה כאן תגלה לכם את התשובה המלאה. בטוחים?' : 'בטוחים שאתם רוצים עזרה?';
+  const textClass = isSolution ? 'hint-text solution-text' : 'hint-text';
+
+  div.innerHTML = `
+    <button class="${btnClass}" onclick="showHintConfirm(this)">${icon} ${title}</button>
+    <div class="${confirmClass}">
+      <p>${confirmText}</p>
+      <div class="hint-confirm-btns">
+        <button class="btn-yes" onclick="revealHint(this)">כן, גלו לי</button>
+        <button class="btn-no" onclick="cancelHint(this)">לא, אמשיך לנסות</button>
+      </div>
+    </div>
+    <div class="${textClass}">${text}</div>
+  `;
+  return div;
+}
+
+function showHintConfirm(btn) {
+  if (navigator.vibrate) navigator.vibrate(15);
+  playHintClick();
+
+  const allItems = document.querySelectorAll('#hints-container .hint-item');
+  allItems.forEach(item => {
+    const tBtn = item.querySelector('.hint-btn');
+    const cDiv = item.querySelector('.hint-confirm');
+    const xDiv = item.querySelector('.hint-text');
+    if (tBtn !== btn) {
+      tBtn.style.display = 'block';
+      cDiv.style.display = 'none';
+      xDiv.style.display = 'none';
+    }
+  });
+
+  btn.style.display = 'none';
+  btn.nextElementSibling.style.display = 'block';
+}
+
+function cancelHint(btn) {
+  if (navigator.vibrate) navigator.vibrate(10);
+  playHintClose();
+  const confirmDiv = btn.closest('.hint-confirm');
+  confirmDiv.style.display = 'none';
+  confirmDiv.previousElementSibling.style.display = 'block';
+}
+
+function revealHint(btn) {
+  if (navigator.vibrate) navigator.vibrate(25);
+  playHintReveal();
+  
+  // הוספת ספירת רמז
+  hintsUsed++;
+  localStorage.setItem('puzzleHintsUsed', hintsUsed);
+
+  const allItems = document.querySelectorAll('#hints-container .hint-item');
+  allItems.forEach(item => {
+    const tBtn = item.querySelector('.hint-btn');
+    const cDiv = item.querySelector('.hint-confirm');
+    const xDiv = item.querySelector('.hint-text');
+    if (cDiv !== btn.closest('.hint-confirm')) {
+      tBtn.style.display = 'block';
+      cDiv.style.display = 'none';
+      xDiv.style.display = 'none';
+    }
+  });
+
+  const confirmDiv = btn.closest('.hint-confirm');
+  confirmDiv.style.display = 'none';
+  confirmDiv.nextElementSibling.style.display = 'block';
+}
+
+// ===== צלילי מערכת וחותמת משופרת (אקורד טלוויזיוני "כוכב נולד") =====
+const AudioCtx = window.AudioContext || window.webkitAudioContext;
+let _ac = null;
+function getAC() { if (!_ac) _ac = new AudioCtx(); return _ac; }
+
+function playClick() {
+  if (navigator.vibrate) navigator.vibrate(15);
+  try { const c=getAC(),o=c.createOscillator(),g=c.createGain(); o.connect(g); g.connect(c.destination); o.frequency.value=700; g.gain.setValueAtTime(0.1,c.currentTime); g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+0.07); o.start(); o.stop(c.currentTime+0.07); } catch(e) {}
+}
+function playError() {
+  if (navigator.vibrate) navigator.vibrate([50, 50, 50]);
+  try { const c=getAC(); [220,180].forEach((f,i)=>{ const o=c.createOscillator(),g=c.createGain(); o.type='sawtooth'; o.connect(g); g.connect(c.destination); o.frequency.value=f; g.gain.setValueAtTime(0.18,c.currentTime+i*0.13); g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+i*0.13+0.15); o.start(c.currentTime+i*0.13); o.stop(c.currentTime+i*0.13+0.16); }); } catch(e) {}
+}
 
 function playStampSound() {
-  safeVibrate([100, 200, 300]); 
+  if (navigator.vibrate) navigator.vibrate([100, 200, 300]); 
   try { 
     const ctx = getAC();
-    if(ctx.state==='suspended') ctx.resume();
     const now = ctx.currentTime;
     
     const freqs = [261.63, 329.63, 392.00, 493.88, 587.33]; 
@@ -952,7 +1010,7 @@ function playStampSound() {
 
 function playVictoryEffects() {
   if (document.body.classList.contains('a11y-no-animations')) return;
-  safeVibrate([100, 50, 100, 50, 200]);
+  if (navigator.vibrate) navigator.vibrate([100, 50, 100, 50, 200]);
   for(let i=0; i<80; i++){
       let conf = document.createElement('div');
       conf.className = 'confetti';
@@ -964,7 +1022,6 @@ function playVictoryEffects() {
   }
   try {
     const c = getAC();
-    if(c.state==='suspended') c.resume();
     [523.25, 659.25, 783.99, 1046.50, 1318.51].forEach((f, i) => {
       const o = c.createOscillator(), g = c.createGain();
       o.connect(g); g.connect(c.destination);
@@ -976,131 +1033,13 @@ function playVictoryEffects() {
   } catch(e){}
 }
 
-// ===== מערכת רמזים דינמית =====
-function openHintsModal() {
-  safeVibrate(15);
-  playHintOpen();
-  const page = PAGES[currentPage];
-  if (!page || (!page.hints && !page.solution)) return;
-  
-  const container = document.getElementById('hints-container');
-  container.innerHTML = '';
-  
-  if (page.hints) {
-    page.hints.forEach((hintText, index) => {
-      container.appendChild(createHintElement(`רמז ${index + 1}`, hintText, false));
-    });
-  }
-  if (page.solution) {
-    container.appendChild(createHintElement(`פיתרון`, page.solution, true));
-  }
-  
-  document.getElementById('hints-overlay').classList.add('show');
-}
-
-function closeHintsModal() {
-  safeVibrate(10);
-  playHintClose();
-  document.getElementById('hints-overlay').classList.remove('show');
-}
-
-function openA11yModal() {
-  safeVibrate(15);
-  playHintOpen();
-  document.getElementById('a11y-overlay').classList.add('show');
-}
-
-function closeA11yModal() {
-  safeVibrate(10);
-  playHintClose();
-  document.getElementById('a11y-overlay').classList.remove('show');
-}
-
-function createHintElement(title, text, isSolution) {
-  const div = document.createElement('div');
-  div.className = 'hint-item';
-  const btnClass = isSolution ? 'hint-btn solution-btn' : 'hint-btn';
-  const icon = isSolution ? '🗝️' : '🔒';
-  const confirmClass = isSolution ? 'hint-confirm solution-confirm' : 'hint-confirm';
-  const confirmText = isSolution ? 'זהירות! לחיצה כאן תגלה לכם את התשובה המלאה. בטוחים?' : 'בטוחים שאתם רוצים עזרה?';
-  const textClass = isSolution ? 'hint-text solution-text' : 'hint-text';
-
-  div.innerHTML = `
-    <button class="${btnClass}" onclick="showHintConfirm(this)">${icon} ${title}</button>
-    <div class="${confirmClass}">
-      <p>${confirmText}</p>
-      <div class="hint-confirm-btns">
-        <button class="btn-yes" onclick="revealHint(this)">כן, גלו לי</button>
-        <button class="btn-no" onclick="cancelHint(this)">לא, אמשיך לנסות</button>
-      </div>
-    </div>
-    <div class="${textClass}">${text}</div>
-  `;
-  return div;
-}
-
-function showHintConfirm(btn) {
-  safeVibrate(15);
-  playHintClick();
-
-  const allItems = document.querySelectorAll('#hints-container .hint-item');
-  allItems.forEach(item => {
-    const tBtn = item.querySelector('.hint-btn');
-    const cDiv = item.querySelector('.hint-confirm');
-    const xDiv = item.querySelector('.hint-text');
-    if (tBtn !== btn) {
-      tBtn.style.display = 'block';
-      cDiv.style.display = 'none';
-      xDiv.style.display = 'none';
-    }
-  });
-
-  btn.style.display = 'none';
-  btn.nextElementSibling.style.display = 'block';
-}
-
-function cancelHint(btn) {
-  safeVibrate(10);
-  playHintClose();
-  const confirmDiv = btn.closest('.hint-confirm');
-  confirmDiv.style.display = 'none';
-  confirmDiv.previousElementSibling.style.display = 'block';
-}
-
-function revealHint(btn) {
-  safeVibrate(25);
-  playHintReveal();
-  
-  // הוספת ספירת רמז
-  hintsUsed++;
-  localStorage.setItem('puzzleHintsUsed', hintsUsed);
-
-  const allItems = document.querySelectorAll('#hints-container .hint-item');
-  allItems.forEach(item => {
-    const tBtn = item.querySelector('.hint-btn');
-    const cDiv = item.querySelector('.hint-confirm');
-    const xDiv = item.querySelector('.hint-text');
-    if (cDiv !== btn.closest('.hint-confirm')) {
-      tBtn.style.display = 'block';
-      cDiv.style.display = 'none';
-      xDiv.style.display = 'none';
-    }
-  });
-
-  const confirmDiv = btn.closest('.hint-confirm');
-  confirmDiv.style.display = 'none';
-  confirmDiv.nextElementSibling.style.display = 'block';
-}
-
-// ===== אימות קוד - תיקון בטוח לכפתור =====
 function submitCode() {
   playClick();
   const page = PAGES[currentPage];
   const val  = document.getElementById('code-input').value.trim().toUpperCase();
-  // זיהוי מדויק של כפתור השליחה למניעת קריסה בטלפון
-  const btn = document.querySelector('#main-submit-btn'); 
+  const btn = document.querySelector('.submit-btn');
   
-  // אפקט ההשהייה
+  // אפקט ההשהייה (Suspense)
   btn.innerHTML = 'מאמת נתונים... ⏳';
   btn.classList.add('verifying-state');
   
@@ -1120,6 +1059,7 @@ function submitCode() {
         setTimeout(() => { 
           box.classList.remove('stamp-approved');
           pendingNext = page.next;
+          playSwooshSound(); // סאונד המטוס טס במעבר עמוד!
           loadPage(pendingNext); 
         }, 2000); 
       } else {
@@ -1159,7 +1099,7 @@ let notesPlayed = [false, false, false, false];
 const RIDDLE_NOTES = [123.47, 130.81, 174.61, 146.83]; 
 
 function toggleRiddle() {
-  safeVibrate(15);
+  if (navigator.vibrate) navigator.vibrate(15);
   const btn = document.getElementById('riddle-play-btn');
   const fill = document.getElementById('riddle-fill');
   const timeDisplay = document.getElementById('riddle-time');
@@ -1328,10 +1268,9 @@ window.addEventListener('touchend', () => { isDraggingBar = false; });
 })();
 
 function playPianoNote(freq, keyEl, isBlack, fromRiddle = false) {
-  safeVibrate(15);
+  if (!fromRiddle && navigator.vibrate) navigator.vibrate(15);
   try {
     const ctx = getAC();
-    if(ctx.state === 'suspended') ctx.resume();
     const now = ctx.currentTime;
     const dur = 2.5; 
 
@@ -1410,20 +1349,6 @@ window.onpopstate = e => {
 };
 
 // אתחול הגדרות הנגישות וטעינת העמוד
-// מנגנון הגנה קטן לשחרור הסאונד בלחיצה הראשונה (למובייל)
-function unlockAudio() {
-  const ctx = getAC();
-  if(ctx.state === 'suspended') ctx.resume();
-  document.body.removeEventListener('click', unlockAudio);
-  document.body.removeEventListener('touchstart', unlockAudio);
-}
-document.body.addEventListener('click', unlockAudio);
-document.body.addEventListener('touchstart', unlockAudio);
-
-function safeVibrate(val) {
-  try { if (navigator.vibrate) navigator.vibrate(val); } catch(e){}
-}
-
 initA11y();
 loadPage(getPageId());
 </script>
