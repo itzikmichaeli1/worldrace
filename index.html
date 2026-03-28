@@ -61,6 +61,26 @@
 
     #app { position: relative; z-index: 1; max-width: 740px; margin: 0 auto; padding: 54px 20px 100px; }
 
+    /* ===== אפקט מתח: החשכה וטשטוש של כל מה שאינו תיבת הקוד ===== */
+    .page-header, .youtube-wrap, .audio-riddle, #piano-section, .crossroads-wrap {
+      transition: filter 0.5s ease, opacity 0.5s ease;
+    }
+    .suspense-mode .page-header, 
+    .suspense-mode .youtube-wrap, 
+    .suspense-mode .audio-riddle, 
+    .suspense-mode #piano-section, 
+    .suspense-mode .crossroads-wrap {
+      opacity: 0.2; 
+      filter: blur(3px) grayscale(60%); 
+      pointer-events: none;
+    }
+    .suspense-mode #code-box {
+      transform: scale(1.03); 
+      box-shadow: 0 15px 40px rgba(255, 150, 0, 0.4); 
+      border-color: rgba(255,160,0,0.9); 
+      z-index: 10;
+    }
+
     /* אנימציית Swipe במקום Fade */
     .swipe-transition { animation: swipePage 0.6s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
     @keyframes swipePage { 0% { opacity: 0; transform: translateX(-40px); } 100% { opacity: 1; transform: translateX(0); } }
@@ -107,7 +127,7 @@
     .youtube-wrap iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: none; }
 
     /* תיבת קוד - עיצוב ספח כרטיס טיסה (Boarding Pass) */
-    .code-box { background: rgba(20,8,0,0.8); border: 2px dashed rgba(255,140,0,0.4); border-radius: 12px; margin-top: 10px; position: relative; overflow: hidden; padding: 32px 24px 28px; text-align: center; }
+    .code-box { background: rgba(20,8,0,0.8); border: 2px dashed rgba(255,140,0,0.4); border-radius: 12px; margin-top: 10px; position: relative; padding: 32px 24px 28px; text-align: center; transition: all 0.5s ease; }
     .code-box::before { content: ''; position: absolute; top: 0; left: 15%; right: 15%; height: 2px; background: linear-gradient(90deg, transparent, rgba(255,160,0,0.8), rgba(0,210,190,0.5), transparent); }
     .code-box::after {
       content: 'APPROVED'; position: absolute; top: 50%; left: 50%; z-index: 10; 
@@ -748,37 +768,27 @@ function loadPage(id) {
   }
 }
 
-// ===== ניהול דרכון (שחזור) עם מניעת ספוילרים כירורגית =====
+// ===== ניהול דרכון (שחזור) =====
 function openMapModal() {
   if (navigator.vibrate) navigator.vibrate(15);
   playHintOpen();
   
   const mapBtns = document.querySelectorAll('.map-btn');
-  let stepCounter = 1;
-  
   mapBtns.forEach(btn => {
     const targetPageId = btn.getAttribute('data-page');
     const targetStep = PAGES[targetPageId].step;
     
-    if (!btn.hasAttribute('data-original-text')) {
-      btn.setAttribute('data-original-text', btn.innerHTML);
-    }
-    
     if (targetStep > maxStep) {
       btn.classList.add('locked');
       btn.onclick = null;
-      btn.innerHTML = 'יעד מסווג (' + stepCounter + ')';
     } else {
       btn.classList.remove('locked');
       btn.onclick = () => jumpTo(targetPageId);
-      btn.innerHTML = btn.getAttribute('data-original-text');
     }
-    stepCounter++;
   });
 
   document.getElementById('map-overlay').classList.add('show');
 }
-
 function closeMapModal() {
   if (navigator.vibrate) navigator.vibrate(10);
   playHintClose();
@@ -1009,7 +1019,12 @@ function playVictoryEffects() {
   } catch(e){}
 }
 
+let isVerifying = false; // משתנה גלובלי למניעת לחיצות כפולות
+
 function submitCode() {
+  if (window.isVerifying) return; // מונע ביצוע אם כבר נמצא בתהליך אימות
+  window.isVerifying = true; // נועל את הכפתור
+
   playClick();
   const page = PAGES[currentPage];
   const val  = document.getElementById('code-input').value.trim().toUpperCase();
@@ -1018,10 +1033,12 @@ function submitCode() {
   // אפקט ההשהייה (Suspense)
   btn.innerHTML = 'מאמת נתונים... ⏳';
   btn.classList.add('verifying-state');
+  document.getElementById('app').classList.add('suspense-mode'); // טשטוש הרקע
   
   setTimeout(() => {
     btn.innerHTML = 'המשך לשלב הבא «';
     btn.classList.remove('verifying-state');
+    document.getElementById('app').classList.remove('suspense-mode'); // הסרת הטשטוש
     
     if (val === page.code.toUpperCase()) {
       playStampSound();
@@ -1035,10 +1052,12 @@ function submitCode() {
         setTimeout(() => { 
           box.classList.remove('stamp-approved');
           pendingNext = page.next;
+          window.isVerifying = false; // משחרר רגע לפני המעבר
           loadPage(pendingNext); 
         }, 2000); 
       } else {
         pendingNext = page.next;
+        window.isVerifying = false; // משחרר רגע לפני המעבר
         loadPage(pendingNext);
       }
     } else {
@@ -1046,9 +1065,13 @@ function submitCode() {
       const inp = document.getElementById('code-input');
       if(!document.body.classList.contains('a11y-no-animations')) {
         inp.classList.add('error', 'shaking');
-        setTimeout(() => inp.classList.remove('shaking'), 600);
+        setTimeout(() => {
+            inp.classList.remove('shaking');
+            window.isVerifying = false; // משחרר בסיום הרעידה
+        }, 600);
       } else {
         inp.classList.add('error');
+        window.isVerifying = false; // משחרר מיד
       }
       document.getElementById('error-msg').style.display = 'block';
     }
