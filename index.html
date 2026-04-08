@@ -22,13 +22,6 @@
       touch-action: manipulation;
     }
 
-    /* הילה חמימה שמתגברת ככל שמתקדמים במשחק */
-    #ambient-glow {
-      position: fixed; inset: 0; pointer-events: none; z-index: 0; 
-      background: radial-gradient(circle at 50% 120%, rgba(255, 140, 0, 0) 0%, transparent 70%);
-      transition: background 1.5s ease;
-    }
-
     /* טקסטורת מפה טופוגרפית */
     body::before {
       content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
@@ -43,7 +36,7 @@
 
     /* ===== הגדרות נגישות ===== */
     body.a11y-high-contrast { background-image: none !important; background-color: #000000 !important; }
-    body.a11y-high-contrast::before, body.a11y-high-contrast #ambient-glow { display: none !important; } 
+    body.a11y-high-contrast::before { display: none !important; } 
     body.a11y-high-contrast * { box-shadow: none !important; text-shadow: none !important; border-color: #ffffff !important; }
     body.a11y-large-text { font-size: 120% !important; }
     body.a11y-large-text .page-title { font-size: clamp(26px, 6vw, 42px) !important; }
@@ -67,14 +60,6 @@
     }
 
     #app { position: relative; z-index: 1; max-width: 740px; margin: 0 auto; padding: 54px 20px 100px; }
-
-    /* אפקט מתח בזמן אימות קוד */
-    .suspense-mode .page-header, .suspense-mode .youtube-wrap, .suspense-mode .audio-riddle, .suspense-mode #piano-section, .suspense-mode .crossroads-wrap {
-      opacity: 0.3; filter: grayscale(50%) blur(1px); transition: all 0.5s ease; pointer-events: none;
-    }
-    .suspense-mode #code-box {
-      transform: scale(1.03); box-shadow: 0 10px 40px rgba(255, 150, 0, 0.4); border-color: rgba(255,150,0,0.8); transition: all 0.5s ease; z-index: 10;
-    }
 
     /* אנימציית Swipe במקום Fade */
     .swipe-transition { animation: swipePage 0.6s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
@@ -107,7 +92,7 @@
     /* ===== כותרת וטקסט ===== */
     .page-header {
       text-align: center; margin-bottom: 36px; padding: 28px 24px 24px; background: rgba(20,10,0,0.65); border-radius: 16px;
-      border: 1px solid rgba(255,140,0,0.3); position: relative; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5); transition: all 0.5s ease;
+      border: 1px solid rgba(255,140,0,0.3); position: relative; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     }
     .page-header::before { content: ''; position: absolute; top: 0; left: 20%; right: 20%; height: 2px; background: linear-gradient(90deg, transparent, rgba(255,160,0,0.9), rgba(0,210,190,0.6), transparent); }
     .site-label { font-size: 11px; letter-spacing: 5px; color: rgba(0,200,190,0.65); margin-bottom: 14px; }
@@ -115,14 +100,14 @@
     .title-divider { width: 70px; height: 3px; background: linear-gradient(90deg, rgba(255,140,0,0.9), rgba(0,210,190,0.7)); margin: 16px auto 18px; border-radius: 2px; }
     
     /* אנימציית ההחלקה העדינה לטקסט */
-    .page-desc { color: rgba(255,230,180,0.85); font-size: 15.5px; line-height: 2.1; white-space: pre-wrap; max-width: 560px; margin: 0 auto; min-height: 40px; animation: slideUpFade 0.8s ease-out forwards; }
+    .page-desc { color: rgba(255,230,180,0.85); font-size: 15.5px; line-height: 2.1; white-space: pre-wrap; max-width: 560px; margin: 0 auto; min-height: 40px; }
     @keyframes slideUpFade { 0% { opacity: 0; transform: translateY(12px); } 100% { opacity: 1; transform: translateY(0); } }
 
-    .youtube-wrap { position: relative; padding-bottom: 56.25%; height: 0; border-radius: 12px; overflow: hidden; border: 2px solid rgba(255,140,0,0.45); margin-bottom: 28px; box-shadow: 0 10px 25px rgba(0,0,0,0.6); transition: all 0.5s ease;}
+    .youtube-wrap { position: relative; padding-bottom: 56.25%; height: 0; border-radius: 12px; overflow: hidden; border: 2px solid rgba(255,140,0,0.45); margin-bottom: 28px; box-shadow: 0 10px 25px rgba(0,0,0,0.6); }
     .youtube-wrap iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: none; }
 
     /* תיבת קוד - עיצוב ספח כרטיס טיסה (Boarding Pass) */
-    .code-box { background: rgba(20,8,0,0.8); border: 2px dashed rgba(255,140,0,0.4); border-radius: 12px; margin-top: 10px; position: relative; overflow: hidden; padding: 32px 24px 28px; text-align: center; transition: all 0.5s ease;}
+    .code-box { background: rgba(20,8,0,0.8); border: 2px dashed rgba(255,140,0,0.4); border-radius: 12px; margin-top: 10px; position: relative; overflow: hidden; padding: 32px 24px 28px; text-align: center; }
     .code-box::before { content: ''; position: absolute; top: 0; left: 15%; right: 15%; height: 2px; background: linear-gradient(90deg, transparent, rgba(255,160,0,0.8), rgba(0,210,190,0.5), transparent); }
     .code-box::after {
       content: 'APPROVED'; position: absolute; top: 50%; left: 50%; z-index: 10; 
@@ -170,7 +155,7 @@
 
     .error-msg { display: none; margin-top: 16px; background: rgba(180,20,0,0.25); border: 1px solid rgba(255,80,50,0.45); border-radius: 8px; padding: 10px 20px; color: rgba(255,160,140,0.95); font-size: 14px; }
 
-    .crossroads-wrap { margin-top: 10px; text-align: center; padding: 28px 16px 32px; background: rgba(20,8,0,0.72); border: 1.5px dashed rgba(255,120,0,0.4); border-radius: 14px; position: relative; overflow: hidden; transition: all 0.5s ease;}
+    .crossroads-wrap { margin-top: 10px; text-align: center; padding: 28px 16px 32px; background: rgba(20,8,0,0.72); border: 1.5px dashed rgba(255,120,0,0.4); border-radius: 14px; position: relative; overflow: hidden; }
     .crossroads-title { text-align: center; font-size: 17px; color: rgba(255,220,150,0.9); margin-bottom: 24px; font-weight: 700; }
     .choice-btns { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; }
     .choice-btn { flex: 1; min-width: 260px; max-width: 340px; border-radius: 12px; border: 2px solid #ff9500; overflow: hidden; cursor: pointer; transition: all 0.15s; padding: 0; box-shadow: 0 6px 0 #a84000, 0 10px 20px rgba(0,0,0,0.4); }
@@ -194,7 +179,7 @@
     .confetti { position: fixed; width: 10px; height: 10px; top: -20px; z-index: 9999; animation: confettiFall 4s linear forwards; pointer-events: none; }
     @keyframes confettiFall { 0% { top: -10px; transform: rotate(0deg) scale(1); } 100% { top: 100vh; transform: rotate(720deg) scale(0.5); } }
 
-    .audio-riddle { background: linear-gradient(145deg, rgba(40,80,140,0.4), rgba(15,35,70,0.6)); border: 1px solid rgba(80,150,220,0.5); border-radius: 12px; padding: 18px 20px; margin-bottom: 24px; display: flex; align-items: center; gap: 16px; box-shadow: 0 8px 20px rgba(0,0,0,0.5), inset 0 2px 5px rgba(255,255,255,0.1); position: relative; z-index: 2; transition: all 0.5s ease;}
+    .audio-riddle { background: linear-gradient(145deg, rgba(40,80,140,0.4), rgba(15,35,70,0.6)); border: 1px solid rgba(80,150,220,0.5); border-radius: 12px; padding: 18px 20px; margin-bottom: 24px; display: flex; align-items: center; gap: 16px; box-shadow: 0 8px 20px rgba(0,0,0,0.5), inset 0 2px 5px rgba(255,255,255,0.1); position: relative; z-index: 2; }
     .audio-play-btn { width: 46px; height: 46px; border-radius: 50%; background: linear-gradient(180deg, rgba(60,130,220,0.5), rgba(30,80,160,0.7)); border: 1px solid rgba(100,170,240,0.6); color: #fff; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; transition: all 0.15s; flex-shrink: 0; box-shadow: 0 4px 10px rgba(0,0,0,0.4), inset 0 2px 4px rgba(255,255,255,0.2); text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
     .audio-track { flex: 1; }
     .audio-label { font-size: 13px; color: rgba(140,200,255,0.85); margin-bottom: 6px; font-weight: 600; text-align: center; }
@@ -209,7 +194,6 @@
     @keyframes popIn { 0%{transform:scale(.75);opacity:0} 100%{transform:scale(1);opacity:1} }
 
     /* ===== פסנתר ===== */
-    #piano-section { transition: all 0.5s ease; }
     .piano-scroll-wrapper { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; padding: 10px 0; direction: ltr; position: relative; z-index: 2; }
     .piano-chassis {
       background: linear-gradient(145deg, #2a0a00, #110000); border: 2px solid #5a2a00; border-radius: 10px;
@@ -247,7 +231,7 @@
     .btn-no { background: #555; color: #fff; }
     .btn-no:hover { background: #666; }
     .hint-text { display: none; background: rgba(255,255,255,0.05); padding: 16px; border-radius: 8px; font-size: 15px; line-height: 1.6; border-right: 4px solid #ff9500; color: #eee; white-space: pre-wrap; margin-top: 8px; }
-    .hint-text.solution-text { border-right-color: #ff4444; font-weight: bold; color: #ffcccc; background: rgba(255,0,0,0.1); }
+    .hint-text.solution-text { border-right-color: #ff4444; font-weight: bold; color: #ffcccc; }
 
     /* רשת הדרכון */
     .map-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
@@ -270,8 +254,6 @@
   </style>
 </head>
 <body>
-
-<div id="ambient-glow"></div>
 
 <div id="global-progress-wrap">
   <div id="global-progress-fill"></div>
@@ -328,7 +310,7 @@
           onblur="document.getElementById('glow-ring').classList.remove('focused')"
         />
       </div>
-      <button class="submit-btn" id="main-submit-btn" onclick="submitCode()">המשך לשלב הבא «</button>
+      <button class="submit-btn" onclick="submitCode()">המשך לשלב הבא «</button>
     </div>
     <div class="error-msg" id="error-msg">✗ קוד שגוי — נסו שוב!</div>
   </div>
@@ -596,12 +578,12 @@ const PAGES = {
   
   /* ===== העמוד הנסתר: סרטון הניצחון הגדול ===== */
   "grand_finale": {
-    step: 13, /* משאיר את מד ההתקדמות מלא */
-    bg: "radial-gradient(ellipse at 25% 15%, #3a2200 0%, #151100 40%, #0a0800 100%)", /* רקע זהוב/חגיגי טיפה יותר */
+    step: 13,
+    bg: "radial-gradient(ellipse at 25% 15%, #3a2200 0%, #151100 40%, #0a0800 100%)",
     title: "המיליון שלכם!",
-    desc: "מדהים! הצלחתם לפתוח את הקופסה האחרונה ולהשלים את המירוץ העולמי.\n\nצפו בסרטון הניצחון שלכם עכשיו:",
-    youtube: "IzSNc7kqjJw", /* הקישור ליוטיוב שנתת */
-    type: "finale_hidden" /* סוג מיוחד שרק יציג את הסרטון בלי כפתורי חידה */
+    desc: "כל הכבוד צוות!\n\nהשלמתם את כל המשימות בהצלחה, לפתוח את הקופסה האחרונה ולהשלים את המירוץ העולמי!",
+    youtube: "IzSNc7kqjJw",
+    type: "finale_hidden"
   }
 };
 
@@ -668,7 +650,6 @@ function loadPage(id) {
   currentStageStartTime = Date.now();
 
   const step = page.step || 1;
-  // אל תשדרג את maxStep אם נכנסים בטעות לעמוד הנסתר לפני הזמן
   if (step > maxStep && id !== 'grand_finale') {
     maxStep = step;
     localStorage.setItem('puzzleMaxStep', maxStep);
@@ -680,10 +661,6 @@ function loadPage(id) {
   document.title = page.title + ' — פאזלס חדרי בריחה';
   document.getElementById('page-title').textContent = page.title;
   
-  // עדכון גלואו הדרגתי
-  const glowOpacity = (step / 13) * 0.15;
-  document.getElementById('ambient-glow').style.background = `radial-gradient(circle at 50% 120%, rgba(255, 140, 0, ${glowOpacity}) 0%, transparent 70%)`;
-
   document.getElementById('global-progress-fill').style.width = ((step / 13) * 100) + '%';
   
   if(!document.body.classList.contains('a11y-high-contrast')) {
@@ -729,15 +706,15 @@ function loadPage(id) {
     riddlePlaying = false;
   }
 
-  // הסתרת כפתורי התפריט אם זה העמוד הנסתר
+  // הסתרת כפתורי התפריט בעמוד הנסתר
   const mapBtn = document.getElementById('floating-map-btn');
   const a11yBtn = document.getElementById('floating-a11y-btn');
   if (id === 'grand_finale') {
-    mapBtn.style.display = 'none';
-    a11yBtn.style.display = 'none';
+    if (mapBtn) mapBtn.style.display = 'none';
+    if (a11yBtn) a11yBtn.style.display = 'none';
   } else {
-    mapBtn.style.display = 'flex';
-    a11yBtn.style.display = 'flex';
+    if (mapBtn) mapBtn.style.display = 'flex';
+    if (a11yBtn) a11yBtn.style.display = 'flex';
   }
 
   document.getElementById('piano-section').style.display = page.piano ? '' : 'none';
@@ -758,7 +735,6 @@ function loadPage(id) {
     document.getElementById('finish-box').style.display = '';
     playVictoryEffects();
     
-    // יצירת לוח התוצאות
     let totalMs = 0;
     let maxStageMs = 0;
     let hardestStage = 'אין נתונים';
@@ -776,55 +752,46 @@ function loadPage(id) {
     document.getElementById('stat-hardest').textContent = `${hardestStage} (${formatTime(maxStageMs)})`;
     document.getElementById('finish-stats').style.display = 'block';
   } else if (page.type === 'finale_hidden') {
-    // הפעלת זיקוקים גם בעמוד הנסתר
+    // הפעלת זיקוקים בעמוד הנסתר
     playVictoryEffects();
   }
   
   window.scrollTo(0, 0);
   
+  // תיקון אבטחה לאנימציית הטקסט בריפרש
   const descEl = document.getElementById('page-desc');
   descEl.innerHTML = page.desc;
+  descEl.style.opacity = 1; // גיבוי לשקיפות
+  
   if(!document.body.classList.contains('a11y-no-animations')) {
     descEl.style.animation = 'none';
-    void descEl.offsetWidth; // Trigger reflow
-    descEl.style.animation = 'slideUpFade 0.8s ease-out forwards';
-  } else {
-    descEl.style.opacity = 1;
+    setTimeout(() => {
+      descEl.style.animation = 'slideUpFade 0.8s ease-out forwards';
+    }, 10);
   }
 }
 
-// ===== ניהול דרכון חכם ומוגן מספוילרים =====
+// ===== ניהול מפה (שחזור) =====
 function openMapModal() {
   if (navigator.vibrate) navigator.vibrate(15);
-  playHintOpen(); 
+  playHintOpen();
   
   const mapBtns = document.querySelectorAll('.map-btn');
-  let stepCounter = 1;
-  
   mapBtns.forEach(btn => {
     const targetPageId = btn.getAttribute('data-page');
     const targetStep = PAGES[targetPageId].step;
     
-    // שמירת השם המקורי
-    if (!btn.hasAttribute('data-original-text')) {
-      btn.setAttribute('data-original-text', btn.innerHTML);
-    }
-    
     if (targetStep > maxStep) {
       btn.classList.add('locked');
       btn.onclick = null;
-      btn.innerHTML = `🔒 יעד מסווג (${stepCounter})`;
     } else {
       btn.classList.remove('locked');
       btn.onclick = () => jumpTo(targetPageId);
-      btn.innerHTML = btn.getAttribute('data-original-text');
     }
-    stepCounter++;
   });
 
   document.getElementById('map-overlay').classList.add('show');
 }
-
 function closeMapModal() {
   if (navigator.vibrate) navigator.vibrate(10);
   playHintClose();
@@ -855,7 +822,6 @@ function playHintReveal() { try { const c=getAC(); const now=c.currentTime; [104
 function playHintClose() { try { const c=getAC(), o=c.createOscillator(), g=c.createGain(); o.type='sine'; o.frequency.setValueAtTime(400, c.currentTime); o.frequency.exponentialRampToValueAtTime(100, c.currentTime+0.15); o.connect(g); g.connect(c.destination); g.gain.setValueAtTime(0, c.currentTime); g.gain.linearRampToValueAtTime(0.1, c.currentTime+0.02); g.gain.exponentialRampToValueAtTime(0.001, c.currentTime+0.2); o.start(); o.stop(c.currentTime+0.25); } catch(e){} }
 function playTypeSound() { if (navigator.vibrate) navigator.vibrate(5); try { const ctx=getAC(); const now=ctx.currentTime; const osc=ctx.createOscillator(); const gain=ctx.createGain(); osc.type='sine'; osc.frequency.setValueAtTime(600, now); osc.frequency.exponentialRampToValueAtTime(300, now+0.05); osc.connect(gain); gain.connect(ctx.destination); gain.gain.setValueAtTime(0, now); gain.gain.linearRampToValueAtTime(0.08, now+0.01); gain.gain.exponentialRampToValueAtTime(0.001, now+0.05); osc.start(now); osc.stop(now+0.06); } catch(e){} }
 
-// ===== מערכת רמזים דינמית =====
 function openHintsModal() {
   if (navigator.vibrate) navigator.vibrate(15);
   playHintOpen();
@@ -950,7 +916,6 @@ function revealHint(btn) {
   if (navigator.vibrate) navigator.vibrate(25);
   playHintReveal();
   
-  // הוספת ספירת רמז
   hintsUsed++;
   localStorage.setItem('puzzleHintsUsed', hintsUsed);
 
@@ -971,7 +936,6 @@ function revealHint(btn) {
   confirmDiv.nextElementSibling.style.display = 'block';
 }
 
-// ===== צלילי מערכת וחותמת משופרת =====
 const AudioCtx = window.AudioContext || window.webkitAudioContext;
 let _ac = null;
 function getAC() { if (!_ac) _ac = new AudioCtx(); return _ac; }
@@ -1028,51 +992,18 @@ function playStampSound() {
   } catch(e){}
 }
 
-function playVictoryEffects() {
-  if (document.body.classList.contains('a11y-no-animations')) return;
-  if (navigator.vibrate) navigator.vibrate([100, 50, 100, 50, 200]);
-  for(let i=0; i<80; i++){
-      let conf = document.createElement('div');
-      conf.className = 'confetti';
-      conf.style.left = Math.random() * 100 + 'vw';
-      conf.style.backgroundColor = ['#ff9500', '#00c8be', '#ffcc00', '#ff4444', '#ffffff'][Math.floor(Math.random()*5)];
-      conf.style.animationDelay = (Math.random() * 2) + 's';
-      document.body.appendChild(conf);
-      setTimeout(()=>conf.remove(), 4500);
-  }
-  try {
-    const c = getAC();
-    [523.25, 659.25, 783.99, 1046.50, 1318.51].forEach((f, i) => {
-      const o = c.createOscillator(), g = c.createGain();
-      o.connect(g); g.connect(c.destination);
-      o.frequency.value = f;
-      g.gain.setValueAtTime(0.15, c.currentTime + i*0.12);
-      g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + i*0.12 + 0.6);
-      o.start(c.currentTime + i*0.12); o.stop(c.currentTime + i*0.12 + 0.6);
-    });
-  } catch(e){}
-}
-
-let isVerifying = false; // הגנה מלחיצות כפולות
-
 function submitCode() {
-  if (window.isVerifying) return;
-  window.isVerifying = true;
-
   playClick();
   const page = PAGES[currentPage];
   const val  = document.getElementById('code-input').value.trim().toUpperCase();
-  const btn = document.getElementById('main-submit-btn'); 
+  const btn = document.querySelector('.submit-btn');
   
-  // אפקט ההשהייה והטשטוש
   btn.innerHTML = 'מאמת נתונים... ⏳';
   btn.classList.add('verifying-state');
-  document.getElementById('app').classList.add('suspense-mode'); 
   
   setTimeout(() => {
     btn.innerHTML = 'המשך לשלב הבא «';
     btn.classList.remove('verifying-state');
-    document.getElementById('app').classList.remove('suspense-mode'); 
     
     if (val === page.code.toUpperCase()) {
       playStampSound();
@@ -1086,12 +1017,10 @@ function submitCode() {
         setTimeout(() => { 
           box.classList.remove('stamp-approved');
           pendingNext = page.next;
-          window.isVerifying = false;
           loadPage(pendingNext); 
         }, 2000); 
       } else {
         pendingNext = page.next;
-        window.isVerifying = false;
         loadPage(pendingNext);
       }
     } else {
@@ -1099,13 +1028,9 @@ function submitCode() {
       const inp = document.getElementById('code-input');
       if(!document.body.classList.contains('a11y-no-animations')) {
         inp.classList.add('error', 'shaking');
-        setTimeout(() => {
-            inp.classList.remove('shaking');
-            window.isVerifying = false;
-        }, 600);
+        setTimeout(() => inp.classList.remove('shaking'), 600);
       } else {
         inp.classList.add('error');
-        window.isVerifying = false;
       }
       document.getElementById('error-msg').style.display = 'block';
     }
@@ -1122,7 +1047,6 @@ function goChoice(choice) {
   loadPage(choice === 'A' ? page.choiceA : page.choiceB);
 }
 
-// ===== אודיו חידה =====
 let riddlePlaying = false;
 let riddleInterval = null;
 let riddleElapsed = 0; 
@@ -1219,7 +1143,6 @@ pBar.addEventListener('touchstart', e => { isDraggingBar = true; handleSeek(e); 
 window.addEventListener('touchmove', e => { if(isDraggingBar) handleSeek(e); }, {passive:true});
 window.addEventListener('touchend', () => { isDraggingBar = false; });
 
-// ===== כוכבים =====
 (function() {
   const c = document.getElementById('stars');
   for (let i = 0; i < 90; i++) {
@@ -1234,7 +1157,6 @@ window.addEventListener('touchend', () => { isDraggingBar = false; });
   }
 })();
 
-// ===== פסנתר 3D =====
 (function(){
   const NOTES = [
     {n:'C2', f:65.41,  b:false}, {n:'C#2',f:69.30,  b:true}, {n:'D2', f:73.42,  b:false}, {n:'D#2',f:77.78,  b:true}, 
@@ -1381,7 +1303,6 @@ window.onpopstate = e => {
   loadPage(id);
 };
 
-// אתחול הגדרות הנגישות וטעינת העמוד
 initA11y();
 loadPage(getPageId());
 </script>
