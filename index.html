@@ -221,7 +221,7 @@
     .piano-instruction { font-size: 16px; color: #ffcc00; font-weight: 700; margin-bottom: 12px; letter-spacing: 0.5px; animation: pulseText 2s infinite; text-align: center; position: relative; z-index: 2; }
     @keyframes pulseText { 0%, 100% { opacity: 0.8; } 50% { opacity: 1; text-shadow: 0 0 8px rgba(255,200,0,0.6); } }
 
-    /* ===== חלונות צפים ורמזים מדורגים ===== */
+    /* ===== חלונות צפים ===== */
     .modal-overlay { display: none; position: fixed; inset: 0; z-index: 200; background: rgba(0,0,0,0.85); align-items: center; justify-content: center; }
     .modal-overlay.show { display: flex; animation: fadeIn 0.25s ease-out; }
     .modal-card { background: #160a00; border: 1px solid #ff9500; border-radius: 12px; padding: 28px 24px; width: 90%; max-width: 420px; position: relative; color: #fff; text-align: right; box-shadow: 0 15px 30px rgba(0,0,0,0.8); max-height: 90vh; overflow-y: auto; }
@@ -230,18 +230,10 @@
     .modal-title { text-align: center; color: #ffcc00; margin-bottom: 24px; font-weight: 800; font-size: 22px; }
     
     .hint-item { margin-bottom: 14px; }
-    .hint-btn { width: 100%; padding: 14px; border-radius: 8px; cursor: pointer; font-size: 16px; font-family: inherit; font-weight: bold; transition: 0.2s; text-align: right; box-shadow: 0 4px 6px rgba(0,0,0,0.3); touch-action: manipulation; }
-    
-    /* עיצוב מדורג לרמזים! */
-    .hint-level-0 { background: linear-gradient(180deg, #3a2a00, #1a1500); border: 1px solid #ffda44; color: #ffe8c0; }
-    .hint-level-0:hover { background: linear-gradient(180deg, #4a3500, #2a2000); transform: translateY(-2px); }
-    
-    .hint-level-1 { background: linear-gradient(180deg, #4a2000, #2a1000); border: 1px solid #ff9500; color: #ffcca0; }
-    .hint-level-1:hover { background: linear-gradient(180deg, #5a2500, #3a1500); transform: translateY(-2px); }
-    
-    .hint-btn.solution-btn { border: 1px solid #ff4444; color: #ffaaaa; background: linear-gradient(180deg, #3a0a0a, #1a0000); }
-    .hint-btn.solution-btn:hover { background: linear-gradient(180deg, #4a1010, #2a0000); transform: translateY(-2px); }
-    
+    .hint-btn { width: 100%; background: linear-gradient(180deg, #2a1500, #1a0a00); border: 1px solid #ff9500; color: #ffe8c0; padding: 14px; border-radius: 8px; cursor: pointer; font-size: 16px; font-family: inherit; font-weight: bold; transition: 0.2s; text-align: right; box-shadow: 0 4px 6px rgba(0,0,0,0.3); touch-action: manipulation; }
+    .hint-btn:hover { background: linear-gradient(180deg, #3a2000, #2a1500); transform: translateY(-2px); }
+    .hint-btn.solution-btn { border-color: #ff4444; color: #ffaaaa; background: linear-gradient(180deg, #3a0a0a, #1a0000); }
+    .hint-btn.solution-btn:hover { background: linear-gradient(180deg, #4a1010, #2a0000); }
     .hint-confirm { display: none; background: #221100; padding: 16px; border-radius: 8px; text-align: center; border: 1px dashed #ff9500; margin-top: 8px; }
     .hint-confirm.solution-confirm { border-color: #ff4444; background: #2a0000; }
     .hint-confirm p { margin-bottom: 14px; font-size: 15px; color: #eee; }
@@ -262,6 +254,7 @@
     .map-btn { background: #221100; border: 1px solid #00c8be; color: #ffe8c0; padding: 10px; border-radius: 8px; font-family: inherit; font-size: 13.5px; cursor: pointer; transition: 0.2s; font-weight: bold; text-align: right;}
     .map-btn:hover { background: #00c8be; color: #000; }
     .map-btn.locked { background: #111; border-color: #333; color: #555; cursor: not-allowed; }
+    .map-btn.locked::before { content: '🔒 '; }
     .map-btn.locked:hover { background: #111; color: #555; transform: none; }
     @media (max-width: 400px) { .map-grid { grid-template-columns: 1fr; } }
 
@@ -363,7 +356,7 @@
       <div class="stat-row">🔥 השלב המאתגר ביותר: <span id="stat-hardest"></span></div>
     </div>
 
-    <button class="submit-btn" style="margin-top: 10px;" onclick="promptResetGame()">התחילו משחק חדש ⟳</button>
+    <button class="submit-btn" style="margin-top: 10px;" onclick="resetGame()">התחילו משחק חדש ⟳</button>
   </div>
 </div>
 
@@ -599,6 +592,16 @@ const PAGES = {
       "אם תענו נכון על כל השאלות תקבלו סמלים שירכיבו משפט שיגיד מה לעשות עם הפנס האולטרה סגול. האירו במקום המתאים והפתרון יחשף."
     ],
     solution: "התשובות לשאלות הן: נכון, לא נכון, נכון, נכון, נכון, לא נכון, נכון, לא נכון.\nהמשפט המתקבל הוא \"הרימו את הדופן הימנית הפנימית של קופסת המשחק\".\nאם תבדקו במקום זה, תמצאו את המפתח לקופסא האחרונה במשחק."
+  },
+  
+  /* ===== העמוד הנסתר: סרטון הניצחון הגדול ===== */
+  "grand_finale": {
+    step: 13, /* משאיר את מד ההתקדמות מלא */
+    bg: "radial-gradient(ellipse at 25% 15%, #3a2200 0%, #151100 40%, #0a0800 100%)", /* רקע זהוב/חגיגי טיפה יותר */
+    title: "המיליון שלכם!",
+    desc: "מדהים! הצלחתם לפתוח את הקופסה האחרונה ולהשלים את המירוץ העולמי.\n\nצפו בסרטון הניצחון שלכם עכשיו:",
+    youtube: "IzSNc7kqjJw", /* הקישור ליוטיוב שנתת */
+    type: "finale_hidden" /* סוג מיוחד שרק יציג את הסרטון בלי כפתורי חידה */
   }
 };
 
@@ -641,7 +644,7 @@ function toggleA11y(className, isChecked) {
 }
 
 function saveCurrentStageTime() {
-  if (currentPage && currentPage !== 'finish') {
+  if (currentPage && currentPage !== 'finish' && currentPage !== 'grand_finale') {
     const timeSpent = Date.now() - currentStageStartTime;
     stageTimes[currentPage] = (stageTimes[currentPage] || 0) + timeSpent;
     localStorage.setItem('puzzleStageTimes', JSON.stringify(stageTimes));
@@ -665,7 +668,8 @@ function loadPage(id) {
   currentStageStartTime = Date.now();
 
   const step = page.step || 1;
-  if (step > maxStep) {
+  // אל תשדרג את maxStep אם נכנסים בטעות לעמוד הנסתר לפני הזמן
+  if (step > maxStep && id !== 'grand_finale') {
     maxStep = step;
     localStorage.setItem('puzzleMaxStep', maxStep);
   }
@@ -725,6 +729,17 @@ function loadPage(id) {
     riddlePlaying = false;
   }
 
+  // הסתרת כפתורי התפריט אם זה העמוד הנסתר
+  const mapBtn = document.getElementById('floating-map-btn');
+  const a11yBtn = document.getElementById('floating-a11y-btn');
+  if (id === 'grand_finale') {
+    mapBtn.style.display = 'none';
+    a11yBtn.style.display = 'none';
+  } else {
+    mapBtn.style.display = 'flex';
+    a11yBtn.style.display = 'flex';
+  }
+
   document.getElementById('piano-section').style.display = page.piano ? '' : 'none';
   
   document.getElementById('code-box').style.display       = 'none';
@@ -743,6 +758,7 @@ function loadPage(id) {
     document.getElementById('finish-box').style.display = '';
     playVictoryEffects();
     
+    // יצירת לוח התוצאות
     let totalMs = 0;
     let maxStageMs = 0;
     let hardestStage = 'אין נתונים';
@@ -759,6 +775,9 @@ function loadPage(id) {
     document.getElementById('stat-hints').textContent = hintsUsed;
     document.getElementById('stat-hardest').textContent = `${hardestStage} (${formatTime(maxStageMs)})`;
     document.getElementById('finish-stats').style.display = 'block';
+  } else if (page.type === 'finale_hidden') {
+    // הפעלת זיקוקים גם בעמוד הנסתר
+    playVictoryEffects();
   }
   
   window.scrollTo(0, 0);
@@ -767,17 +786,17 @@ function loadPage(id) {
   descEl.innerHTML = page.desc;
   if(!document.body.classList.contains('a11y-no-animations')) {
     descEl.style.animation = 'none';
-    void descEl.offsetWidth; 
+    void descEl.offsetWidth; // Trigger reflow
     descEl.style.animation = 'slideUpFade 0.8s ease-out forwards';
   } else {
     descEl.style.opacity = 1;
   }
 }
 
-// ===== ניהול מפה חכם מוגן ספוילרים =====
+// ===== ניהול דרכון חכם ומוגן מספוילרים =====
 function openMapModal() {
   if (navigator.vibrate) navigator.vibrate(15);
-  playHintOpen();
+  playHintOpen(); 
   
   const mapBtns = document.querySelectorAll('.map-btn');
   let stepCounter = 1;
@@ -786,6 +805,7 @@ function openMapModal() {
     const targetPageId = btn.getAttribute('data-page');
     const targetStep = PAGES[targetPageId].step;
     
+    // שמירת השם המקורי
     if (!btn.hasAttribute('data-original-text')) {
       btn.setAttribute('data-original-text', btn.innerHTML);
     }
@@ -804,6 +824,7 @@ function openMapModal() {
 
   document.getElementById('map-overlay').classList.add('show');
 }
+
 function closeMapModal() {
   if (navigator.vibrate) navigator.vibrate(10);
   playHintClose();
@@ -834,7 +855,7 @@ function playHintReveal() { try { const c=getAC(); const now=c.currentTime; [104
 function playHintClose() { try { const c=getAC(), o=c.createOscillator(), g=c.createGain(); o.type='sine'; o.frequency.setValueAtTime(400, c.currentTime); o.frequency.exponentialRampToValueAtTime(100, c.currentTime+0.15); o.connect(g); g.connect(c.destination); g.gain.setValueAtTime(0, c.currentTime); g.gain.linearRampToValueAtTime(0.1, c.currentTime+0.02); g.gain.exponentialRampToValueAtTime(0.001, c.currentTime+0.2); o.start(); o.stop(c.currentTime+0.25); } catch(e){} }
 function playTypeSound() { if (navigator.vibrate) navigator.vibrate(5); try { const ctx=getAC(); const now=ctx.currentTime; const osc=ctx.createOscillator(); const gain=ctx.createGain(); osc.type='sine'; osc.frequency.setValueAtTime(600, now); osc.frequency.exponentialRampToValueAtTime(300, now+0.05); osc.connect(gain); gain.connect(ctx.destination); gain.gain.setValueAtTime(0, now); gain.gain.linearRampToValueAtTime(0.08, now+0.01); gain.gain.exponentialRampToValueAtTime(0.001, now+0.05); osc.start(now); osc.stop(now+0.06); } catch(e){} }
 
-// ===== מערכת רמזים דינמית ומדורגת =====
+// ===== מערכת רמזים דינמית =====
 function openHintsModal() {
   if (navigator.vibrate) navigator.vibrate(15);
   playHintOpen();
@@ -846,11 +867,11 @@ function openHintsModal() {
   
   if (page.hints) {
     page.hints.forEach((hintText, index) => {
-      container.appendChild(createHintElement(`רמז ${index + 1}`, hintText, false, index));
+      container.appendChild(createHintElement(`רמז ${index + 1}`, hintText, false));
     });
   }
   if (page.solution) {
-    container.appendChild(createHintElement(`פיתרון סופי`, page.solution, true, 99));
+    container.appendChild(createHintElement(`פיתרון`, page.solution, true));
   }
   
   document.getElementById('hints-overlay').classList.add('show');
@@ -874,13 +895,10 @@ function closeA11yModal() {
   document.getElementById('a11y-overlay').classList.remove('show');
 }
 
-function createHintElement(title, text, isSolution, index) {
+function createHintElement(title, text, isSolution) {
   const div = document.createElement('div');
   div.className = 'hint-item';
-  
-  let btnLevelClass = isSolution ? 'solution-btn' : `hint-level-${index % 2}`;
-  const btnClass = `hint-btn ${btnLevelClass}`;
-  
+  const btnClass = isSolution ? 'hint-btn solution-btn' : 'hint-btn';
   const icon = isSolution ? '🗝️' : '🔒';
   const confirmClass = isSolution ? 'hint-confirm solution-confirm' : 'hint-confirm';
   const confirmText = isSolution ? 'זהירות! לחיצה כאן תגלה לכם את התשובה המלאה. בטוחים?' : 'בטוחים שאתם רוצים עזרה?';
@@ -932,6 +950,7 @@ function revealHint(btn) {
   if (navigator.vibrate) navigator.vibrate(25);
   playHintReveal();
   
+  // הוספת ספירת רמז
   hintsUsed++;
   localStorage.setItem('puzzleHintsUsed', hintsUsed);
 
@@ -1034,24 +1053,26 @@ function playVictoryEffects() {
   } catch(e){}
 }
 
+let isVerifying = false; // הגנה מלחיצות כפולות
+
 function submitCode() {
-  if (window.isVerifying) return; // מונע ביצוע כפול
-  window.isVerifying = true; // נועל את הכפתור
+  if (window.isVerifying) return;
+  window.isVerifying = true;
 
   playClick();
   const page = PAGES[currentPage];
   const val  = document.getElementById('code-input').value.trim().toUpperCase();
   const btn = document.getElementById('main-submit-btn'); 
   
-  // אפקט ההשהייה (Suspense)
+  // אפקט ההשהייה והטשטוש
   btn.innerHTML = 'מאמת נתונים... ⏳';
   btn.classList.add('verifying-state');
-  document.getElementById('app').classList.add('suspense-mode'); // טשטוש הרקע
+  document.getElementById('app').classList.add('suspense-mode'); 
   
   setTimeout(() => {
     btn.innerHTML = 'המשך לשלב הבא «';
     btn.classList.remove('verifying-state');
-    document.getElementById('app').classList.remove('suspense-mode'); // הסרת הטשטוש
+    document.getElementById('app').classList.remove('suspense-mode'); 
     
     if (val === page.code.toUpperCase()) {
       playStampSound();
@@ -1065,12 +1086,12 @@ function submitCode() {
         setTimeout(() => { 
           box.classList.remove('stamp-approved');
           pendingNext = page.next;
-          window.isVerifying = false; // שחרור רגע לפני מעבר
+          window.isVerifying = false;
           loadPage(pendingNext); 
         }, 2000); 
       } else {
         pendingNext = page.next;
-        window.isVerifying = false; // שחרור
+        window.isVerifying = false;
         loadPage(pendingNext);
       }
     } else {
@@ -1080,11 +1101,11 @@ function submitCode() {
         inp.classList.add('error', 'shaking');
         setTimeout(() => {
             inp.classList.remove('shaking');
-            window.isVerifying = false; // שחרור אחרי שנגמרת האנימציה
+            window.isVerifying = false;
         }, 600);
       } else {
         inp.classList.add('error');
-        window.isVerifying = false; // שחרור מיידי
+        window.isVerifying = false;
       }
       document.getElementById('error-msg').style.display = 'block';
     }
