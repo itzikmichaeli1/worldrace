@@ -247,7 +247,7 @@
     .btn-no { background: #555; color: #fff; }
     .btn-no:hover { background: #666; }
     .hint-text { display: none; background: rgba(255,255,255,0.05); padding: 16px; border-radius: 8px; font-size: 15px; line-height: 1.6; border-right: 4px solid #ff9500; color: #eee; white-space: pre-wrap; margin-top: 8px; }
-    .hint-text.solution-text { border-right-color: #ff4444; font-weight: bold; color: #ffcccc; background: rgba(255,0,0,0.1); }
+    .hint-text.solution-text { border-right-color: #ff4444; font-weight: bold; color: #ffcccc; }
 
     /* רשת הדרכון */
     .map-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
@@ -270,6 +270,21 @@
   </style>
 </head>
 <body>
+
+<script>
+  function unlockAudio() {
+    const ctx = getAC();
+    if(ctx.state === 'suspended') ctx.resume();
+    document.body.removeEventListener('click', unlockAudio);
+    document.body.removeEventListener('touchstart', unlockAudio);
+  }
+  document.body.addEventListener('click', unlockAudio);
+  document.body.addEventListener('touchstart', unlockAudio);
+  
+  function safeVibrate(val) {
+    try { if (navigator.vibrate) navigator.vibrate(val); } catch(e){}
+  }
+</script>
 
 <div id="ambient-glow"></div>
 
@@ -356,7 +371,7 @@
       <div class="stat-row">🔥 השלב המאתגר ביותר: <span id="stat-hardest"></span></div>
     </div>
 
-    <button class="submit-btn" style="margin-top: 10px;" onclick="resetGame()">התחילו משחק חדש ⟳</button>
+    <button class="submit-btn" style="margin-top: 10px;" onclick="promptResetGame()">התחילו משחק חדש ⟳</button>
   </div>
 </div>
 
@@ -599,7 +614,7 @@ const PAGES = {
     step: 13, /* משאיר את מד ההתקדמות מלא */
     bg: "radial-gradient(ellipse at 25% 15%, #3a2200 0%, #151100 40%, #0a0800 100%)", /* רקע זהוב/חגיגי טיפה יותר */
     title: "המיליון שלכם!",
-    desc: "מדהים! הצלחתם לפתוח את הקופסה האחרונה ולהשלים את המירוץ העולמי.\n\nצפו בסרטון הניצחון שלכם עכשיו:",
+    desc: "כל הכבוד צוות! השלמתם את כל המשימות בהצלחה, לפתוח את הקופסה האחרונה ולהשלים את המירוץ העולמי!",
     youtube: "IzSNc7kqjJw", /* הקישור ליוטיוב שנתת */
     type: "finale_hidden" /* סוג מיוחד שרק יציג את הסרטון בלי כפתורי חידה */
   }
@@ -835,12 +850,14 @@ function jumpTo(pageId) {
   loadPage(pageId);
 }
 
+// ניקוי נתונים לתחילת משחק חדש עם אישור
 function promptResetGame() {
   if (confirm("פעולה זו תמחק את ההתקדמות שלכם ותתחיל משחק חדש. בטוחים?")) {
     resetGame();
   }
 }
 
+// ניקוי אוטומטי לעמוד הסיום
 function resetGame() {
   localStorage.removeItem('puzzleMaxStep');
   localStorage.removeItem('puzzleHintsUsed');
@@ -971,93 +988,12 @@ function revealHint(btn) {
   confirmDiv.nextElementSibling.style.display = 'block';
 }
 
-// ===== צלילי מערכת וחותמת משופרת =====
-const AudioCtx = window.AudioContext || window.webkitAudioContext;
-let _ac = null;
-function getAC() { if (!_ac) _ac = new AudioCtx(); return _ac; }
-
-function playClick() {
-  if (navigator.vibrate) navigator.vibrate(15);
-  try { const c=getAC(),o=c.createOscillator(),g=c.createGain(); o.connect(g); g.connect(c.destination); o.frequency.value=700; g.gain.setValueAtTime(0.1,c.currentTime); g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+0.07); o.start(); o.stop(c.currentTime+0.07); } catch(e) {}
-}
-function playError() {
-  if (navigator.vibrate) navigator.vibrate([50, 50, 50]);
-  try { const c=getAC(); [220,180].forEach((f,i)=>{ const o=c.createOscillator(),g=c.createGain(); o.type='sawtooth'; o.connect(g); g.connect(c.destination); o.frequency.value=f; g.gain.setValueAtTime(0.18,c.currentTime+i*0.13); g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+i*0.13+0.15); o.start(c.currentTime+i*0.13); o.stop(c.currentTime+i*0.13+0.16); }); } catch(e) {}
-}
-
-function playStampSound() {
-  if (navigator.vibrate) navigator.vibrate([100, 200, 300]); 
-  try { 
-    const ctx = getAC();
-    const now = ctx.currentTime;
-    
-    const freqs = [261.63, 329.63, 392.00, 493.88, 587.33]; 
-
-    freqs.forEach((freq, i) => {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = i % 2 === 0 ? 'triangle' : 'sine'; 
-      osc.frequency.value = freq;
-
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-
-      gain.gain.setValueAtTime(0, now);
-      gain.gain.linearRampToValueAtTime(0.3 / freqs.length, now + 0.2); 
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 4.0); 
-
-      osc.start(now);
-      osc.stop(now + 4.5);
-    });
-
-    const bassOsc = ctx.createOscillator();
-    const bassGain = ctx.createGain();
-    bassOsc.type = 'sine';
-    bassOsc.frequency.setValueAtTime(100, now);
-    bassOsc.frequency.exponentialRampToValueAtTime(30, now + 1.5);
-    bassOsc.connect(bassGain);
-    bassGain.connect(ctx.destination);
-    
-    bassGain.gain.setValueAtTime(0, now);
-    bassGain.gain.linearRampToValueAtTime(0.5, now + 0.3);
-    bassGain.gain.exponentialRampToValueAtTime(0.001, now + 3.0);
-    
-    bassOsc.start(now);
-    bassOsc.stop(now + 3.5);
-
-  } catch(e){}
-}
-
-function playVictoryEffects() {
-  if (document.body.classList.contains('a11y-no-animations')) return;
-  if (navigator.vibrate) navigator.vibrate([100, 50, 100, 50, 200]);
-  for(let i=0; i<80; i++){
-      let conf = document.createElement('div');
-      conf.className = 'confetti';
-      conf.style.left = Math.random() * 100 + 'vw';
-      conf.style.backgroundColor = ['#ff9500', '#00c8be', '#ffcc00', '#ff4444', '#ffffff'][Math.floor(Math.random()*5)];
-      conf.style.animationDelay = (Math.random() * 2) + 's';
-      document.body.appendChild(conf);
-      setTimeout(()=>conf.remove(), 4500);
-  }
-  try {
-    const c = getAC();
-    [523.25, 659.25, 783.99, 1046.50, 1318.51].forEach((f, i) => {
-      const o = c.createOscillator(), g = c.createGain();
-      o.connect(g); g.connect(c.destination);
-      o.frequency.value = f;
-      g.gain.setValueAtTime(0.15, c.currentTime + i*0.12);
-      g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + i*0.12 + 0.6);
-      o.start(c.currentTime + i*0.12); o.stop(c.currentTime + i*0.12 + 0.6);
-    });
-  } catch(e){}
-}
-
-let isVerifying = false; // הגנה מלחיצות כפולות
+// משתנה למניעת לחיצות כפולות (Anti-Spam)
+let isVerifying = false; 
 
 function submitCode() {
-  if (window.isVerifying) return;
-  window.isVerifying = true;
+  if (window.isVerifying) return; // הגנה: אם התיבה באימות, אל תבצע כלום
+  window.isVerifying = true; // נועל את הכפתור
 
   playClick();
   const page = PAGES[currentPage];
@@ -1086,12 +1022,12 @@ function submitCode() {
         setTimeout(() => { 
           box.classList.remove('stamp-approved');
           pendingNext = page.next;
-          window.isVerifying = false;
+          window.isVerifying = false; // שחרור כפתור
           loadPage(pendingNext); 
         }, 2000); 
       } else {
         pendingNext = page.next;
-        window.isVerifying = false;
+        window.isVerifying = false; // שחרור כפתור
         loadPage(pendingNext);
       }
     } else {
@@ -1101,11 +1037,11 @@ function submitCode() {
         inp.classList.add('error', 'shaking');
         setTimeout(() => {
             inp.classList.remove('shaking');
-            window.isVerifying = false;
+            window.isVerifying = false; // שחרור כפתור
         }, 600);
       } else {
         inp.classList.add('error');
-        window.isVerifying = false;
+        window.isVerifying = false; // שחרור כפתור
       }
       document.getElementById('error-msg').style.display = 'block';
     }
