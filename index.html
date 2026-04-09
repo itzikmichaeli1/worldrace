@@ -74,7 +74,7 @@
     }
     #floating-map-btn:hover { background: #00c8be; color: #000; transform: scale(1.05); }
 
-    /* כפתור רמזים - עיצוב מעטפת מירוץ צהובה-אדומה (כעת נורה) */
+    /* כפתור רמזים - עיצוב נורה */
     #floating-hint-btn {
       position: fixed; bottom: 20px; left: 20px; z-index: 100; width: 56px; height: 56px; border-radius: 50%;
       background: linear-gradient(135deg, #ffd54f, #fbc02d); border: 2.5px solid #d32f2f; color: #b71c1c; box-shadow: 0 4px 15px rgba(211,47,47,0.4);
@@ -346,8 +346,7 @@
       <div class="stat-row">🔥 השלב המאתגר ביותר: <span id="stat-hardest"></span></div>
     </div>
 
-    <button class="submit-btn" style="margin-top: 10px;" onclick="resetGame()">התחילו משחק חדש ⟳</button>
-  </div>
+    </div>
 </div>
 
 <button id="floating-hint-btn" onclick="openHintsModal()" title="רמזים">💡</button>
@@ -582,12 +581,22 @@ const PAGES = {
       "אם תענו נכון על כל השאלות תקבלו סמלים שירכיבו משפט שיגיד מה לעשות עם הפנס האולטרה סגול. האירו במקום המתאים והפתרון יחשף."
     ],
     solution: "התשובות לשאלות הן: נכון, לא נכון, נכון, נכון, נכון, לא נכון, נכון, לא נכון.\nהמשפט המתקבל הוא \"הרימו את הדופן הימנית הפנימית של קופסת המשחק\".\nאם תבדקו במקום זה, תמצאו את המפתח לקופסא האחרונה במשחק."
+  },
+
+  /* ===== העמוד הנסתר: סרטון הניצחון הגדול ===== */
+  "grand_finale": {
+    step: 13,
+    bg: "radial-gradient(ellipse at 25% 15%, #3a2200 0%, #151100 40%, #0a0800 100%)",
+    title: "המיליון שלכם!",
+    desc: "כל הכבוד צוות!\n\nהשלמתם את כל המשימות בהצלחה, לפתוח את הקופסה האחרונה ולהשלים את המירוץ העולמי!",
+    youtube: "IzSNc7kqjJw",
+    type: "finale_hidden"
   }
 };
 
 let currentPage = null;
 let pendingNext  = null;
-let idleHintTimer = null; // הוספתי משתנה לטיימר הרמזים הנסתר
+let idleHintTimer = null; 
 
 // ===== מנוע אנליטיקה ו-State =====
 let maxStep = parseInt(localStorage.getItem('puzzleMaxStep')) || 1;
@@ -625,7 +634,7 @@ function toggleA11y(className, isChecked) {
 }
 
 function saveCurrentStageTime() {
-  if (currentPage && currentPage !== 'finish') {
+  if (currentPage && currentPage !== 'finish' && currentPage !== 'grand_finale') {
     const timeSpent = Date.now() - currentStageStartTime;
     stageTimes[currentPage] = (stageTimes[currentPage] || 0) + timeSpent;
     localStorage.setItem('puzzleStageTimes', JSON.stringify(stageTimes));
@@ -649,7 +658,8 @@ function loadPage(id) {
   currentStageStartTime = Date.now();
 
   const step = page.step || 1;
-  if (step > maxStep) {
+  // הגנה: לא מעדכן שלב מקסימלי אם נכנסו בטעות לעמוד הנסתר
+  if (step > maxStep && id !== 'grand_finale') {
     maxStep = step;
     localStorage.setItem('puzzleMaxStep', maxStep);
   }
@@ -683,14 +693,11 @@ function loadPage(id) {
   }
 
   const hintBtn = document.getElementById('floating-hint-btn');
-  
-  // איפוס הטיימר הנסתר במעבר עמוד
   clearTimeout(idleHintTimer);
   hintBtn.classList.remove('needs-hint');
-  
+
   if (page.hints || page.solution) {
     hintBtn.style.display = 'flex';
-    // הפעלת הפעימה הזהובה אחרי 5 דקות של חוסר מעש
     if(!document.body.classList.contains('a11y-no-animations')) {
       idleHintTimer = setTimeout(() => {
         hintBtn.classList.add('needs-hint');
@@ -714,6 +721,17 @@ function loadPage(id) {
     ar.style.display = 'none';
     clearInterval(riddleInterval);
     riddlePlaying = false;
+  }
+
+  // הסתרת כפתורי תפריט בעמוד הניצחון הנסתר
+  const mapBtn = document.getElementById('floating-map-btn');
+  const a11yBtn = document.getElementById('floating-a11y-btn');
+  if (id === 'grand_finale') {
+    if (mapBtn) mapBtn.style.display = 'none';
+    if (a11yBtn) a11yBtn.style.display = 'none';
+  } else {
+    if (mapBtn) mapBtn.style.display = 'flex';
+    if (a11yBtn) a11yBtn.style.display = 'flex';
   }
 
   document.getElementById('piano-section').style.display = page.piano ? '' : 'none';
@@ -750,6 +768,8 @@ function loadPage(id) {
     document.getElementById('stat-hints').textContent = hintsUsed;
     document.getElementById('stat-hardest').textContent = `${hardestStage} (${formatTime(maxStageMs)})`;
     document.getElementById('finish-stats').style.display = 'block';
+  } else if (page.type === 'finale_hidden') {
+    playVictoryEffects();
   }
   
   window.scrollTo(0, 0);
@@ -770,17 +790,27 @@ function openMapModal() {
   playHintOpen();
   
   const mapBtns = document.querySelectorAll('.map-btn');
+  let stepCounter = 1;
+
   mapBtns.forEach(btn => {
     const targetPageId = btn.getAttribute('data-page');
     const targetStep = PAGES[targetPageId].step;
     
+    // שמירת השם המקורי כדי שלא יאבד ספוילר בעתיד
+    if (!btn.hasAttribute('data-original-text')) {
+      btn.setAttribute('data-original-text', btn.innerHTML);
+    }
+    
     if (targetStep > maxStep) {
       btn.classList.add('locked');
       btn.onclick = null;
+      btn.innerHTML = `🔒 יעד מסווג (${stepCounter})`;
     } else {
       btn.classList.remove('locked');
       btn.onclick = () => jumpTo(targetPageId);
+      btn.innerHTML = btn.getAttribute('data-original-text');
     }
+    stepCounter++;
   });
 
   document.getElementById('map-overlay').classList.add('show');
@@ -818,7 +848,6 @@ function openHintsModal() {
   if (navigator.vibrate) navigator.vibrate(15);
   playHintOpen();
   
-  // עצירת הפעימה ברגע שהשחקן פותח את הרמז
   document.getElementById('floating-hint-btn').classList.remove('needs-hint');
   clearTimeout(idleHintTimer);
 
