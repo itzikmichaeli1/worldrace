@@ -272,7 +272,7 @@
     .map-btn.locked:hover { background: #111; color: #555; transform: none; }
     @media (max-width: 400px) { .map-grid { grid-template-columns: 1fr; } }
 
-    /* תפריט מוזיקה (חדש) */
+    /* תפריט מוזיקה */
     .music-controls { display: flex; flex-direction: column; gap: 20px; align-items: center; margin-top: 10px; }
     .volume-slider { width: 100%; direction: ltr; cursor: pointer; }
     .music-toggle-btn { background: linear-gradient(180deg, #ff9500 0%, #d96000 100%); color: #fff; border: 1px solid #ff9500; padding: 12px 30px; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; font-family: inherit; width: 100%; text-shadow: 0 1px 2px rgba(0,0,0,0.5); box-shadow: 0 4px 6px rgba(0,0,0,0.3); transition: 0.2s;}
@@ -290,6 +290,21 @@
   </style>
 </head>
 <body>
+
+<script>
+  function unlockAudio() {
+    const ctx = getAC();
+    if(ctx.state === 'suspended') ctx.resume();
+    document.body.removeEventListener('click', unlockAudio);
+    document.body.removeEventListener('touchstart', unlockAudio);
+  }
+  document.body.addEventListener('click', unlockAudio);
+  document.body.addEventListener('touchstart', unlockAudio);
+  
+  function safeVibrate(val) {
+    try { if (navigator.vibrate) navigator.vibrate(val); } catch(e){}
+  }
+</script>
 
 <div id="ambient-glow"></div>
 
@@ -391,7 +406,7 @@
       <button id="music-toggle-btn" class="music-toggle-btn" onclick="toggleMusic()">▶ הפעל מוזיקה</button>
       <div style="width: 100%; text-align: center; margin-top: 15px;">
         <label for="volume-slider" style="display: block; margin-bottom: 10px; color: #ffcca0; font-weight:bold;">עוצמת שמע</label>
-        <input type="range" id="volume-slider" class="volume-slider" min="0" max="1" step="0.05" value="0.3" oninput="changeVolume(this.value)">
+        <input type="range" id="volume-slider" class="volume-slider" min="0" max="1" step="0.05" value="0.2" oninput="changeVolume(this.value)">
       </div>
     </div>
   </div>
@@ -648,11 +663,11 @@ let idleHintTimer = null;
 // ===== מערכת סאונד רקע =====
 const bgMusic = document.getElementById('bg-music');
 let isMusicPlaying = false;
-let isFading = false; // למניעת התנגשויות באנימציות הפייד
+let isFading = false; 
 
-// פלייליסט - כרגע רק לעמוד הפתיחה לבדיקה
+// הגדרת השיר הראשון
 const musicTracks = {
-  'opening': 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3' // <--- איציק, שים פה את הלינק לMP3 שלך!
+  'opening': 'Leaving-On-A-Jet-Plane.mp3'
 };
 
 function openMusicModal() {
@@ -677,13 +692,11 @@ function toggleMusic() {
     isMusicPlaying = false;
     btn.innerHTML = '▶ הפעל מוזיקה';
   } else {
-    // בדיקה אם יש לנו שיר לעמוד הנוכחי
     const track = musicTracks[currentPage];
     if (track) {
       if (!bgMusic.src.endsWith(track)) {
          bgMusic.src = track;
       }
-      // נגדיר ווליום לפי הסליידר (ברירת מחדל 0.3)
       bgMusic.volume = document.getElementById('volume-slider').value;
       bgMusic.play().then(() => {
         isMusicPlaying = true;
@@ -701,7 +714,6 @@ function changeVolume(val) {
   }
 }
 
-// פונקציית פייד בין שירים (מוכנה לשימוש כשנוסיף עוד שלבים)
 function fadeToNewTrack(newSrc) {
     if (!newSrc || isFading || bgMusic.src.endsWith(newSrc)) return;
     
@@ -947,7 +959,7 @@ function loadPage(id) {
   }
 }
 
-// ===== ניהול מפה (עם הגנת ספוילרים) =====
+// ===== ניהול דרכון (עם הגנת ספוילרים) =====
 function openMapModal() {
   if (navigator.vibrate) navigator.vibrate(15);
   playHintOpen(); 
@@ -959,7 +971,7 @@ function openMapModal() {
     const targetPageId = btn.getAttribute('data-page');
     const targetStep = PAGES[targetPageId].step;
     
-    // שמירת השם המקורי
+    // שמירת השם המקורי כדי שלא יאבד ספוילר בעתיד
     if (!btn.hasAttribute('data-original-text')) {
       btn.setAttribute('data-original-text', btn.innerHTML);
     }
@@ -1013,7 +1025,6 @@ function openHintsModal() {
   if (navigator.vibrate) navigator.vibrate(15);
   playHintOpen();
   
-  // עצירת הפעימה ברגע שהשחקן פותח את הרמז
   document.getElementById('floating-hint-btn').classList.remove('needs-hint');
   clearTimeout(idleHintTimer);
 
