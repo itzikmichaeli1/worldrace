@@ -89,10 +89,10 @@
     }
     #floating-map-btn:hover { background: #00c8be; color: #000; transform: scale(1.05); }
 
-    /* כפתור מוזיקה (חדש) */
+    /* כפתור מוזיקה - הועבר לתחתית ליד הרמזים */
     #floating-music-btn {
-      position: fixed; top: 15px; right: 15px; z-index: 1000; height: 36px; width: 36px; border-radius: 18px;
-      background: rgba(20,10,0,0.85); border: 1px solid #ff9500; color: #ff9500; font-size: 16px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 10px rgba(0,0,0,0.5); transition: 0.2s;
+      position: fixed; bottom: 20px; left: 85px; z-index: 100; height: 56px; width: 56px; border-radius: 50%;
+      background: rgba(20,10,0,0.85); border: 2.5px solid #ff9500; color: #ff9500; font-size: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(255,149,0,0.3); transition: 0.2s;
     }
     #floating-music-btn:hover { background: #ff9500; color: #000; transform: scale(1.1); }
 
@@ -136,7 +136,7 @@
     .youtube-wrap { position: relative; padding-bottom: 56.25%; height: 0; border-radius: 12px; overflow: hidden; border: 2px solid rgba(255,140,0,0.45); margin-bottom: 28px; box-shadow: 0 10px 25px rgba(0,0,0,0.6); }
     .youtube-wrap iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: none; }
 
-    /* תיבת קוד - עיצוב ספח כרטיס טיסה (Boarding Pass) */
+    /* תיבת קוד */
     .code-box { background: rgba(20,8,0,0.8); border: 2px dashed rgba(255,140,0,0.4); border-radius: 12px; margin-top: 10px; position: relative; overflow: hidden; padding: 32px 24px 28px; text-align: center; }
     .code-box::before { content: ''; position: absolute; top: 0; left: 15%; right: 15%; height: 2px; background: linear-gradient(90deg, transparent, rgba(255,160,0,0.8), rgba(0,210,190,0.5), transparent); }
     .code-box::after {
@@ -160,7 +160,7 @@
     .code-glow-ring { border-radius: 6px; padding: 3px; background: linear-gradient(135deg, rgba(255,100,0,0.25), rgba(0,180,170,0.15)); transition: background 0.3s; }
     .code-glow-ring.focused { background: linear-gradient(135deg, rgba(255,160,0,0.7), rgba(0,210,190,0.5)); }
     
-    /* שורת ההקלדה - עיצוב לוח טיסות דיגיטלי */
+    /* שורת ההקלדה */
     .code-input {
       display: block; background: #0a0500; border: 1px solid rgba(255,140,0,0.5); border-radius: 4px; padding: 14px 24px;
       color: #ffaa00; font-size: 28px; outline: none; direction: ltr; letter-spacing: 10px; text-align: center;
@@ -195,13 +195,11 @@
     
     .finish-wrap { text-align: center; padding: 20px; }
     .finish-trophy { font-size: 80px; margin-bottom: 20px; animation: popIn 1s cubic-bezier(0.34,1.56,0.64,1); }
-    .finish-title { color: #ffeb99; font-size: 32px; font-weight: 800; margin-bottom: 12px; text-shadow: 0 2px 10px rgba(255, 200, 0, 0.5);}
-    .finish-sub { color: rgba(255,240,200,0.85); font-size: 18px; line-height: 1.8; margin-bottom: 25px; }
     
-    /* לוח תוצאות סיום */
+    /* לוח תוצאות מורחב שיוצג רק בעמוד הניצחון */
     .finish-stats {
       background: rgba(0,0,0,0.5); border: 1px solid rgba(255,149,0,0.5); border-radius: 12px;
-      padding: 20px; text-align: right; max-width: 400px; margin: 0 auto 35px; box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);
+      padding: 20px; text-align: right; max-width: 450px; margin: 25px auto; box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);
     }
     .stat-row { font-size: 16px; color: #00c8be; margin-bottom: 12px; font-weight: bold; }
     .stat-row span { color: #fff; font-weight: normal; margin-right: 8px; }
@@ -273,7 +271,8 @@
     @media (max-width: 400px) { .map-grid { grid-template-columns: 1fr; } }
 
     /* תפריט מוזיקה */
-    .music-controls { display: flex; flex-direction: column; gap: 20px; align-items: center; margin-top: 10px; }
+    .music-controls { display: flex; flex-direction: column; gap: 15px; align-items: center; margin-top: 10px; }
+    .track-name-display { color: #ffcca0; font-size: 15px; font-weight: bold; text-align: center; background: rgba(255,255,255,0.05); padding: 8px; border-radius: 6px; width: 100%; border: 1px solid rgba(255,149,0,0.2); }
     .volume-slider { width: 100%; direction: ltr; cursor: pointer; }
     .music-toggle-btn { background: linear-gradient(180deg, #ff9500 0%, #d96000 100%); color: #fff; border: 1px solid #ff9500; padding: 12px 30px; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; font-family: inherit; width: 100%; text-shadow: 0 1px 2px rgba(0,0,0,0.5); box-shadow: 0 4px 6px rgba(0,0,0,0.3); transition: 0.2s;}
     .music-toggle-btn:hover { filter: brightness(1.1); transform: translateY(-2px); }
@@ -292,15 +291,14 @@
 <body>
 
 <div id="ambient-glow"></div>
-
-<div id="global-progress-wrap">
-  <div id="global-progress-fill"></div>
-</div>
-
+<div id="global-progress-wrap"><div id="global-progress-fill"></div></div>
 <div id="stars"></div>
 
 <button id="floating-map-btn" onclick="openMapModal()" title="הדרכון שלכם">🛂 הדרכון שלכם</button>
+
 <button id="floating-music-btn" onclick="openMusicModal()" title="מוזיקת רקע">🎵</button>
+<button id="floating-hint-btn" onclick="openHintsModal()" title="רמזים">💡</button>
+<button id="floating-a11y-btn" onclick="openA11yModal()" title="הגדרות ונגישות">♿</button>
 
 <div id="app" class="swipe-transition">
   <div class="page-header">
@@ -310,18 +308,17 @@
     <p class="page-desc" id="page-desc"></p>
   </div>
 
+  <div id="grand-finale-stats-container"></div>
+
   <div class="youtube-wrap" id="youtube-wrap" style="display:none">
-    <iframe id="youtube-iframe" allowfullscreen
-      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
+    <iframe id="youtube-iframe" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
   </div>
 
   <div class="audio-riddle" id="audio-riddle" style="display:none">
     <button class="audio-play-btn" id="riddle-play-btn" onclick="toggleRiddle()">▶</button>
     <div class="audio-track">
       <div class="audio-label">הקלטה מסווגת: פענחו את רצף התווים</div>
-      <div class="audio-progress-bar" id="riddle-progress-bar">
-        <div class="audio-progress-fill" id="riddle-fill"></div>
-      </div>
+      <div class="audio-progress-bar" id="riddle-progress-bar"><div class="audio-progress-fill" id="riddle-fill"></div></div>
       <div class="audio-time" id="riddle-time">0:00 / 0:15</div>
     </div>
   </div>
@@ -342,12 +339,7 @@
     <div class="code-input-wrap">
       <div class="code-hint-arrow">▼</div>
       <div class="code-glow-ring" id="glow-ring">
-        <input type="text" class="code-input" id="code-input"
-          oninput="clearError(); playTypeSound()"
-          onkeydown="if(event.key==='Enter')submitCode()"
-          onfocus="document.getElementById('glow-ring').classList.add('focused')"
-          onblur="document.getElementById('glow-ring').classList.remove('focused')"
-        />
+        <input type="text" class="code-input" id="code-input" oninput="clearError(); playTypeSound()" onkeydown="if(event.key==='Enter')submitCode()" onfocus="document.getElementById('glow-ring').classList.add('focused')" onblur="document.getElementById('glow-ring').classList.remove('focused')"/>
       </div>
       <button class="submit-btn" id="main-submit-btn" onclick="submitCode()">המשך לשלב הבא «</button>
     </div>
@@ -357,30 +349,15 @@
   <div class="crossroads-wrap" id="crossroads-box" style="display:none">
     <div class="crossroads-title">בחרו משימה אחת מבין השתיים:</div>
     <div class="choice-btns">
-      <button class="choice-btn" onclick="playClick();goChoice('A')">
-        <img class="choice-img" src="time.jpg" alt="חבל על הזמן"/>
-      </button>
-      <button class="choice-btn" onclick="playClick();goChoice('B')">
-        <img class="choice-img" src="show-time.jpg" alt="זמן להופעה"/>
-      </button>
+      <button class="choice-btn" onclick="playClick();goChoice('A')"><img class="choice-img" src="time.jpg" alt="חבל על הזמן"/></button>
+      <button class="choice-btn" onclick="playClick();goChoice('B')"><img class="choice-img" src="show-time.jpg" alt="זמן להופעה"/></button>
     </div>
   </div>
 
   <div class="finish-wrap" id="finish-box" style="display:none">
     <div class="finish-trophy">🏆</div>
-    <div class="finish-title" id="finish-title-text">כל הכבוד צוות!</div>
-    <div class="finish-sub" id="finish-sub-text">עברתם את כל המדינות, והצלחתם בכל המשימות! הגיע הזמן לטוס חזרה לישראל! הצוות הראשון שיחצה את קו הגמר יזכה במיליון! פיתחו את המעטפה האחרונה, שם תחכה לכם משימת הסיום!</div>
-    
-    <div class="finish-stats" id="finish-stats" style="display:none;">
-      <div class="stat-row">⏱️ זמן משחק כולל: <span id="stat-total-time"></span></div>
-      <div class="stat-row">💡 רמזים שנוצלו: <span id="stat-hints"></span></div>
-      <div class="stat-row">🔥 השלב המאתגר ביותר: <span id="stat-hardest"></span></div>
-    </div>
   </div>
 </div>
-
-<button id="floating-hint-btn" onclick="openHintsModal()" title="רמזים">💡</button>
-<button id="floating-a11y-btn" onclick="openA11yModal()" title="הגדרות ונגישות">♿</button>
 
 <div id="music-overlay" class="modal-overlay">
   <div class="modal-card">
@@ -388,6 +365,7 @@
     <h2 class="modal-title">פסקול המשחק 🎵</h2>
     <p style="font-size: 14px; color: #eee; text-align: center; margin-bottom: 15px;">הכניסו את עצמכם לאווירה של המירוץ העולמי.</p>
     <div class="music-controls">
+      <div id="track-name-display" class="track-name-display">אין מוזיקה בשלב זה</div>
       <button id="music-toggle-btn" class="music-toggle-btn" onclick="toggleMusic()">▶ הפעל מוזיקה</button>
       <div style="width: 100%; text-align: center; margin-top: 15px;">
         <label for="volume-slider" style="display: block; margin-bottom: 10px; color: #ffcca0; font-weight:bold;">עוצמת שמע</label>
@@ -668,6 +646,15 @@ function openMusicModal() {
   if (navigator.vibrate) navigator.vibrate(15);
   playHintOpen();
   document.getElementById('music-overlay').classList.add('show');
+  
+  const track = musicTracks[currentPage];
+  const display = document.getElementById('track-name-display');
+  if (track) {
+    const cleanName = track.replace('.mp3', '').replace(/-/g, ' ');
+    display.innerText = `מוזיקת רקע: ${cleanName}`;
+  } else {
+    display.innerText = "אין מוזיקה בשלב זה";
+  }
 }
 
 function closeMusicModal() {
@@ -708,7 +695,9 @@ function changeVolume(val) {
 
 // ===== מנוע אנליטיקה ו-State =====
 let maxStep = parseInt(localStorage.getItem('puzzleMaxStep')) || 1;
-let hintsUsed = parseInt(localStorage.getItem('puzzleHintsUsed')) || 0;
+let smallHintsUsed = parseInt(localStorage.getItem('puzzleHintsUsed')) || 0; // רמזים קטנים
+let solutionsUsed = parseInt(localStorage.getItem('puzzleSolutionsUsed')) || 0; // פתרונות מלאים
+let wrongCodes = parseInt(localStorage.getItem('puzzleWrongCodes')) || 0; // קודים שגויים
 let stageTimes = JSON.parse(localStorage.getItem('puzzleStageTimes')) || {};
 let currentStageStartTime = Date.now();
 
@@ -759,7 +748,7 @@ function formatTime(ms) {
 function loadPage(id) {
   saveCurrentStageTime();
   
-  // עצירת המוזיקה באופן מוחלט בכל מעבר עמוד (כדי לא להתנגש עם יוטיוב)
+  // עצירת המוזיקה באופן מוחלט בכל מעבר עמוד
   bgMusic.pause();
   isMusicPlaying = false;
   const musicBtnUi = document.getElementById('music-toggle-btn');
@@ -772,7 +761,6 @@ function loadPage(id) {
   currentStageStartTime = Date.now();
 
   const step = page.step || 1;
-  // הגנה: לא מעדכן שלב מקסימלי אם נכנסו בטעות לעמוד הנסתר
   if (step > maxStep && id !== 'grand_finale') {
     maxStep = step;
     localStorage.setItem('puzzleMaxStep', maxStep);
@@ -841,7 +829,7 @@ function loadPage(id) {
     riddlePlaying = false;
   }
 
-  // הסתרת כפתורי תפריט בעמוד הניצחון הנסתר (כולל כפתור מוזיקה)
+  // הסתרת כפתורי תפריט בעמוד הניצחון הנסתר
   const mapBtn = document.getElementById('floating-map-btn');
   const a11yBtn = document.getElementById('floating-a11y-btn');
   const musicBtn = document.getElementById('floating-music-btn');
@@ -849,6 +837,7 @@ function loadPage(id) {
     if (mapBtn) mapBtn.style.display = 'none';
     if (a11yBtn) a11yBtn.style.display = 'none';
     if (musicBtn) musicBtn.style.display = 'none';
+    if (hintBtn) hintBtn.style.display = 'none';
   } else {
     if (mapBtn) mapBtn.style.display = 'flex';
     if (a11yBtn) a11yBtn.style.display = 'flex';
@@ -860,8 +849,10 @@ function loadPage(id) {
   document.getElementById('code-box').style.display       = 'none';
   document.getElementById('crossroads-box').style.display = 'none';
   document.getElementById('finish-box').style.display     = 'none';
-  document.getElementById('finish-stats').style.display   = 'none';
 
+  const statsContainer = document.getElementById('grand-finale-stats-container');
+  statsContainer.innerHTML = ''; 
+  
   if (page.type === 'code') {
     document.getElementById('code-box').style.display = '';
     document.getElementById('code-input').value = '';
@@ -871,34 +862,47 @@ function loadPage(id) {
     document.getElementById('crossroads-box').style.display = '';
   } else if (page.type === 'finish') {
     document.getElementById('finish-box').style.display = '';
+  } else if (page.type === 'finale_hidden') {
     playVictoryEffects();
     
+    // בניית הסטטיסטיקה המלאה
     let totalMs = 0;
     let maxStageMs = 0;
+    let minStageMs = Infinity;
     let hardestStage = 'אין נתונים';
+    let fastestStage = 'אין נתונים';
     
     for (const [stageId, ms] of Object.entries(stageTimes)) {
+      if (stageId === 'crossroads' || stageId === 'finish' || stageId === 'grand_finale') continue;
       totalMs += ms;
       if (ms > maxStageMs && PAGES[stageId]) {
         maxStageMs = ms;
         hardestStage = PAGES[stageId].title;
       }
+      if (ms > 0 && ms < minStageMs && PAGES[stageId]) {
+        minStageMs = ms;
+        fastestStage = PAGES[stageId].title;
+      }
     }
+    if (minStageMs === Infinity) minStageMs = 0;
     
-    document.getElementById('stat-total-time').textContent = formatTime(totalMs);
-    document.getElementById('stat-hints').textContent = hintsUsed;
-    document.getElementById('stat-hardest').textContent = `${hardestStage} (${formatTime(maxStageMs)})`;
-    document.getElementById('finish-stats').style.display = 'block';
-  } else if (page.type === 'finale_hidden') {
-    playVictoryEffects();
+    statsContainer.innerHTML = `
+      <div class="finish-stats" style="display:block;">
+        <div class="stat-row">⏱️ זמן משחק כולל: <span>${formatTime(totalMs)}</span></div>
+        <div class="stat-row">🔥 השלב המאתגר ביותר: <span>${hardestStage} (${formatTime(maxStageMs)})</span></div>
+        <div class="stat-row">⚡ השלב המהיר ביותר: <span>${fastestStage} (${formatTime(minStageMs)})</span></div>
+        <div class="stat-row">💡 רמזים קטנים שנוצלו: <span>${smallHintsUsed}</span></div>
+        <div class="stat-row">🗝️ פתרונות מלאים שנחשפו: <span>${solutionsUsed}</span></div>
+        <div class="stat-row">🤦‍♂️ קודים שגויים שהוזנו: <span>${wrongCodes}</span></div>
+      </div>
+    `;
   }
   
   window.scrollTo(0, 0);
   
-  // תיקון אבטחה לאנימציית הטקסט בריפרש
   const descEl = document.getElementById('page-desc');
   descEl.innerHTML = page.desc;
-  descEl.style.opacity = 1; // גיבוי לשקיפות
+  descEl.style.opacity = 1; 
   
   if(!document.body.classList.contains('a11y-no-animations')) {
     descEl.style.animation = 'none';
@@ -921,7 +925,6 @@ function openMapModal() {
     const targetPageId = btn.getAttribute('data-page');
     const targetStep = PAGES[targetPageId].step;
     
-    // שמירת השם המקורי
     if (!btn.hasAttribute('data-original-text')) {
       btn.setAttribute('data-original-text', btn.innerHTML);
     }
@@ -960,6 +963,8 @@ function promptResetGame() {
 function resetGame() {
   localStorage.removeItem('puzzleMaxStep');
   localStorage.removeItem('puzzleHintsUsed');
+  localStorage.removeItem('puzzleSolutionsUsed');
+  localStorage.removeItem('puzzleWrongCodes');
   localStorage.removeItem('puzzleStageTimes');
   location.href = location.pathname; 
 }
@@ -975,7 +980,6 @@ function openHintsModal() {
   if (navigator.vibrate) navigator.vibrate(15);
   playHintOpen();
   
-  // עצירת הפעימה ברגע שהשחקן פותח את הרמז
   document.getElementById('floating-hint-btn').classList.remove('needs-hint');
   clearTimeout(idleHintTimer);
 
@@ -1070,22 +1074,29 @@ function revealHint(btn) {
   if (navigator.vibrate) navigator.vibrate(25);
   playHintReveal();
   
-  hintsUsed++;
-  localStorage.setItem('puzzleHintsUsed', hintsUsed);
+  const confirmDiv = btn.closest('.hint-confirm');
+  
+  // פיצול ספירת רמזים מול פתרונות מלאים
+  if (confirmDiv.classList.contains('solution-confirm')) {
+      solutionsUsed++;
+      localStorage.setItem('puzzleSolutionsUsed', solutionsUsed);
+  } else {
+      smallHintsUsed++;
+      localStorage.setItem('puzzleHintsUsed', smallHintsUsed);
+  }
 
   const allItems = document.querySelectorAll('#hints-container .hint-item');
   allItems.forEach(item => {
     const tBtn = item.querySelector('.hint-btn');
     const cDiv = item.querySelector('.hint-confirm');
     const xDiv = item.querySelector('.hint-text');
-    if (cDiv !== btn.closest('.hint-confirm')) {
+    if (cDiv !== confirmDiv) {
       tBtn.style.display = 'block';
       cDiv.style.display = 'none';
       xDiv.style.display = 'none';
     }
   });
 
-  const confirmDiv = btn.closest('.hint-confirm');
   confirmDiv.style.display = 'none';
   confirmDiv.nextElementSibling.style.display = 'block';
 }
@@ -1182,7 +1193,6 @@ function submitCode() {
   const val  = document.getElementById('code-input').value.trim().toUpperCase();
   const btn = document.getElementById('main-submit-btn'); 
   
-  // אפקט ההשהייה והטשטוש
   btn.innerHTML = 'מאמת נתונים... ⏳';
   btn.classList.add('verifying-state');
   document.getElementById('app').classList.add('suspense-mode'); 
@@ -1214,6 +1224,11 @@ function submitCode() {
       }
     } else {
       playError();
+      
+      // ספירת קודים שגויים (מדד האופס)
+      wrongCodes++;
+      localStorage.setItem('puzzleWrongCodes', wrongCodes);
+
       const inp = document.getElementById('code-input');
       if(!document.body.classList.contains('a11y-no-animations')) {
         inp.classList.add('error', 'shaking');
