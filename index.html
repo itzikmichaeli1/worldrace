@@ -89,7 +89,7 @@
     }
     #floating-map-btn:hover { background: #00c8be; color: #000; transform: scale(1.05); }
 
-    /* כפתור מוזיקה */
+    /* כפתור מוזיקה (חדש) */
     #floating-music-btn {
       position: fixed; top: 15px; right: 15px; z-index: 1000; height: 36px; width: 36px; border-radius: 18px;
       background: rgba(20,10,0,0.85); border: 1px solid #ff9500; color: #ff9500; font-size: 16px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 10px rgba(0,0,0,0.5); transition: 0.2s;
@@ -290,21 +290,6 @@
   </style>
 </head>
 <body>
-
-<script>
-  function unlockAudio() {
-    const ctx = getAC();
-    if(ctx.state === 'suspended') ctx.resume();
-    document.body.removeEventListener('click', unlockAudio);
-    document.body.removeEventListener('touchstart', unlockAudio);
-  }
-  document.body.addEventListener('click', unlockAudio);
-  document.body.addEventListener('touchstart', unlockAudio);
-  
-  function safeVibrate(val) {
-    try { if (navigator.vibrate) navigator.vibrate(val); } catch(e){}
-  }
-</script>
 
 <div id="ambient-glow"></div>
 
@@ -663,11 +648,20 @@ let idleHintTimer = null;
 // ===== מערכת סאונד רקע =====
 const bgMusic = document.getElementById('bg-music');
 let isMusicPlaying = false;
-let isFading = false; 
 
-// הגדרת השיר הראשון
+// הפלייליסט המלא והמעודכן
 const musicTracks = {
-  'opening': 'Leaving-On-A-Jet-Plane.mp3'
+  'opening': 'Leaving-On-A-Jet-Plane.mp3',
+  'london': 'Spice-Girls-Say-Youll-Be-There.mp3',
+  'time-first': '9-to-5.mp3',
+  'time-second': '9-to-5.mp3',
+  'boarding': 'Leaving-On-A-Jet-Plane.mp3',
+  'zoo': 'American-Pie.mp3',
+  'museum': 'Mozart-Symphony-40.mp3',
+  'tajmahal': 'Mozart-Symphony-40.mp3',
+  'airport': 'Robbie-Williams-Supreme.mp3',
+  'market': 'Girls-Like-You-Indian-Version.mp3',
+  'finish': 'ilanit-el-haderech.mp3'
 };
 
 function openMusicModal() {
@@ -703,59 +697,14 @@ function toggleMusic() {
         btn.innerHTML = '⏸ השהה מוזיקה';
       }).catch(e => console.log("Playback blocked:", e));
     } else {
-       alert("אין מוזיקת רקע מוגדרת לשלב זה (עדיין).");
+       alert("אין מוזיקת רקע מוגדרת לשלב זה.");
     }
   }
 }
 
 function changeVolume(val) {
-  if(!isFading) {
-     bgMusic.volume = val;
-  }
+   bgMusic.volume = val;
 }
-
-function fadeToNewTrack(newSrc) {
-    if (!newSrc || isFading || bgMusic.src.endsWith(newSrc)) return;
-    
-    const targetVolume = document.getElementById('volume-slider').value;
-    
-    if (!isMusicPlaying) {
-        bgMusic.src = newSrc;
-        bgMusic.volume = targetVolume;
-        return;
-    }
-
-    isFading = true;
-    let vol = bgMusic.volume;
-    const fadeOut = setInterval(() => {
-        if (vol > 0.05) {
-            vol -= 0.05;
-            bgMusic.volume = vol;
-        } else {
-            clearInterval(fadeOut);
-            bgMusic.pause();
-            bgMusic.src = newSrc;
-            bgMusic.play().then(() => {
-                let volIn = 0;
-                bgMusic.volume = volIn;
-                const fadeIn = setInterval(() => {
-                    if (volIn < targetVolume - 0.05) {
-                        volIn += 0.05;
-                        bgMusic.volume = volIn;
-                    } else {
-                        bgMusic.volume = targetVolume;
-                        isFading = false;
-                        clearInterval(fadeIn);
-                    }
-                }, 100);
-            }).catch(e => {
-                isFading = false;
-                console.log(e);
-            });
-        }
-    }, 100);
-}
-
 
 // ===== מנוע אנליטיקה ו-State =====
 let maxStep = parseInt(localStorage.getItem('puzzleMaxStep')) || 1;
@@ -809,6 +758,12 @@ function formatTime(ms) {
 
 function loadPage(id) {
   saveCurrentStageTime();
+  
+  // עצירת המוזיקה באופן מוחלט בכל מעבר עמוד (כדי לא להתנגש עם יוטיוב)
+  bgMusic.pause();
+  isMusicPlaying = false;
+  const musicBtnUi = document.getElementById('music-toggle-btn');
+  if(musicBtnUi) musicBtnUi.innerHTML = '▶ הפעל מוזיקה';
   
   currentPage = id;
   const page  = PAGES[id];
@@ -937,11 +892,6 @@ function loadPage(id) {
   } else if (page.type === 'finale_hidden') {
     playVictoryEffects();
   }
-
-  // הפעלת מעבר סאונד אם נדרש והמוזיקה דולקת
-  if (isMusicPlaying && musicTracks[id]) {
-     fadeToNewTrack(musicTracks[id]);
-  }
   
   window.scrollTo(0, 0);
   
@@ -971,7 +921,7 @@ function openMapModal() {
     const targetPageId = btn.getAttribute('data-page');
     const targetStep = PAGES[targetPageId].step;
     
-    // שמירת השם המקורי כדי שלא יאבד ספוילר בעתיד
+    // שמירת השם המקורי
     if (!btn.hasAttribute('data-original-text')) {
       btn.setAttribute('data-original-text', btn.innerHTML);
     }
@@ -1025,6 +975,7 @@ function openHintsModal() {
   if (navigator.vibrate) navigator.vibrate(15);
   playHintOpen();
   
+  // עצירת הפעימה ברגע שהשחקן פותח את הרמז
   document.getElementById('floating-hint-btn').classList.remove('needs-hint');
   clearTimeout(idleHintTimer);
 
