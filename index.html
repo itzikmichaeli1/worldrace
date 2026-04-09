@@ -22,6 +22,13 @@
       touch-action: manipulation;
     }
 
+    /* הילה חמימה שמתגברת ככל שמתקדמים במשחק */
+    #ambient-glow {
+      position: fixed; inset: 0; pointer-events: none; z-index: 0; 
+      background: radial-gradient(circle at 50% 120%, rgba(255, 140, 0, 0) 0%, transparent 70%);
+      transition: background 1.5s ease;
+    }
+
     /* טקסטורת מפה טופוגרפית */
     body::before {
       content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
@@ -36,7 +43,7 @@
 
     /* ===== הגדרות נגישות ===== */
     body.a11y-high-contrast { background-image: none !important; background-color: #000000 !important; }
-    body.a11y-high-contrast::before { display: none !important; } 
+    body.a11y-high-contrast::before, body.a11y-high-contrast #ambient-glow { display: none !important; } 
     body.a11y-high-contrast * { box-shadow: none !important; text-shadow: none !important; border-color: #ffffff !important; }
     body.a11y-large-text { font-size: 120% !important; }
     body.a11y-large-text .page-title { font-size: clamp(26px, 6vw, 42px) !important; }
@@ -61,6 +68,14 @@
 
     #app { position: relative; z-index: 1; max-width: 740px; margin: 0 auto; padding: 54px 20px 100px; }
 
+    /* אפקט מתח בזמן אימות קוד */
+    .suspense-mode .page-header, .suspense-mode .youtube-wrap, .suspense-mode .audio-riddle, .suspense-mode #piano-section, .suspense-mode .crossroads-wrap {
+      opacity: 0.3; filter: grayscale(50%) blur(1px); transition: all 0.5s ease; pointer-events: none;
+    }
+    .suspense-mode #code-box {
+      transform: scale(1.03); box-shadow: 0 10px 40px rgba(255, 150, 0, 0.4); border-color: rgba(255,150,0,0.8); transition: all 0.5s ease; z-index: 10;
+    }
+
     /* אנימציית Swipe במקום Fade */
     .swipe-transition { animation: swipePage 0.6s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
     @keyframes swipePage { 0% { opacity: 0; transform: translateX(-40px); } 100% { opacity: 1; transform: translateX(0); } }
@@ -74,13 +89,21 @@
     }
     #floating-map-btn:hover { background: #00c8be; color: #000; transform: scale(1.05); }
 
-    /* כפתור רמזים - עיצוב מעטפת מירוץ צהובה-אדומה */
+    /* כפתור רמזים - נורה */
     #floating-hint-btn {
       position: fixed; bottom: 20px; left: 20px; z-index: 100; width: 56px; height: 56px; border-radius: 50%;
       background: linear-gradient(135deg, #ffd54f, #fbc02d); border: 2.5px solid #d32f2f; color: #b71c1c; box-shadow: 0 4px 15px rgba(211,47,47,0.4);
       font-size: 24px; cursor: pointer; display: none; transition: transform 0.2s, box-shadow 0.2s; align-items: center; justify-content: center;
     }
     #floating-hint-btn:hover { transform: scale(1.1); box-shadow: 0 6px 20px rgba(211,47,47,0.6); }
+
+    /* פעימות לנורה במצב תקיעות */
+    @keyframes gentlePulse {
+      0% { transform: scale(1); box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4); }
+      50% { transform: scale(1.1); box-shadow: 0 4px 25px rgba(255, 215, 0, 0.8); border-color: #fff; }
+      100% { transform: scale(1); box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4); }
+    }
+    .needs-hint { animation: gentlePulse 2s infinite !important; border-color: #ffeb3b !important; }
 
     #floating-a11y-btn {
       position: fixed; bottom: 20px; right: 20px; z-index: 100; width: 50px; height: 50px; border-radius: 50%;
@@ -179,7 +202,7 @@
     .confetti { position: fixed; width: 10px; height: 10px; top: -20px; z-index: 9999; animation: confettiFall 4s linear forwards; pointer-events: none; }
     @keyframes confettiFall { 0% { top: -10px; transform: rotate(0deg) scale(1); } 100% { top: 100vh; transform: rotate(720deg) scale(0.5); } }
 
-    .audio-riddle { background: linear-gradient(145deg, rgba(40,80,140,0.4), rgba(15,35,70,0.6)); border: 1px solid rgba(80,150,220,0.5); border-radius: 12px; padding: 18px 20px; margin-bottom: 24px; display: flex; align-items: center; gap: 16px; box-shadow: 0 8px 20px rgba(0,0,0,0.5), inset 0 2px 5px rgba(255,255,255,0.1); position: relative; z-index: 2; }
+    .audio-riddle { background: linear-gradient(145deg, rgba(40,80,140,0.4), rgba(15,35,70,0.6)); border: 1px solid rgba(80,150,220,0.5); border-radius: 12px; padding: 18px 20px; margin-bottom: 24px; display: flex; align-items: center; gap: 16px; box-shadow: 0 8px 20px rgba(0,0,0,0.5), inset 0 2px 5px rgba(255,255,255,0.1); position: relative; z-index: 2; transition: all 0.5s ease;}
     .audio-play-btn { width: 46px; height: 46px; border-radius: 50%; background: linear-gradient(180deg, rgba(60,130,220,0.5), rgba(30,80,160,0.7)); border: 1px solid rgba(100,170,240,0.6); color: #fff; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; transition: all 0.15s; flex-shrink: 0; box-shadow: 0 4px 10px rgba(0,0,0,0.4), inset 0 2px 4px rgba(255,255,255,0.2); text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
     .audio-track { flex: 1; }
     .audio-label { font-size: 13px; color: rgba(140,200,255,0.85); margin-bottom: 6px; font-weight: 600; text-align: center; }
@@ -238,7 +261,6 @@
     .map-btn { background: #221100; border: 1px solid #00c8be; color: #ffe8c0; padding: 10px; border-radius: 8px; font-family: inherit; font-size: 13.5px; cursor: pointer; transition: 0.2s; font-weight: bold; text-align: right;}
     .map-btn:hover { background: #00c8be; color: #000; }
     .map-btn.locked { background: #111; border-color: #333; color: #555; cursor: not-allowed; }
-    .map-btn.locked::before { content: '🔒 '; }
     .map-btn.locked:hover { background: #111; color: #555; transform: none; }
     @media (max-width: 400px) { .map-grid { grid-template-columns: 1fr; } }
 
@@ -254,6 +276,8 @@
   </style>
 </head>
 <body>
+
+<div id="ambient-glow"></div>
 
 <div id="global-progress-wrap">
   <div id="global-progress-fill"></div>
@@ -310,7 +334,7 @@
           onblur="document.getElementById('glow-ring').classList.remove('focused')"
         />
       </div>
-      <button class="submit-btn" onclick="submitCode()">המשך לשלב הבא «</button>
+      <button class="submit-btn" id="main-submit-btn" onclick="submitCode()">המשך לשלב הבא «</button>
     </div>
     <div class="error-msg" id="error-msg">✗ קוד שגוי — נסו שוב!</div>
   </div>
@@ -342,13 +366,13 @@
   </div>
 </div>
 
-<button id="floating-hint-btn" onclick="openHintsModal()" title="רמזים">✉️</button>
+<button id="floating-hint-btn" onclick="openHintsModal()" title="רמזים">💡</button>
 <button id="floating-a11y-btn" onclick="openA11yModal()" title="הגדרות ונגישות">♿</button>
 
 <div id="hints-overlay" class="modal-overlay">
   <div class="modal-card">
     <button class="close-modal-btn" onclick="closeHintsModal()">✖</button>
-    <h2 class="modal-title">מעטפת עזרה ✉️</h2>
+    <h2 class="modal-title">רמזים 💡</h2>
     <div id="hints-container"></div>
   </div>
 </div>
@@ -589,6 +613,7 @@ const PAGES = {
 
 let currentPage = null;
 let pendingNext  = null;
+let idleHintTimer = null; // טיימר שקט לרמז
 
 // ===== מנוע אנליטיקה ו-State =====
 let maxStep = parseInt(localStorage.getItem('puzzleMaxStep')) || 1;
@@ -650,6 +675,7 @@ function loadPage(id) {
   currentStageStartTime = Date.now();
 
   const step = page.step || 1;
+  // אל תשדרג את maxStep אם נכנסים בטעות לעמוד הנסתר לפני הזמן
   if (step > maxStep && id !== 'grand_finale') {
     maxStep = step;
     localStorage.setItem('puzzleMaxStep', maxStep);
@@ -661,6 +687,10 @@ function loadPage(id) {
   document.title = page.title + ' — פאזלס חדרי בריחה';
   document.getElementById('page-title').textContent = page.title;
   
+  // עדכון גלואו הדרגתי
+  const glowOpacity = (step / 13) * 0.15;
+  document.getElementById('ambient-glow').style.background = `radial-gradient(circle at 50% 120%, rgba(255, 140, 0, ${glowOpacity}) 0%, transparent 70%)`;
+
   document.getElementById('global-progress-fill').style.width = ((step / 13) * 100) + '%';
   
   if(!document.body.classList.contains('a11y-high-contrast')) {
@@ -684,8 +714,18 @@ function loadPage(id) {
   }
 
   const hintBtn = document.getElementById('floating-hint-btn');
+  // איפוס אנימציית הטיימר של הרמז בכל מעבר עמוד
+  clearTimeout(idleHintTimer);
+  hintBtn.classList.remove('needs-hint');
+  
   if (page.hints || page.solution) {
     hintBtn.style.display = 'flex';
+    // הפעלת פעימה זהובה אחרי 5 דקות של חוסר מעש
+    if(!document.body.classList.contains('a11y-no-animations')) {
+      idleHintTimer = setTimeout(() => {
+        hintBtn.classList.add('needs-hint');
+      }, 5 * 60 * 1000); 
+    }
   } else {
     hintBtn.style.display = 'none';
   }
@@ -706,7 +746,7 @@ function loadPage(id) {
     riddlePlaying = false;
   }
 
-  // הסתרת כפתורי התפריט בעמוד הנסתר
+  // הסתרת כפתורי התפריט אם זה העמוד הנסתר
   const mapBtn = document.getElementById('floating-map-btn');
   const a11yBtn = document.getElementById('floating-a11y-btn');
   if (id === 'grand_finale') {
@@ -735,6 +775,7 @@ function loadPage(id) {
     document.getElementById('finish-box').style.display = '';
     playVictoryEffects();
     
+    // יצירת לוח התוצאות
     let totalMs = 0;
     let maxStageMs = 0;
     let hardestStage = 'אין נתונים';
@@ -752,7 +793,7 @@ function loadPage(id) {
     document.getElementById('stat-hardest').textContent = `${hardestStage} (${formatTime(maxStageMs)})`;
     document.getElementById('finish-stats').style.display = 'block';
   } else if (page.type === 'finale_hidden') {
-    // הפעלת זיקוקים בעמוד הנסתר
+    // הפעלת זיקוקים גם בעמוד הנסתר
     playVictoryEffects();
   }
   
@@ -771,27 +812,38 @@ function loadPage(id) {
   }
 }
 
-// ===== ניהול מפה (שחזור) =====
+// ===== ניהול מפה חכם ומוגן מספוילרים =====
 function openMapModal() {
   if (navigator.vibrate) navigator.vibrate(15);
-  playHintOpen();
+  playHintOpen(); 
   
   const mapBtns = document.querySelectorAll('.map-btn');
+  let stepCounter = 1;
+  
   mapBtns.forEach(btn => {
     const targetPageId = btn.getAttribute('data-page');
     const targetStep = PAGES[targetPageId].step;
     
+    // שמירת השם המקורי
+    if (!btn.hasAttribute('data-original-text')) {
+      btn.setAttribute('data-original-text', btn.innerHTML);
+    }
+    
     if (targetStep > maxStep) {
       btn.classList.add('locked');
       btn.onclick = null;
+      btn.innerHTML = `🔒 יעד מסווג (${stepCounter})`;
     } else {
       btn.classList.remove('locked');
       btn.onclick = () => jumpTo(targetPageId);
+      btn.innerHTML = btn.getAttribute('data-original-text');
     }
+    stepCounter++;
   });
 
   document.getElementById('map-overlay').classList.add('show');
 }
+
 function closeMapModal() {
   if (navigator.vibrate) navigator.vibrate(10);
   playHintClose();
@@ -802,12 +854,14 @@ function jumpTo(pageId) {
   loadPage(pageId);
 }
 
+// ניקוי נתונים לתחילת משחק חדש עם אישור
 function promptResetGame() {
   if (confirm("פעולה זו תמחק את ההתקדמות שלכם ותתחיל משחק חדש. בטוחים?")) {
     resetGame();
   }
 }
 
+// ניקוי אוטומטי לעמוד הסיום
 function resetGame() {
   localStorage.removeItem('puzzleMaxStep');
   localStorage.removeItem('puzzleHintsUsed');
@@ -822,9 +876,15 @@ function playHintReveal() { try { const c=getAC(); const now=c.currentTime; [104
 function playHintClose() { try { const c=getAC(), o=c.createOscillator(), g=c.createGain(); o.type='sine'; o.frequency.setValueAtTime(400, c.currentTime); o.frequency.exponentialRampToValueAtTime(100, c.currentTime+0.15); o.connect(g); g.connect(c.destination); g.gain.setValueAtTime(0, c.currentTime); g.gain.linearRampToValueAtTime(0.1, c.currentTime+0.02); g.gain.exponentialRampToValueAtTime(0.001, c.currentTime+0.2); o.start(); o.stop(c.currentTime+0.25); } catch(e){} }
 function playTypeSound() { if (navigator.vibrate) navigator.vibrate(5); try { const ctx=getAC(); const now=ctx.currentTime; const osc=ctx.createOscillator(); const gain=ctx.createGain(); osc.type='sine'; osc.frequency.setValueAtTime(600, now); osc.frequency.exponentialRampToValueAtTime(300, now+0.05); osc.connect(gain); gain.connect(ctx.destination); gain.gain.setValueAtTime(0, now); gain.gain.linearRampToValueAtTime(0.08, now+0.01); gain.gain.exponentialRampToValueAtTime(0.001, now+0.05); osc.start(now); osc.stop(now+0.06); } catch(e){} }
 
+// ===== מערכת רמזים דינמית =====
 function openHintsModal() {
   if (navigator.vibrate) navigator.vibrate(15);
   playHintOpen();
+  
+  // עצירת הפעימה אם היא דולקת
+  document.getElementById('floating-hint-btn').classList.remove('needs-hint');
+  clearTimeout(idleHintTimer);
+  
   const page = PAGES[currentPage];
   if (!page || (!page.hints && !page.solution)) return;
   
@@ -916,6 +976,7 @@ function revealHint(btn) {
   if (navigator.vibrate) navigator.vibrate(25);
   playHintReveal();
   
+  // הוספת ספירת רמז
   hintsUsed++;
   localStorage.setItem('puzzleHintsUsed', hintsUsed);
 
@@ -936,74 +997,27 @@ function revealHint(btn) {
   confirmDiv.nextElementSibling.style.display = 'block';
 }
 
-const AudioCtx = window.AudioContext || window.webkitAudioContext;
-let _ac = null;
-function getAC() { if (!_ac) _ac = new AudioCtx(); return _ac; }
-
-function playClick() {
-  if (navigator.vibrate) navigator.vibrate(15);
-  try { const c=getAC(),o=c.createOscillator(),g=c.createGain(); o.connect(g); g.connect(c.destination); o.frequency.value=700; g.gain.setValueAtTime(0.1,c.currentTime); g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+0.07); o.start(); o.stop(c.currentTime+0.07); } catch(e) {}
-}
-function playError() {
-  if (navigator.vibrate) navigator.vibrate([50, 50, 50]);
-  try { const c=getAC(); [220,180].forEach((f,i)=>{ const o=c.createOscillator(),g=c.createGain(); o.type='sawtooth'; o.connect(g); g.connect(c.destination); o.frequency.value=f; g.gain.setValueAtTime(0.18,c.currentTime+i*0.13); g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+i*0.13+0.15); o.start(c.currentTime+i*0.13); o.stop(c.currentTime+i*0.13+0.16); }); } catch(e) {}
-}
-
-function playStampSound() {
-  if (navigator.vibrate) navigator.vibrate([100, 200, 300]); 
-  try { 
-    const ctx = getAC();
-    const now = ctx.currentTime;
-    
-    const freqs = [261.63, 329.63, 392.00, 493.88, 587.33]; 
-
-    freqs.forEach((freq, i) => {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = i % 2 === 0 ? 'triangle' : 'sine'; 
-      osc.frequency.value = freq;
-
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-
-      gain.gain.setValueAtTime(0, now);
-      gain.gain.linearRampToValueAtTime(0.3 / freqs.length, now + 0.2); 
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 4.0); 
-
-      osc.start(now);
-      osc.stop(now + 4.5);
-    });
-
-    const bassOsc = ctx.createOscillator();
-    const bassGain = ctx.createGain();
-    bassOsc.type = 'sine';
-    bassOsc.frequency.setValueAtTime(100, now);
-    bassOsc.frequency.exponentialRampToValueAtTime(30, now + 1.5);
-    bassOsc.connect(bassGain);
-    bassGain.connect(ctx.destination);
-    
-    bassGain.gain.setValueAtTime(0, now);
-    bassGain.gain.linearRampToValueAtTime(0.5, now + 0.3);
-    bassGain.gain.exponentialRampToValueAtTime(0.001, now + 3.0);
-    
-    bassOsc.start(now);
-    bassOsc.stop(now + 3.5);
-
-  } catch(e){}
-}
+// משתנה למניעת לחיצות כפולות (Anti-Spam)
+let isVerifying = false; 
 
 function submitCode() {
+  if (window.isVerifying) return; // הגנה: אם התיבה באימות, אל תבצע כלום
+  window.isVerifying = true; // נועל את הכפתור
+
   playClick();
   const page = PAGES[currentPage];
   const val  = document.getElementById('code-input').value.trim().toUpperCase();
-  const btn = document.querySelector('.submit-btn');
+  const btn = document.getElementById('main-submit-btn'); 
   
+  // אפקט ההשהייה והטשטוש
   btn.innerHTML = 'מאמת נתונים... ⏳';
   btn.classList.add('verifying-state');
+  document.getElementById('app').classList.add('suspense-mode'); 
   
   setTimeout(() => {
     btn.innerHTML = 'המשך לשלב הבא «';
     btn.classList.remove('verifying-state');
+    document.getElementById('app').classList.remove('suspense-mode'); 
     
     if (val === page.code.toUpperCase()) {
       playStampSound();
@@ -1017,10 +1031,12 @@ function submitCode() {
         setTimeout(() => { 
           box.classList.remove('stamp-approved');
           pendingNext = page.next;
+          window.isVerifying = false; // שחרור רגע לפני מעבר
           loadPage(pendingNext); 
         }, 2000); 
       } else {
         pendingNext = page.next;
+        window.isVerifying = false; // שחרור
         loadPage(pendingNext);
       }
     } else {
@@ -1028,9 +1044,13 @@ function submitCode() {
       const inp = document.getElementById('code-input');
       if(!document.body.classList.contains('a11y-no-animations')) {
         inp.classList.add('error', 'shaking');
-        setTimeout(() => inp.classList.remove('shaking'), 600);
+        setTimeout(() => {
+            inp.classList.remove('shaking');
+            window.isVerifying = false; // שחרור כפתור
+        }, 600);
       } else {
         inp.classList.add('error');
+        window.isVerifying = false; // שחרור כפתור
       }
       document.getElementById('error-msg').style.display = 'block';
     }
@@ -1047,6 +1067,7 @@ function goChoice(choice) {
   loadPage(choice === 'A' ? page.choiceA : page.choiceB);
 }
 
+// ===== אודיו חידה =====
 let riddlePlaying = false;
 let riddleInterval = null;
 let riddleElapsed = 0; 
@@ -1143,6 +1164,7 @@ pBar.addEventListener('touchstart', e => { isDraggingBar = true; handleSeek(e); 
 window.addEventListener('touchmove', e => { if(isDraggingBar) handleSeek(e); }, {passive:true});
 window.addEventListener('touchend', () => { isDraggingBar = false; });
 
+// ===== כוכבים =====
 (function() {
   const c = document.getElementById('stars');
   for (let i = 0; i < 90; i++) {
@@ -1157,6 +1179,7 @@ window.addEventListener('touchend', () => { isDraggingBar = false; });
   }
 })();
 
+// ===== פסנתר 3D =====
 (function(){
   const NOTES = [
     {n:'C2', f:65.41,  b:false}, {n:'C#2',f:69.30,  b:true}, {n:'D2', f:73.42,  b:false}, {n:'D#2',f:77.78,  b:true}, 
