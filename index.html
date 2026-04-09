@@ -74,13 +74,21 @@
     }
     #floating-map-btn:hover { background: #00c8be; color: #000; transform: scale(1.05); }
 
-    /* כפתור רמזים - עיצוב מעטפת מירוץ צהובה-אדומה */
+    /* כפתור רמזים - עיצוב מעטפת מירוץ צהובה-אדומה (כעת נורה) */
     #floating-hint-btn {
       position: fixed; bottom: 20px; left: 20px; z-index: 100; width: 56px; height: 56px; border-radius: 50%;
       background: linear-gradient(135deg, #ffd54f, #fbc02d); border: 2.5px solid #d32f2f; color: #b71c1c; box-shadow: 0 4px 15px rgba(211,47,47,0.4);
       font-size: 24px; cursor: pointer; display: none; transition: transform 0.2s, box-shadow 0.2s; align-items: center; justify-content: center;
     }
     #floating-hint-btn:hover { transform: scale(1.1); box-shadow: 0 6px 20px rgba(211,47,47,0.6); }
+
+    /* האנימציה לנורה פועמת (מופעלת רק אחרי 5 דקות) */
+    @keyframes gentlePulse {
+      0% { transform: scale(1); box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4); }
+      50% { transform: scale(1.1); box-shadow: 0 4px 25px rgba(255, 215, 0, 0.8); border-color: #fff; }
+      100% { transform: scale(1); box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4); }
+    }
+    .needs-hint { animation: gentlePulse 2s infinite !important; border-color: #ffeb3b !important; }
 
     #floating-a11y-btn {
       position: fixed; bottom: 20px; right: 20px; z-index: 100; width: 50px; height: 50px; border-radius: 50%;
@@ -342,7 +350,7 @@
   </div>
 </div>
 
-<button id="floating-hint-btn" onclick="openHintsModal()" title="רמזים">✉️</button>
+<button id="floating-hint-btn" onclick="openHintsModal()" title="רמזים">💡</button>
 <button id="floating-a11y-btn" onclick="openA11yModal()" title="הגדרות ונגישות">♿</button>
 
 <div id="hints-overlay" class="modal-overlay">
@@ -574,21 +582,12 @@ const PAGES = {
       "אם תענו נכון על כל השאלות תקבלו סמלים שירכיבו משפט שיגיד מה לעשות עם הפנס האולטרה סגול. האירו במקום המתאים והפתרון יחשף."
     ],
     solution: "התשובות לשאלות הן: נכון, לא נכון, נכון, נכון, נכון, לא נכון, נכון, לא נכון.\nהמשפט המתקבל הוא \"הרימו את הדופן הימנית הפנימית של קופסת המשחק\".\nאם תבדקו במקום זה, תמצאו את המפתח לקופסא האחרונה במשחק."
-  },
-  
-  /* ===== העמוד הנסתר: סרטון הניצחון הגדול ===== */
-  "grand_finale": {
-    step: 13,
-    bg: "radial-gradient(ellipse at 25% 15%, #3a2200 0%, #151100 40%, #0a0800 100%)",
-    title: "המיליון שלכם!",
-    desc: "כל הכבוד צוות!\n\nהשלמתם את כל המשימות בהצלחה, לפתוח את הקופסה האחרונה ולהשלים את המירוץ העולמי!",
-    youtube: "IzSNc7kqjJw",
-    type: "finale_hidden"
   }
 };
 
 let currentPage = null;
 let pendingNext  = null;
+let idleHintTimer = null; // הוספתי משתנה לטיימר הרמזים הנסתר
 
 // ===== מנוע אנליטיקה ו-State =====
 let maxStep = parseInt(localStorage.getItem('puzzleMaxStep')) || 1;
@@ -626,7 +625,7 @@ function toggleA11y(className, isChecked) {
 }
 
 function saveCurrentStageTime() {
-  if (currentPage && currentPage !== 'finish' && currentPage !== 'grand_finale') {
+  if (currentPage && currentPage !== 'finish') {
     const timeSpent = Date.now() - currentStageStartTime;
     stageTimes[currentPage] = (stageTimes[currentPage] || 0) + timeSpent;
     localStorage.setItem('puzzleStageTimes', JSON.stringify(stageTimes));
@@ -650,7 +649,7 @@ function loadPage(id) {
   currentStageStartTime = Date.now();
 
   const step = page.step || 1;
-  if (step > maxStep && id !== 'grand_finale') {
+  if (step > maxStep) {
     maxStep = step;
     localStorage.setItem('puzzleMaxStep', maxStep);
   }
@@ -684,8 +683,19 @@ function loadPage(id) {
   }
 
   const hintBtn = document.getElementById('floating-hint-btn');
+  
+  // איפוס הטיימר הנסתר במעבר עמוד
+  clearTimeout(idleHintTimer);
+  hintBtn.classList.remove('needs-hint');
+  
   if (page.hints || page.solution) {
     hintBtn.style.display = 'flex';
+    // הפעלת הפעימה הזהובה אחרי 5 דקות של חוסר מעש
+    if(!document.body.classList.contains('a11y-no-animations')) {
+      idleHintTimer = setTimeout(() => {
+        hintBtn.classList.add('needs-hint');
+      }, 5 * 60 * 1000); 
+    }
   } else {
     hintBtn.style.display = 'none';
   }
@@ -704,17 +714,6 @@ function loadPage(id) {
     ar.style.display = 'none';
     clearInterval(riddleInterval);
     riddlePlaying = false;
-  }
-
-  // הסתרת כפתורי התפריט בעמוד הנסתר
-  const mapBtn = document.getElementById('floating-map-btn');
-  const a11yBtn = document.getElementById('floating-a11y-btn');
-  if (id === 'grand_finale') {
-    if (mapBtn) mapBtn.style.display = 'none';
-    if (a11yBtn) a11yBtn.style.display = 'none';
-  } else {
-    if (mapBtn) mapBtn.style.display = 'flex';
-    if (a11yBtn) a11yBtn.style.display = 'flex';
   }
 
   document.getElementById('piano-section').style.display = page.piano ? '' : 'none';
@@ -751,27 +750,21 @@ function loadPage(id) {
     document.getElementById('stat-hints').textContent = hintsUsed;
     document.getElementById('stat-hardest').textContent = `${hardestStage} (${formatTime(maxStageMs)})`;
     document.getElementById('finish-stats').style.display = 'block';
-  } else if (page.type === 'finale_hidden') {
-    // הפעלת זיקוקים בעמוד הנסתר
-    playVictoryEffects();
   }
   
   window.scrollTo(0, 0);
   
-  // תיקון אבטחה לאנימציית הטקסט בריפרש
   const descEl = document.getElementById('page-desc');
   descEl.innerHTML = page.desc;
-  descEl.style.opacity = 1; // גיבוי לשקיפות
-  
   if(!document.body.classList.contains('a11y-no-animations')) {
     descEl.style.animation = 'none';
-    setTimeout(() => {
-      descEl.style.animation = 'slideUpFade 0.8s ease-out forwards';
-    }, 10);
+    void descEl.offsetWidth; 
+    descEl.style.animation = 'slideUpFade 0.8s ease-out forwards';
+  } else {
+    descEl.style.opacity = 1;
   }
 }
 
-// ===== ניהול מפה (שחזור) =====
 function openMapModal() {
   if (navigator.vibrate) navigator.vibrate(15);
   playHintOpen();
@@ -815,7 +808,6 @@ function resetGame() {
   location.href = location.pathname; 
 }
 
-// ===== חיוויי סאונד לממשק =====
 function playHintOpen() { try { const c=getAC(), o=c.createOscillator(), g=c.createGain(); o.type='sine'; o.frequency.setValueAtTime(880, c.currentTime); o.connect(g); g.connect(c.destination); g.gain.setValueAtTime(0, c.currentTime); g.gain.linearRampToValueAtTime(0.1, c.currentTime+0.05); g.gain.exponentialRampToValueAtTime(0.001, c.currentTime+1); o.start(); o.stop(c.currentTime+1.1); } catch(e){} }
 function playHintClick() { try { const c=getAC(), o=c.createOscillator(), g=c.createGain(); o.type='square'; o.frequency.setValueAtTime(300, c.currentTime); o.frequency.exponentialRampToValueAtTime(50, c.currentTime+0.05); o.connect(g); g.connect(c.destination); g.gain.setValueAtTime(0, c.currentTime); g.gain.linearRampToValueAtTime(0.1, c.currentTime+0.01); g.gain.exponentialRampToValueAtTime(0.001, c.currentTime+0.05); o.start(); o.stop(c.currentTime+0.06); } catch(e){} }
 function playHintReveal() { try { const c=getAC(); const now=c.currentTime; [1046.5, 1318.51, 1567.98].forEach((f, i) => { const o=c.createOscillator(), g=c.createGain(); o.type='triangle'; o.frequency.value=f; o.connect(g); g.connect(c.destination); g.gain.setValueAtTime(0, now); g.gain.setValueAtTime(0, now + i*0.05); g.gain.linearRampToValueAtTime(0.1, now + i*0.05 + 0.05); g.gain.exponentialRampToValueAtTime(0.001, now + 1.5); o.start(now); o.stop(now + 1.6); }); } catch(e){} }
@@ -825,6 +817,11 @@ function playTypeSound() { if (navigator.vibrate) navigator.vibrate(5); try { co
 function openHintsModal() {
   if (navigator.vibrate) navigator.vibrate(15);
   playHintOpen();
+  
+  // עצירת הפעימה ברגע שהשחקן פותח את הרמז
+  document.getElementById('floating-hint-btn').classList.remove('needs-hint');
+  clearTimeout(idleHintTimer);
+
   const page = PAGES[currentPage];
   if (!page || (!page.hints && !page.solution)) return;
   
