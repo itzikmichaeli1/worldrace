@@ -4,6 +4,9 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
   <title>המירוץ העולמי - פאזלס חדרי בריחה</title>
+  
+  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+
   <style>
     /* הוספתי את הפונט VT323 לטובת לוח הטיסות */
     @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;800&family=Rubik:wght@500;700;900&family=VT323&display=swap');
@@ -89,13 +92,6 @@
     }
     #floating-map-btn:hover { background: #00c8be; color: #000; transform: scale(1.05); }
 
-    /* כפתור מוזיקה - הועבר לתחתית ליד הרמזים */
-    #floating-music-btn {
-      position: fixed; bottom: 20px; left: 85px; z-index: 100; height: 56px; width: 56px; border-radius: 50%;
-      background: rgba(20,10,0,0.85); border: 2.5px solid #ff9500; color: #ff9500; font-size: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(255,149,0,0.3); transition: 0.2s;
-    }
-    #floating-music-btn:hover { background: #ff9500; color: #000; transform: scale(1.1); }
-
     /* כפתור רמזים - עיצוב נורה */
     #floating-hint-btn {
       position: fixed; bottom: 20px; left: 20px; z-index: 100; width: 56px; height: 56px; border-radius: 50%;
@@ -104,7 +100,14 @@
     }
     #floating-hint-btn:hover { transform: scale(1.1); box-shadow: 0 6px 20px rgba(211,47,47,0.6); }
 
-    /* האנימציה לנורה פועמת (מופעלת רק אחרי 5 דקות) */
+    /* כפתור מוזיקה בתחתית (משודרג) */
+    #floating-music-btn {
+      position: fixed; bottom: 20px; left: 85px; z-index: 100; height: 56px; width: 56px; border-radius: 50%;
+      background: rgba(20,10,0,0.85); border: 2.5px solid #ff9500; color: #ff9500; font-size: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(255,149,0,0.3); transition: 0.2s;
+    }
+    #floating-music-btn:hover { background: #ff9500; color: #000; transform: scale(1.1); }
+
+    /* האנימציה לנורה פועמת */
     @keyframes gentlePulse {
       0% { transform: scale(1); box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4); }
       50% { transform: scale(1.1); box-shadow: 0 4px 25px rgba(255, 215, 0, 0.8); border-color: #fff; }
@@ -126,10 +129,22 @@
     }
     .page-header::before { content: ''; position: absolute; top: 0; left: 20%; right: 20%; height: 2px; background: linear-gradient(90deg, transparent, rgba(255,160,0,0.9), rgba(0,210,190,0.6), transparent); }
     .site-label { font-size: 11px; letter-spacing: 5px; color: rgba(0,200,190,0.65); margin-bottom: 14px; }
-    .page-title { color: #ffe0a0; font-size: clamp(22px, 5vw, 34px); font-weight: 800; line-height: 1.3; margin-bottom: 8px; }
+    .page-title { color: #ffe0a0; font-size: clamp(22px, 5vw, 34px); font-weight: 800; line-height: 1.3; margin-bottom: 8px; transition: all 0.3s ease; }
     .title-divider { width: 70px; height: 3px; background: linear-gradient(90deg, rgba(255,140,0,0.9), rgba(0,210,190,0.7)); margin: 16px auto 18px; border-radius: 2px; }
     
-    /* אנימציית ההחלקה העדינה לטקסט */
+    /* אנימציית הניצחון היוקרתית לטקסט */
+    .million-title {
+      font-size: clamp(40px, 9vw, 65px) !important;
+      color: #fffbdd !important;
+      text-shadow: 0 0 10px #ffaa00, 0 0 20px #ff8800, 0 0 40px #ffaa00, 0 0 80px #ff5500 !important;
+      animation: pulseMillion 1.5s ease-in-out infinite alternate !important;
+      margin-bottom: 20px !important;
+    }
+    @keyframes pulseMillion {
+      from { transform: scale(1); text-shadow: 0 0 10px #ffaa00, 0 0 20px #ff8800; }
+      to { transform: scale(1.05); text-shadow: 0 0 20px #ffaa00, 0 0 30px #ffaa00, 0 0 60px #ffaa00, 0 0 90px #ff5500; }
+    }
+
     .page-desc { color: rgba(255,230,180,0.85); font-size: 15.5px; line-height: 2.1; white-space: pre-wrap; max-width: 560px; margin: 0 auto; min-height: 40px; }
     @keyframes slideUpFade { 0% { opacity: 0; transform: translateY(12px); } 100% { opacity: 1; transform: translateY(0); } }
 
@@ -160,7 +175,6 @@
     .code-glow-ring { border-radius: 6px; padding: 3px; background: linear-gradient(135deg, rgba(255,100,0,0.25), rgba(0,180,170,0.15)); transition: background 0.3s; }
     .code-glow-ring.focused { background: linear-gradient(135deg, rgba(255,160,0,0.7), rgba(0,210,190,0.5)); }
     
-    /* שורת ההקלדה */
     .code-input {
       display: block; background: #0a0500; border: 1px solid rgba(255,140,0,0.5); border-radius: 4px; padding: 14px 24px;
       color: #ffaa00; font-size: 28px; outline: none; direction: ltr; letter-spacing: 10px; text-align: center;
@@ -196,13 +210,18 @@
     .finish-wrap { text-align: center; padding: 20px; }
     .finish-trophy { font-size: 80px; margin-bottom: 20px; animation: popIn 1s cubic-bezier(0.34,1.56,0.64,1); }
     
+    /* סורק ה-QR */
+    #qr-reader { width: 100%; max-width: 350px; margin: 20px auto; display: none; border: 2px solid rgba(0,200,190,0.6); border-radius: 12px; overflow: hidden; background: #000; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
+    .finish-actions { display: flex; flex-direction: column; align-items: center; gap: 15px; margin-top: 20px; }
+
     /* לוח תוצאות מורחב שיוצג רק בעמוד הניצחון */
     .finish-stats {
-      background: rgba(0,0,0,0.5); border: 1px solid rgba(255,149,0,0.5); border-radius: 12px;
-      padding: 20px; text-align: right; max-width: 450px; margin: 25px auto; box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);
+      background: rgba(0,0,0,0.6); border: 1px solid rgba(255,149,0,0.5); border-radius: 12px;
+      padding: 24px; text-align: right; max-width: 450px; margin: 25px auto; box-shadow: inset 0 2px 15px rgba(0,0,0,0.8);
     }
-    .stat-row { font-size: 16px; color: #00c8be; margin-bottom: 12px; font-weight: bold; }
-    .stat-row span { color: #fff; font-weight: normal; margin-right: 8px; }
+    .stat-row { font-size: 16px; color: #00c8be; margin-bottom: 14px; font-weight: bold; border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 8px; }
+    .stat-row:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+    .stat-row span { color: #fff; font-weight: normal; margin-right: 8px; font-family: monospace; font-size: 17px;}
 
     .confetti { position: fixed; width: 10px; height: 10px; top: -20px; z-index: 9999; animation: confettiFall 4s linear forwards; pointer-events: none; }
     @keyframes confettiFall { 0% { top: -10px; transform: rotate(0deg) scale(1); } 100% { top: 100vh; transform: rotate(720deg) scale(0.5); } }
@@ -296,10 +315,6 @@
 
 <button id="floating-map-btn" onclick="openMapModal()" title="הדרכון שלכם">🛂 הדרכון שלכם</button>
 
-<button id="floating-music-btn" onclick="openMusicModal()" title="מוזיקת רקע">🎵</button>
-<button id="floating-hint-btn" onclick="openHintsModal()" title="רמזים">💡</button>
-<button id="floating-a11y-btn" onclick="openA11yModal()" title="הגדרות ונגישות">♿</button>
-
 <div id="app" class="swipe-transition">
   <div class="page-header">
     <div class="site-label">פאזלס חדרי בריחה</div>
@@ -356,6 +371,28 @@
 
   <div class="finish-wrap" id="finish-box" style="display:none">
     <div class="finish-trophy">🏆</div>
+    
+    <div class="finish-actions" id="finish-actions">
+      <button class="submit-btn" style="width: 100%; max-width: 350px;" onclick="startScanner()">📷 סרקו את כרטיס הניצחון</button>
+      <div id="qr-reader"></div>
+      
+      <button class="hint-btn" style="width: auto; padding: 10px 20px; font-size: 14px; background: transparent; border: 1px solid rgba(255,255,255,0.2); box-shadow: none;" onclick="showBypassModal()">💻 משחקים ממחשב? לחצו כאן</button>
+    </div>
+  </div>
+</div>
+
+<button id="floating-music-btn" onclick="openMusicModal()" title="מוזיקת רקע">🎵</button>
+<button id="floating-hint-btn" onclick="openHintsModal()" title="רמזים">💡</button>
+<button id="floating-a11y-btn" onclick="openA11yModal()" title="הגדרות ונגישות">♿</button>
+
+<div id="bypass-overlay" class="modal-overlay">
+  <div class="modal-card" style="text-align: center;">
+    <button class="close-modal-btn" onclick="document.getElementById('bypass-overlay').classList.remove('show')">✖</button>
+    <h2 class="modal-title">אימות ניצחון 🕵️‍♂️</h2>
+    <p style="font-size: 16px; color: #eee; margin-bottom: 25px;">האם פתחתם את הקופסה האחרונה ואתם מחזיקים את כרטיס הניצחון ביד?</p>
+    <div class="hint-confirm-btns">
+      <button class="btn-yes" style="font-size: 16px; padding: 12px 30px;" onclick="document.getElementById('bypass-overlay').classList.remove('show'); loadPage('grand_finale');">כן, פתחנו!</button>
+    </div>
   </div>
 </div>
 
@@ -613,7 +650,7 @@ const PAGES = {
     step: 13,
     bg: "radial-gradient(ellipse at 25% 15%, #3a2200 0%, #151100 40%, #0a0800 100%)",
     title: "המיליון שלכם!",
-    desc: "כל הכבוד צוות!\n\nהשלמתם את כל המשימות בהצלחה, לפתוח את הקופסה האחרונה ולהשלים את המירוץ העולמי!",
+    desc: "", // רוקנתי את הטקסט כדי להשאיר רק כותרת ואת הסרטון
     youtube: "IzSNc7kqjJw",
     type: "finale_hidden"
   }
@@ -695,9 +732,9 @@ function changeVolume(val) {
 
 // ===== מנוע אנליטיקה ו-State =====
 let maxStep = parseInt(localStorage.getItem('puzzleMaxStep')) || 1;
-let smallHintsUsed = parseInt(localStorage.getItem('puzzleHintsUsed')) || 0; // רמזים קטנים
-let solutionsUsed = parseInt(localStorage.getItem('puzzleSolutionsUsed')) || 0; // פתרונות מלאים
-let wrongCodes = parseInt(localStorage.getItem('puzzleWrongCodes')) || 0; // קודים שגויים
+let smallHintsUsed = parseInt(localStorage.getItem('puzzleHintsUsed')) || 0;
+let solutionsUsed = parseInt(localStorage.getItem('puzzleSolutionsUsed')) || 0;
+let wrongCodes = parseInt(localStorage.getItem('puzzleWrongCodes')) || 0;
 let stageTimes = JSON.parse(localStorage.getItem('puzzleStageTimes')) || {};
 let currentStageStartTime = Date.now();
 
@@ -748,11 +785,16 @@ function formatTime(ms) {
 function loadPage(id) {
   saveCurrentStageTime();
   
-  // עצירת המוזיקה באופן מוחלט בכל מעבר עמוד
   bgMusic.pause();
   isMusicPlaying = false;
   const musicBtnUi = document.getElementById('music-toggle-btn');
   if(musicBtnUi) musicBtnUi.innerHTML = '▶ הפעל מוזיקה';
+  
+  // עצירת סורק אם רץ
+  if (html5QrcodeScanner) {
+      try { html5QrcodeScanner.clear(); } catch(e){}
+      document.getElementById('qr-reader').style.display = 'none';
+  }
   
   currentPage = id;
   const page  = PAGES[id];
@@ -770,12 +812,19 @@ function loadPage(id) {
   history.pushState({ page: id }, '', url);
 
   document.title = page.title + ' — פאזלס חדרי בריחה';
-  document.getElementById('page-title').textContent = page.title;
   
-  // עדכון גלואו הדרגתי
+  const titleEl = document.getElementById('page-title');
+  titleEl.textContent = page.title;
+  
+  // החלת העיצוב המיוחד לניצחון
+  if (id === 'grand_finale') {
+      titleEl.classList.add('million-title');
+  } else {
+      titleEl.classList.remove('million-title');
+  }
+  
   const glowOpacity = (step / 13) * 0.15;
   document.getElementById('ambient-glow').style.background = `radial-gradient(circle at 50% 120%, rgba(255, 140, 0, ${glowOpacity}) 0%, transparent 70%)`;
-
   document.getElementById('global-progress-fill').style.width = ((step / 13) * 100) + '%';
   
   if(!document.body.classList.contains('a11y-high-contrast')) {
@@ -829,7 +878,6 @@ function loadPage(id) {
     riddlePlaying = false;
   }
 
-  // הסתרת כפתורי תפריט בעמוד הניצחון הנסתר
   const mapBtn = document.getElementById('floating-map-btn');
   const a11yBtn = document.getElementById('floating-a11y-btn');
   const musicBtn = document.getElementById('floating-music-btn');
@@ -865,7 +913,6 @@ function loadPage(id) {
   } else if (page.type === 'finale_hidden') {
     playVictoryEffects();
     
-    // בניית הסטטיסטיקה המלאה
     let totalMs = 0;
     let maxStageMs = 0;
     let minStageMs = Infinity;
@@ -887,7 +934,7 @@ function loadPage(id) {
     if (minStageMs === Infinity) minStageMs = 0;
     
     statsContainer.innerHTML = `
-      <div class="finish-stats" style="display:block;">
+      <div class="finish-stats" style="display:block; animation: slideUpFade 1s ease-out forwards;">
         <div class="stat-row">⏱️ זמן משחק כולל: <span>${formatTime(totalMs)}</span></div>
         <div class="stat-row">🔥 השלב המאתגר ביותר: <span>${hardestStage} (${formatTime(maxStageMs)})</span></div>
         <div class="stat-row">⚡ השלב המהיר ביותר: <span>${fastestStage} (${formatTime(minStageMs)})</span></div>
@@ -901,19 +948,49 @@ function loadPage(id) {
   window.scrollTo(0, 0);
   
   const descEl = document.getElementById('page-desc');
-  descEl.innerHTML = page.desc;
-  descEl.style.opacity = 1; 
-  
-  if(!document.body.classList.contains('a11y-no-animations')) {
-    descEl.style.animation = 'none';
-    void descEl.offsetWidth; 
-    setTimeout(() => {
-      descEl.style.animation = 'slideUpFade 0.8s ease-out forwards';
-    }, 10);
+  if (id === 'grand_finale') {
+      descEl.style.display = 'none';
+  } else {
+      descEl.style.display = 'block';
+      descEl.innerHTML = page.desc;
+      descEl.style.opacity = 1; 
+      if(!document.body.classList.contains('a11y-no-animations')) {
+        descEl.style.animation = 'none';
+        void descEl.offsetWidth; 
+        setTimeout(() => {
+          descEl.style.animation = 'slideUpFade 0.8s ease-out forwards';
+        }, 10);
+      }
   }
 }
 
-// ===== ניהול דרכון (עם הגנת ספוילרים) =====
+// ===== סורק QR למסך הסיום =====
+let html5QrcodeScanner;
+function startScanner() {
+    if (navigator.vibrate) navigator.vibrate(15);
+    document.getElementById('qr-reader').style.display = 'block';
+    if (!html5QrcodeScanner) {
+        html5QrcodeScanner = new Html5QrcodeScanner(
+            "qr-reader", 
+            { fps: 10, qrbox: {width: 250, height: 250} },
+            false
+        );
+        html5QrcodeScanner.render(onScanSuccess, onScanError);
+    }
+}
+function onScanSuccess(decodedText, decodedResult) {
+    // כל סריקה מוצלחת תיקח לעמוד הסיום כדי למנוע בעיות של לינקים שונים
+    html5QrcodeScanner.clear();
+    document.getElementById('qr-reader').style.display = 'none';
+    loadPage('grand_finale');
+}
+function onScanError(errorMessage) { /* שקט */ }
+function showBypassModal() {
+    if (navigator.vibrate) navigator.vibrate(15);
+    document.getElementById('bypass-overlay').classList.add('show');
+}
+
+// ===== ניהול דרכון =====
 function openMapModal() {
   if (navigator.vibrate) navigator.vibrate(15);
   playHintOpen(); 
@@ -969,7 +1046,6 @@ function resetGame() {
   location.href = location.pathname; 
 }
 
-// ===== חיוויי סאונד לממשק =====
 function playHintOpen() { try { const c=getAC(), o=c.createOscillator(), g=c.createGain(); o.type='sine'; o.frequency.setValueAtTime(880, c.currentTime); o.connect(g); g.connect(c.destination); g.gain.setValueAtTime(0, c.currentTime); g.gain.linearRampToValueAtTime(0.1, c.currentTime+0.05); g.gain.exponentialRampToValueAtTime(0.001, c.currentTime+1); o.start(); o.stop(c.currentTime+1.1); } catch(e){} }
 function playHintClick() { try { const c=getAC(), o=c.createOscillator(), g=c.createGain(); o.type='square'; o.frequency.setValueAtTime(300, c.currentTime); o.frequency.exponentialRampToValueAtTime(50, c.currentTime+0.05); o.connect(g); g.connect(c.destination); g.gain.setValueAtTime(0, c.currentTime); g.gain.linearRampToValueAtTime(0.1, c.currentTime+0.01); g.gain.exponentialRampToValueAtTime(0.001, c.currentTime+0.05); o.start(); o.stop(c.currentTime+0.06); } catch(e){} }
 function playHintReveal() { try { const c=getAC(); const now=c.currentTime; [1046.5, 1318.51, 1567.98].forEach((f, i) => { const o=c.createOscillator(), g=c.createGain(); o.type='triangle'; o.frequency.value=f; o.connect(g); g.connect(c.destination); g.gain.setValueAtTime(0, now); g.gain.setValueAtTime(0, now + i*0.05); g.gain.linearRampToValueAtTime(0.1, now + i*0.05 + 0.05); g.gain.exponentialRampToValueAtTime(0.001, now + 1.5); o.start(now); o.stop(now + 1.6); }); } catch(e){} }
@@ -1076,7 +1152,6 @@ function revealHint(btn) {
   
   const confirmDiv = btn.closest('.hint-confirm');
   
-  // פיצול ספירת רמזים מול פתרונות מלאים
   if (confirmDiv.classList.contains('solution-confirm')) {
       solutionsUsed++;
       localStorage.setItem('puzzleSolutionsUsed', solutionsUsed);
@@ -1182,7 +1257,7 @@ function playVictoryEffects() {
   } catch(e){}
 }
 
-let isVerifying = false; // הגנה מלחיצות כפולות
+let isVerifying = false;
 
 function submitCode() {
   if (window.isVerifying) return;
@@ -1225,7 +1300,6 @@ function submitCode() {
     } else {
       playError();
       
-      // ספירת קודים שגויים (מדד האופס)
       wrongCodes++;
       localStorage.setItem('puzzleWrongCodes', wrongCodes);
 
