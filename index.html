@@ -22,6 +22,13 @@
       touch-action: manipulation;
     }
 
+    /* הילה חמימה שמתגברת ככל שמתקדמים במשחק */
+    #ambient-glow {
+      position: fixed; inset: 0; pointer-events: none; z-index: 0; 
+      background: radial-gradient(circle at 50% 120%, rgba(255, 140, 0, 0) 0%, transparent 70%);
+      transition: background 1.5s ease;
+    }
+
     /* טקסטורת מפה טופוגרפית */
     body::before {
       content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
@@ -36,7 +43,7 @@
 
     /* ===== הגדרות נגישות ===== */
     body.a11y-high-contrast { background-image: none !important; background-color: #000000 !important; }
-    body.a11y-high-contrast::before { display: none !important; } 
+    body.a11y-high-contrast::before, body.a11y-high-contrast #ambient-glow { display: none !important; } 
     body.a11y-high-contrast * { box-shadow: none !important; text-shadow: none !important; border-color: #ffffff !important; }
     body.a11y-large-text { font-size: 120% !important; }
     body.a11y-large-text .page-title { font-size: clamp(26px, 6vw, 42px) !important; }
@@ -61,6 +68,14 @@
 
     #app { position: relative; z-index: 1; max-width: 740px; margin: 0 auto; padding: 54px 20px 100px; }
 
+    /* אפקט מתח בזמן אימות קוד */
+    .suspense-mode .page-header, .suspense-mode .youtube-wrap, .suspense-mode .audio-riddle, .suspense-mode #piano-section, .suspense-mode .crossroads-wrap {
+      opacity: 0.3; filter: grayscale(50%) blur(1px); transition: all 0.5s ease; pointer-events: none;
+    }
+    .suspense-mode #code-box {
+      transform: scale(1.03); box-shadow: 0 10px 40px rgba(255, 150, 0, 0.4); border-color: rgba(255,150,0,0.8); transition: all 0.5s ease; z-index: 10;
+    }
+
     /* אנימציית Swipe במקום Fade */
     .swipe-transition { animation: swipePage 0.6s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
     @keyframes swipePage { 0% { opacity: 0; transform: translateX(-40px); } 100% { opacity: 1; transform: translateX(0); } }
@@ -73,6 +88,13 @@
       background: rgba(20,10,0,0.85); border: 1px solid #00c8be; color: #00c8be; font-size: 14px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 2px 10px rgba(0,0,0,0.5); transition: 0.2s; font-family: inherit; letter-spacing: 0.5px;
     }
     #floating-map-btn:hover { background: #00c8be; color: #000; transform: scale(1.05); }
+
+    /* כפתור מוזיקה */
+    #floating-music-btn {
+      position: fixed; top: 15px; right: 15px; z-index: 1000; height: 36px; width: 36px; border-radius: 18px;
+      background: rgba(20,10,0,0.85); border: 1px solid #ff9500; color: #ff9500; font-size: 16px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 10px rgba(0,0,0,0.5); transition: 0.2s;
+    }
+    #floating-music-btn:hover { background: #ff9500; color: #000; transform: scale(1.1); }
 
     /* כפתור רמזים - עיצוב נורה */
     #floating-hint-btn {
@@ -250,6 +272,12 @@
     .map-btn.locked:hover { background: #111; color: #555; transform: none; }
     @media (max-width: 400px) { .map-grid { grid-template-columns: 1fr; } }
 
+    /* תפריט מוזיקה (חדש) */
+    .music-controls { display: flex; flex-direction: column; gap: 20px; align-items: center; margin-top: 10px; }
+    .volume-slider { width: 100%; direction: ltr; cursor: pointer; }
+    .music-toggle-btn { background: linear-gradient(180deg, #ff9500 0%, #d96000 100%); color: #fff; border: 1px solid #ff9500; padding: 12px 30px; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; font-family: inherit; width: 100%; text-shadow: 0 1px 2px rgba(0,0,0,0.5); box-shadow: 0 4px 6px rgba(0,0,0,0.3); transition: 0.2s;}
+    .music-toggle-btn:hover { filter: brightness(1.1); transform: translateY(-2px); }
+
     /* תפריט נגישות */
     .a11y-toggle-row { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; margin-bottom: 10px; }
     .a11y-toggle-label { font-size: 16px; font-weight: bold; }
@@ -263,6 +291,8 @@
 </head>
 <body>
 
+<div id="ambient-glow"></div>
+
 <div id="global-progress-wrap">
   <div id="global-progress-fill"></div>
 </div>
@@ -270,6 +300,7 @@
 <div id="stars"></div>
 
 <button id="floating-map-btn" onclick="openMapModal()" title="הדרכון שלכם">🛂 הדרכון שלכם</button>
+<button id="floating-music-btn" onclick="openMusicModal()" title="מוזיקת רקע">🎵</button>
 
 <div id="app" class="swipe-transition">
   <div class="page-header">
@@ -318,7 +349,7 @@
           onblur="document.getElementById('glow-ring').classList.remove('focused')"
         />
       </div>
-      <button class="submit-btn" onclick="submitCode()">המשך לשלב הבא «</button>
+      <button class="submit-btn" id="main-submit-btn" onclick="submitCode()">המשך לשלב הבא «</button>
     </div>
     <div class="error-msg" id="error-msg">✗ קוד שגוי — נסו שוב!</div>
   </div>
@@ -345,12 +376,26 @@
       <div class="stat-row">💡 רמזים שנוצלו: <span id="stat-hints"></span></div>
       <div class="stat-row">🔥 השלב המאתגר ביותר: <span id="stat-hardest"></span></div>
     </div>
-
-    </div>
+  </div>
 </div>
 
 <button id="floating-hint-btn" onclick="openHintsModal()" title="רמזים">💡</button>
 <button id="floating-a11y-btn" onclick="openA11yModal()" title="הגדרות ונגישות">♿</button>
+
+<div id="music-overlay" class="modal-overlay">
+  <div class="modal-card">
+    <button class="close-modal-btn" onclick="closeMusicModal()">✖</button>
+    <h2 class="modal-title">פסקול המשחק 🎵</h2>
+    <p style="font-size: 14px; color: #eee; text-align: center; margin-bottom: 15px;">הכניסו את עצמכם לאווירה של המירוץ העולמי.</p>
+    <div class="music-controls">
+      <button id="music-toggle-btn" class="music-toggle-btn" onclick="toggleMusic()">▶ הפעל מוזיקה</button>
+      <div style="width: 100%; text-align: center; margin-top: 15px;">
+        <label for="volume-slider" style="display: block; margin-bottom: 10px; color: #ffcca0; font-weight:bold;">עוצמת שמע</label>
+        <input type="range" id="volume-slider" class="volume-slider" min="0" max="1" step="0.05" value="0.3" oninput="changeVolume(this.value)">
+      </div>
+    </div>
+  </div>
+</div>
 
 <div id="hints-overlay" class="modal-overlay">
   <div class="modal-card">
@@ -415,6 +460,8 @@
     </div>
   </div>
 </div>
+
+<audio id="bg-music" loop></audio>
 
 <script>
 // ================================================================
@@ -582,7 +629,7 @@ const PAGES = {
     ],
     solution: "התשובות לשאלות הן: נכון, לא נכון, נכון, נכון, נכון, לא נכון, נכון, לא נכון.\nהמשפט המתקבל הוא \"הרימו את הדופן הימנית הפנימית של קופסת המשחק\".\nאם תבדקו במקום זה, תמצאו את המפתח לקופסא האחרונה במשחק."
   },
-
+  
   /* ===== העמוד הנסתר: סרטון הניצחון הגדול ===== */
   "grand_finale": {
     step: 13,
@@ -597,6 +644,106 @@ const PAGES = {
 let currentPage = null;
 let pendingNext  = null;
 let idleHintTimer = null; 
+
+// ===== מערכת סאונד רקע =====
+const bgMusic = document.getElementById('bg-music');
+let isMusicPlaying = false;
+let isFading = false; // למניעת התנגשויות באנימציות הפייד
+
+// פלייליסט - כרגע רק לעמוד הפתיחה לבדיקה
+const musicTracks = {
+  'opening': 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3' // <--- איציק, שים פה את הלינק לMP3 שלך!
+};
+
+function openMusicModal() {
+  if (navigator.vibrate) navigator.vibrate(15);
+  playHintOpen();
+  document.getElementById('music-overlay').classList.add('show');
+}
+
+function closeMusicModal() {
+  if (navigator.vibrate) navigator.vibrate(10);
+  playHintClose();
+  document.getElementById('music-overlay').classList.remove('show');
+}
+
+function toggleMusic() {
+  if (navigator.vibrate) navigator.vibrate(15);
+  playClick();
+  const btn = document.getElementById('music-toggle-btn');
+  
+  if (isMusicPlaying) {
+    bgMusic.pause();
+    isMusicPlaying = false;
+    btn.innerHTML = '▶ הפעל מוזיקה';
+  } else {
+    // בדיקה אם יש לנו שיר לעמוד הנוכחי
+    const track = musicTracks[currentPage];
+    if (track) {
+      if (!bgMusic.src.endsWith(track)) {
+         bgMusic.src = track;
+      }
+      // נגדיר ווליום לפי הסליידר (ברירת מחדל 0.3)
+      bgMusic.volume = document.getElementById('volume-slider').value;
+      bgMusic.play().then(() => {
+        isMusicPlaying = true;
+        btn.innerHTML = '⏸ השהה מוזיקה';
+      }).catch(e => console.log("Playback blocked:", e));
+    } else {
+       alert("אין מוזיקת רקע מוגדרת לשלב זה (עדיין).");
+    }
+  }
+}
+
+function changeVolume(val) {
+  if(!isFading) {
+     bgMusic.volume = val;
+  }
+}
+
+// פונקציית פייד בין שירים (מוכנה לשימוש כשנוסיף עוד שלבים)
+function fadeToNewTrack(newSrc) {
+    if (!newSrc || isFading || bgMusic.src.endsWith(newSrc)) return;
+    
+    const targetVolume = document.getElementById('volume-slider').value;
+    
+    if (!isMusicPlaying) {
+        bgMusic.src = newSrc;
+        bgMusic.volume = targetVolume;
+        return;
+    }
+
+    isFading = true;
+    let vol = bgMusic.volume;
+    const fadeOut = setInterval(() => {
+        if (vol > 0.05) {
+            vol -= 0.05;
+            bgMusic.volume = vol;
+        } else {
+            clearInterval(fadeOut);
+            bgMusic.pause();
+            bgMusic.src = newSrc;
+            bgMusic.play().then(() => {
+                let volIn = 0;
+                bgMusic.volume = volIn;
+                const fadeIn = setInterval(() => {
+                    if (volIn < targetVolume - 0.05) {
+                        volIn += 0.05;
+                        bgMusic.volume = volIn;
+                    } else {
+                        bgMusic.volume = targetVolume;
+                        isFading = false;
+                        clearInterval(fadeIn);
+                    }
+                }, 100);
+            }).catch(e => {
+                isFading = false;
+                console.log(e);
+            });
+        }
+    }, 100);
+}
+
 
 // ===== מנוע אנליטיקה ו-State =====
 let maxStep = parseInt(localStorage.getItem('puzzleMaxStep')) || 1;
@@ -670,6 +817,10 @@ function loadPage(id) {
   document.title = page.title + ' — פאזלס חדרי בריחה';
   document.getElementById('page-title').textContent = page.title;
   
+  // עדכון גלואו הדרגתי
+  const glowOpacity = (step / 13) * 0.15;
+  document.getElementById('ambient-glow').style.background = `radial-gradient(circle at 50% 120%, rgba(255, 140, 0, ${glowOpacity}) 0%, transparent 70%)`;
+
   document.getElementById('global-progress-fill').style.width = ((step / 13) * 100) + '%';
   
   if(!document.body.classList.contains('a11y-high-contrast')) {
@@ -723,15 +874,18 @@ function loadPage(id) {
     riddlePlaying = false;
   }
 
-  // הסתרת כפתורי תפריט בעמוד הניצחון הנסתר
+  // הסתרת כפתורי תפריט בעמוד הניצחון הנסתר (כולל כפתור מוזיקה)
   const mapBtn = document.getElementById('floating-map-btn');
   const a11yBtn = document.getElementById('floating-a11y-btn');
+  const musicBtn = document.getElementById('floating-music-btn');
   if (id === 'grand_finale') {
     if (mapBtn) mapBtn.style.display = 'none';
     if (a11yBtn) a11yBtn.style.display = 'none';
+    if (musicBtn) musicBtn.style.display = 'none';
   } else {
     if (mapBtn) mapBtn.style.display = 'flex';
     if (a11yBtn) a11yBtn.style.display = 'flex';
+    if (musicBtn) musicBtn.style.display = 'flex';
   }
 
   document.getElementById('piano-section').style.display = page.piano ? '' : 'none';
@@ -771,32 +925,41 @@ function loadPage(id) {
   } else if (page.type === 'finale_hidden') {
     playVictoryEffects();
   }
+
+  // הפעלת מעבר סאונד אם נדרש והמוזיקה דולקת
+  if (isMusicPlaying && musicTracks[id]) {
+     fadeToNewTrack(musicTracks[id]);
+  }
   
   window.scrollTo(0, 0);
   
+  // תיקון אבטחה לאנימציית הטקסט בריפרש
   const descEl = document.getElementById('page-desc');
   descEl.innerHTML = page.desc;
+  descEl.style.opacity = 1; // גיבוי לשקיפות
+  
   if(!document.body.classList.contains('a11y-no-animations')) {
     descEl.style.animation = 'none';
     void descEl.offsetWidth; 
-    descEl.style.animation = 'slideUpFade 0.8s ease-out forwards';
-  } else {
-    descEl.style.opacity = 1;
+    setTimeout(() => {
+      descEl.style.animation = 'slideUpFade 0.8s ease-out forwards';
+    }, 10);
   }
 }
 
+// ===== ניהול מפה (עם הגנת ספוילרים) =====
 function openMapModal() {
   if (navigator.vibrate) navigator.vibrate(15);
-  playHintOpen();
+  playHintOpen(); 
   
   const mapBtns = document.querySelectorAll('.map-btn');
   let stepCounter = 1;
-
+  
   mapBtns.forEach(btn => {
     const targetPageId = btn.getAttribute('data-page');
     const targetStep = PAGES[targetPageId].step;
     
-    // שמירת השם המקורי כדי שלא יאבד ספוילר בעתיד
+    // שמירת השם המקורי
     if (!btn.hasAttribute('data-original-text')) {
       btn.setAttribute('data-original-text', btn.innerHTML);
     }
@@ -815,6 +978,7 @@ function openMapModal() {
 
   document.getElementById('map-overlay').classList.add('show');
 }
+
 function closeMapModal() {
   if (navigator.vibrate) navigator.vibrate(10);
   playHintClose();
@@ -838,6 +1002,7 @@ function resetGame() {
   location.href = location.pathname; 
 }
 
+// ===== חיוויי סאונד לממשק =====
 function playHintOpen() { try { const c=getAC(), o=c.createOscillator(), g=c.createGain(); o.type='sine'; o.frequency.setValueAtTime(880, c.currentTime); o.connect(g); g.connect(c.destination); g.gain.setValueAtTime(0, c.currentTime); g.gain.linearRampToValueAtTime(0.1, c.currentTime+0.05); g.gain.exponentialRampToValueAtTime(0.001, c.currentTime+1); o.start(); o.stop(c.currentTime+1.1); } catch(e){} }
 function playHintClick() { try { const c=getAC(), o=c.createOscillator(), g=c.createGain(); o.type='square'; o.frequency.setValueAtTime(300, c.currentTime); o.frequency.exponentialRampToValueAtTime(50, c.currentTime+0.05); o.connect(g); g.connect(c.destination); g.gain.setValueAtTime(0, c.currentTime); g.gain.linearRampToValueAtTime(0.1, c.currentTime+0.01); g.gain.exponentialRampToValueAtTime(0.001, c.currentTime+0.05); o.start(); o.stop(c.currentTime+0.06); } catch(e){} }
 function playHintReveal() { try { const c=getAC(); const now=c.currentTime; [1046.5, 1318.51, 1567.98].forEach((f, i) => { const o=c.createOscillator(), g=c.createGain(); o.type='triangle'; o.frequency.value=f; o.connect(g); g.connect(c.destination); g.gain.setValueAtTime(0, now); g.gain.setValueAtTime(0, now + i*0.05); g.gain.linearRampToValueAtTime(0.1, now + i*0.05 + 0.05); g.gain.exponentialRampToValueAtTime(0.001, now + 1.5); o.start(now); o.stop(now + 1.6); }); } catch(e){} }
@@ -848,6 +1013,7 @@ function openHintsModal() {
   if (navigator.vibrate) navigator.vibrate(15);
   playHintOpen();
   
+  // עצירת הפעימה ברגע שהשחקן פותח את הרמז
   document.getElementById('floating-hint-btn').classList.remove('needs-hint');
   clearTimeout(idleHintTimer);
 
@@ -1018,18 +1184,51 @@ function playStampSound() {
   } catch(e){}
 }
 
+function playVictoryEffects() {
+  if (document.body.classList.contains('a11y-no-animations')) return;
+  if (navigator.vibrate) navigator.vibrate([100, 50, 100, 50, 200]);
+  for(let i=0; i<80; i++){
+      let conf = document.createElement('div');
+      conf.className = 'confetti';
+      conf.style.left = Math.random() * 100 + 'vw';
+      conf.style.backgroundColor = ['#ff9500', '#00c8be', '#ffcc00', '#ff4444', '#ffffff'][Math.floor(Math.random()*5)];
+      conf.style.animationDelay = (Math.random() * 2) + 's';
+      document.body.appendChild(conf);
+      setTimeout(()=>conf.remove(), 4500);
+  }
+  try {
+    const c = getAC();
+    [523.25, 659.25, 783.99, 1046.50, 1318.51].forEach((f, i) => {
+      const o = c.createOscillator(), g = c.createGain();
+      o.connect(g); g.connect(c.destination);
+      o.frequency.value = f;
+      g.gain.setValueAtTime(0.15, c.currentTime + i*0.12);
+      g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + i*0.12 + 0.6);
+      o.start(c.currentTime + i*0.12); o.stop(c.currentTime + i*0.12 + 0.6);
+    });
+  } catch(e){}
+}
+
+let isVerifying = false; // הגנה מלחיצות כפולות
+
 function submitCode() {
+  if (window.isVerifying) return;
+  window.isVerifying = true;
+
   playClick();
   const page = PAGES[currentPage];
   const val  = document.getElementById('code-input').value.trim().toUpperCase();
-  const btn = document.querySelector('.submit-btn');
+  const btn = document.getElementById('main-submit-btn'); 
   
+  // אפקט ההשהייה והטשטוש
   btn.innerHTML = 'מאמת נתונים... ⏳';
   btn.classList.add('verifying-state');
+  document.getElementById('app').classList.add('suspense-mode'); 
   
   setTimeout(() => {
     btn.innerHTML = 'המשך לשלב הבא «';
     btn.classList.remove('verifying-state');
+    document.getElementById('app').classList.remove('suspense-mode'); 
     
     if (val === page.code.toUpperCase()) {
       playStampSound();
@@ -1043,10 +1242,12 @@ function submitCode() {
         setTimeout(() => { 
           box.classList.remove('stamp-approved');
           pendingNext = page.next;
+          window.isVerifying = false;
           loadPage(pendingNext); 
         }, 2000); 
       } else {
         pendingNext = page.next;
+        window.isVerifying = false;
         loadPage(pendingNext);
       }
     } else {
@@ -1054,9 +1255,13 @@ function submitCode() {
       const inp = document.getElementById('code-input');
       if(!document.body.classList.contains('a11y-no-animations')) {
         inp.classList.add('error', 'shaking');
-        setTimeout(() => inp.classList.remove('shaking'), 600);
+        setTimeout(() => {
+            inp.classList.remove('shaking');
+            window.isVerifying = false;
+        }, 600);
       } else {
         inp.classList.add('error');
+        window.isVerifying = false;
       }
       document.getElementById('error-msg').style.display = 'block';
     }
