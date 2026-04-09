@@ -132,17 +132,18 @@
     .page-title { color: #ffe0a0; font-size: clamp(22px, 5vw, 34px); font-weight: 800; line-height: 1.3; margin-bottom: 8px; transition: all 0.3s ease; }
     .title-divider { width: 70px; height: 3px; background: linear-gradient(90deg, rgba(255,140,0,0.9), rgba(0,210,190,0.7)); margin: 16px auto 18px; border-radius: 2px; }
     
-    /* אנימציית הניצחון היוקרתית לטקסט */
+    /* אנימציית הניצחון קלה ומהירה ל-GPU */
     .million-title {
       font-size: clamp(40px, 9vw, 65px) !important;
-      color: #fffbdd !important;
-      text-shadow: 0 0 10px #ffaa00, 0 0 20px #ff8800, 0 0 40px #ffaa00, 0 0 80px #ff5500 !important;
-      animation: pulseMillion 1.5s ease-in-out infinite alternate !important;
+      color: #ffd700 !important; 
+      text-shadow: 0 4px 10px rgba(0,0,0,0.8), 0 0 20px rgba(255, 170, 0, 0.4) !important;
+      animation: elegantPulse 2s ease-in-out infinite alternate !important;
       margin-bottom: 20px !important;
+      will-change: transform;
     }
-    @keyframes pulseMillion {
-      from { transform: scale(1); text-shadow: 0 0 10px #ffaa00, 0 0 20px #ff8800; }
-      to { transform: scale(1.05); text-shadow: 0 0 20px #ffaa00, 0 0 30px #ffaa00, 0 0 60px #ffaa00, 0 0 90px #ff5500; }
+    @keyframes elegantPulse {
+      from { transform: scale(1); }
+      to { transform: scale(1.05); }
     }
 
     .page-desc { color: rgba(255,230,180,0.85); font-size: 15.5px; line-height: 2.1; white-space: pre-wrap; max-width: 560px; margin: 0 auto; min-height: 40px; }
@@ -210,7 +211,7 @@
     .finish-wrap { text-align: center; padding: 20px; }
     .finish-trophy { font-size: 80px; margin-bottom: 20px; animation: popIn 1s cubic-bezier(0.34,1.56,0.64,1); }
     
-    /* סורק ה-QR */
+    /* סורק ה-QR החדש - מינימליסטי וללא שוליים מיותרים */
     #qr-reader { width: 100%; max-width: 350px; margin: 20px auto; display: none; border: 2px solid rgba(0,200,190,0.6); border-radius: 12px; overflow: hidden; background: #000; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
     .finish-actions { display: flex; flex-direction: column; align-items: center; gap: 15px; margin-top: 20px; }
 
@@ -645,12 +646,11 @@ const PAGES = {
     solution: "התשובות לשאלות הן: נכון, לא נכון, נכון, נכון, נכון, לא נכון, נכון, לא נכון.\nהמשפט המתקבל הוא \"הרימו את הדופן הימנית הפנימית של קופסת המשחק\".\nאם תבדקו במקום זה, תמצאו את המפתח לקופסא האחרונה במשחק."
   },
   
-  /* ===== העמוד הנסתר: סרטון הניצחון הגדול ===== */
   "grand_finale": {
     step: 13,
     bg: "radial-gradient(ellipse at 25% 15%, #3a2200 0%, #151100 40%, #0a0800 100%)",
     title: "המיליון שלכם!",
-    desc: "", // רוקנתי את הטקסט כדי להשאיר רק כותרת ואת הסרטון
+    desc: "",
     youtube: "IzSNc7kqjJw",
     type: "finale_hidden"
   }
@@ -660,11 +660,9 @@ let currentPage = null;
 let pendingNext  = null;
 let idleHintTimer = null; 
 
-// ===== מערכת סאונד רקע =====
 const bgMusic = document.getElementById('bg-music');
 let isMusicPlaying = false;
 
-// הפלייליסט המלא והמעודכן
 const musicTracks = {
   'opening': 'Leaving-On-A-Jet-Plane.mp3',
   'london': 'Spice-Girls-Say-Youll-Be-There.mp3',
@@ -730,7 +728,6 @@ function changeVolume(val) {
    bgMusic.volume = val;
 }
 
-// ===== מנוע אנליטיקה ו-State =====
 let maxStep = parseInt(localStorage.getItem('puzzleMaxStep')) || 1;
 let smallHintsUsed = parseInt(localStorage.getItem('puzzleHintsUsed')) || 0;
 let solutionsUsed = parseInt(localStorage.getItem('puzzleSolutionsUsed')) || 0;
@@ -782,6 +779,54 @@ function formatTime(ms) {
   return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
 }
 
+// ===== ניהול סורק ה-QR בצורה נקייה עם פונקציות ישירות =====
+let html5QrCode;
+
+function startScanner() {
+    if (navigator.vibrate) navigator.vibrate(15);
+    document.getElementById('qr-reader').style.display = 'block';
+    document.getElementById('qr-reader').innerHTML = ''; 
+    
+    html5QrCode = new Html5Qrcode("qr-reader");
+    
+    html5QrCode.start(
+        { facingMode: "environment" }, // כופה שימוש במצלמה אחורית
+        {
+            fps: 10,
+            qrbox: { width: 250, height: 250 }
+        },
+        onScanSuccess,
+        onScanError
+    ).catch(err => {
+        console.error("Camera error", err);
+        alert("לא הצלחנו לגשת למצלמה האחורית. ודאו שנתתם אישור בדפדפן, או השתמשו בכפתור המחשב למטה.");
+    });
+}
+
+function stopScanner() {
+    if (html5QrCode && html5QrCode.isScanning) {
+        html5QrCode.stop().then(() => {
+            html5QrCode.clear();
+            document.getElementById('qr-reader').style.display = 'none';
+        }).catch(err => console.error("Error stopping scanner", err));
+    }
+}
+
+function onScanSuccess(decodedText, decodedResult) {
+    stopScanner(); // עוצר את המצלמה אחרי סריקה מוצלחת
+    loadPage('grand_finale');
+}
+
+function onScanError(errorMessage) { /* השתקת שגיאות סריקה רגילות */ }
+
+// מוודא שהמצלמה נסגרת לגמרי במקרה של ריענון או עזיבת העמוד
+window.addEventListener('beforeunload', () => {
+    if (html5QrCode && html5QrCode.isScanning) {
+        html5QrCode.stop();
+    }
+});
+
+
 function loadPage(id) {
   saveCurrentStageTime();
   
@@ -790,11 +835,7 @@ function loadPage(id) {
   const musicBtnUi = document.getElementById('music-toggle-btn');
   if(musicBtnUi) musicBtnUi.innerHTML = '▶ הפעל מוזיקה';
   
-  // עצירת סורק אם רץ
-  if (html5QrcodeScanner) {
-      try { html5QrcodeScanner.clear(); } catch(e){}
-      document.getElementById('qr-reader').style.display = 'none';
-  }
+  stopScanner(); // עוצר את המצלמה אם עברנו עמוד
   
   currentPage = id;
   const page  = PAGES[id];
@@ -816,7 +857,6 @@ function loadPage(id) {
   const titleEl = document.getElementById('page-title');
   titleEl.textContent = page.title;
   
-  // החלת העיצוב המיוחד לניצחון
   if (id === 'grand_finale') {
       titleEl.classList.add('million-title');
   } else {
@@ -964,33 +1004,11 @@ function loadPage(id) {
   }
 }
 
-// ===== סורק QR למסך הסיום =====
-let html5QrcodeScanner;
-function startScanner() {
-    if (navigator.vibrate) navigator.vibrate(15);
-    document.getElementById('qr-reader').style.display = 'block';
-    if (!html5QrcodeScanner) {
-        html5QrcodeScanner = new Html5QrcodeScanner(
-            "qr-reader", 
-            { fps: 10, qrbox: {width: 250, height: 250} },
-            false
-        );
-        html5QrcodeScanner.render(onScanSuccess, onScanError);
-    }
-}
-function onScanSuccess(decodedText, decodedResult) {
-    // כל סריקה מוצלחת תיקח לעמוד הסיום כדי למנוע בעיות של לינקים שונים
-    html5QrcodeScanner.clear();
-    document.getElementById('qr-reader').style.display = 'none';
-    loadPage('grand_finale');
-}
-function onScanError(errorMessage) { /* שקט */ }
 function showBypassModal() {
     if (navigator.vibrate) navigator.vibrate(15);
     document.getElementById('bypass-overlay').classList.add('show');
 }
 
-// ===== ניהול דרכון =====
 function openMapModal() {
   if (navigator.vibrate) navigator.vibrate(15);
   playHintOpen(); 
