@@ -200,11 +200,14 @@
     .finish-wrap { text-align: center; padding: 20px; }
     .finish-trophy { font-size: 80px; margin-bottom: 20px; animation: popIn 1s cubic-bezier(0.34,1.56,0.64,1); }
     
-    /* סורק ה-QR החדש - מינימליסטי וללא שוליים מיותרים */
+    /* סורק ה-QR החדש */
     #qr-reader { width: 100%; max-width: 350px; margin: 20px auto; display: none; border: 2px solid rgba(0,200,190,0.6); border-radius: 12px; overflow: hidden; background: #000; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
     .finish-actions { display: flex; flex-direction: column; align-items: center; gap: 15px; margin-top: 20px; }
 
-    /* לוח תוצאות מורחב שיוצג רק בעמוד הניצחון */
+    /* סטייל לכפתור נכה (לפני סימון צ'קבוקס) */
+    #bypass-confirm-btn:disabled { background: #555; color: #999; cursor: not-allowed; box-shadow: none; border-bottom: none; transform: none; }
+
+    /* לוח תוצאות מורחב */
     .finish-stats {
       background: rgba(0,0,0,0.6); border: 1px solid rgba(255,149,0,0.5); border-radius: 12px;
       padding: 24px; text-align: right; max-width: 450px; margin: 25px auto; box-shadow: inset 0 2px 15px rgba(0,0,0,0.8);
@@ -363,10 +366,12 @@
     <div class="finish-trophy">🏆</div>
     
     <div class="finish-actions" id="finish-actions">
-      <button class="submit-btn" style="width: 100%; max-width: 350px;" onclick="startScanner()">📷 סרקו את כרטיס הניצחון</button>
-      <div id="qr-reader"></div>
+      <div id="scanner-btn-wrap" style="width: 100%;">
+         <button class="submit-btn" style="width: 100%; max-width: 350px;" onclick="startScanner()">📷 סרקו את כרטיס הניצחון</button>
+         <div id="qr-reader"></div>
+      </div>
       
-      <button class="hint-btn" style="width: auto; padding: 10px 20px; font-size: 14px; background: transparent; border: 1px solid rgba(255,255,255,0.2); box-shadow: none;" onclick="showBypassModal()">💻 משחקים ממחשב? לחצו כאן</button>
+      <button id="pc-bypass-btn" class="hint-btn" style="width: auto; padding: 10px 20px; font-size: 14px; background: transparent; border: 1px solid rgba(255,255,255,0.2); box-shadow: none;" onclick="showBypassModal()">⚠️ משחקים ממחשב ללא מצלמה? לחצו כאן</button>
     </div>
   </div>
 </div>
@@ -379,9 +384,17 @@
   <div class="modal-card" style="text-align: center;">
     <button class="close-modal-btn" onclick="document.getElementById('bypass-overlay').classList.remove('show')">✖</button>
     <h2 class="modal-title">אימות ניצחון 🕵️‍♂️</h2>
-    <p style="font-size: 16px; color: #eee; margin-bottom: 25px;">האם פתחתם את הקופסה האחרונה ואתם מחזיקים את כרטיס הניצחון ביד?</p>
+    <p style="font-size: 16px; color: #eee; margin-bottom: 20px;">האם פתחתם את הקופסה האחרונה ואתם מחזיקים את כרטיס הניצחון ביד?</p>
+    
+    <div style="margin-bottom: 25px; text-align: right; background: rgba(0,0,0,0.4); padding: 15px; border-radius: 8px; border: 1px solid #ff9500;">
+      <label style="display: flex; align-items: flex-start; gap: 10px; cursor: pointer; color: #ffcca0; line-height: 1.4;">
+        <input type="checkbox" id="bypass-checkbox" style="width: 22px; height: 22px; margin-top: 2px;" onchange="document.getElementById('bypass-confirm-btn').disabled = !this.checked;">
+        <span style="font-size: 15px;">אני מאשר/ת שסיימנו את המשחק ופתחנו פיזית את הקופסה האחרונה.</span>
+      </label>
+    </div>
+
     <div class="hint-confirm-btns">
-      <button class="btn-yes" style="font-size: 16px; padding: 12px 30px;" onclick="document.getElementById('bypass-overlay').classList.remove('show'); loadPage('grand_finale');">כן, פתחנו!</button>
+      <button id="bypass-confirm-btn" class="submit-btn" style="width: 100%; margin-top: 0; padding: 12px;" disabled onclick="executeBypass()">מעבר לעמוד הניצחון »</button>
     </div>
   </div>
 </div>
@@ -423,9 +436,9 @@
       <button class="map-btn" data-page="show-first">🎸 זמן להופעה</button>
       <button class="map-btn" data-page="boarding">🧳 קוד טיסה (תיק)</button>
       <button class="map-btn" data-page="zoo">🇺🇸 גן חיות</button>
-      <button class="map-btn" data-page="museum">🖼️ מוזיאון הפורטרטים</button>
+      <button class="map-btn" data-page="museum">🇺🇸 מוזיאון הפורטרטים</button>
       <button class="map-btn" data-page="tajmahal">🇮🇳 טאג' מאהל</button>
-      <button class="map-btn" data-page="airport">✈️ שדה תעופה</button>
+      <button class="map-btn" data-page="airport">🇮🇳 שדה תעופה</button>
       <button class="map-btn" data-page="guru">🇮🇳 דראמסלה (גורו)</button>
       <button class="map-btn" data-page="market">🇮🇳 השוק</button>
     </div>
@@ -469,6 +482,26 @@
 <audio id="bg-music" loop></audio>
 
 <script>
+// ================================================================
+//  מילון השמות הרשמי לסטטיסטיקות הניצחון
+// ================================================================
+const TASK_NAMES = {
+  'opening': 'מושבי המטוס',
+  'london': 'חידת הרכבת התחתית',
+  'time-first': 'חידת השעונים [חבל על הזמן]',
+  'show-first': 'חידת הפסנתר [זמן להופעה]',
+  'time-second': 'חידת השעונים [חבל על הזמן]',
+  'show-second': 'חידת הפסנתר [זמן להופעה]',
+  'boarding': 'חידת התיק',
+  'zoo': 'חידת גן החיות',
+  'museum': 'חידת הפורטרטים',
+  'tajmahal': 'חידת הטאג\' מהאל',
+  'airport': 'חידת ההילוכים',
+  'guru': 'חידת הגורו',
+  'market': 'חידת השוק',
+  'finish': 'חידת נכון לא נכון'
+};
+
 // ================================================================
 //  מבנה המשחק המלא
 // ================================================================
@@ -754,7 +787,7 @@ function toggleA11y(className, isChecked) {
 }
 
 function saveCurrentStageTime() {
-  if (currentPage && currentPage !== 'finish' && currentPage !== 'grand_finale') {
+  if (currentPage && currentPage !== 'grand_finale') {
     const timeSpent = Date.now() - currentStageStartTime;
     stageTimes[currentPage] = (stageTimes[currentPage] || 0) + timeSpent;
     localStorage.setItem('puzzleStageTimes', JSON.stringify(stageTimes));
@@ -779,7 +812,7 @@ function startScanner() {
     html5QrCode = new Html5Qrcode("qr-reader");
     
     html5QrCode.start(
-        { facingMode: "environment" }, // כופה שימוש במצלמה אחורית
+        { facingMode: "environment" }, 
         {
             fps: 10,
             qrbox: { width: 250, height: 250 }
@@ -802,13 +835,12 @@ function stopScanner() {
 }
 
 function onScanSuccess(decodedText, decodedResult) {
-    stopScanner(); // עוצר את המצלמה אחרי סריקה מוצלחת
+    stopScanner(); 
     loadPage('grand_finale');
 }
 
-function onScanError(errorMessage) { /* השתקת שגיאות סריקה רגילות */ }
+function onScanError(errorMessage) { /* שקט */ }
 
-// מוודא שהמצלמה נסגרת לגמרי במקרה של ריענון או עזיבת העמוד
 window.addEventListener('beforeunload', () => {
     if (html5QrCode && html5QrCode.isScanning) {
         html5QrCode.stop();
@@ -824,7 +856,7 @@ function loadPage(id) {
   const musicBtnUi = document.getElementById('music-toggle-btn');
   if(musicBtnUi) musicBtnUi.innerHTML = '▶ הפעל מוזיקה';
   
-  stopScanner(); // עוצר את המצלמה אם עברנו עמוד
+  stopScanner(); 
   
   currentPage = id;
   const page  = PAGES[id];
@@ -939,6 +971,20 @@ function loadPage(id) {
     document.getElementById('crossroads-box').style.display = '';
   } else if (page.type === 'finish') {
     document.getElementById('finish-box').style.display = '';
+    
+    // מנגנון זיהוי סביבה חכם (מובייל או מחשב)
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const scannerWrap = document.getElementById('scanner-btn-wrap');
+    const pcBtn = document.getElementById('pc-bypass-btn');
+    
+    if(isMobile) {
+        if(scannerWrap) scannerWrap.style.display = 'block';
+        if(pcBtn) pcBtn.style.display = 'none'; // מסתיר את כפתור המחשב בטלפונים
+    } else {
+        if(scannerWrap) scannerWrap.style.display = 'none'; // מסתיר את המצלמה במחשב
+        if(pcBtn) pcBtn.style.display = 'inline-block';
+    }
+
   } else if (page.type === 'finale_hidden') {
     playVictoryEffects();
     
@@ -949,15 +995,15 @@ function loadPage(id) {
     let fastestStage = 'אין נתונים';
     
     for (const [stageId, ms] of Object.entries(stageTimes)) {
-      if (stageId === 'crossroads' || stageId === 'finish' || stageId === 'grand_finale') continue;
+      if (stageId === 'crossroads' || stageId === 'grand_finale') continue; // שמרנו את ה-finish!
       totalMs += ms;
-      if (ms > maxStageMs && PAGES[stageId]) {
+      if (ms > maxStageMs && TASK_NAMES[stageId]) {
         maxStageMs = ms;
-        hardestStage = PAGES[stageId].title;
+        hardestStage = TASK_NAMES[stageId];
       }
-      if (ms > 0 && ms < minStageMs && PAGES[stageId]) {
+      if (ms > 0 && ms < minStageMs && TASK_NAMES[stageId]) {
         minStageMs = ms;
-        fastestStage = PAGES[stageId].title;
+        fastestStage = TASK_NAMES[stageId];
       }
     }
     if (minStageMs === Infinity) minStageMs = 0;
@@ -993,10 +1039,18 @@ function loadPage(id) {
   }
 }
 
+// פונקציות למודל העקיפה
 function showBypassModal() {
     if (navigator.vibrate) navigator.vibrate(15);
+    document.getElementById('bypass-checkbox').checked = false;
+    document.getElementById('bypass-confirm-btn').disabled = true;
     document.getElementById('bypass-overlay').classList.add('show');
 }
+function executeBypass() {
+    document.getElementById('bypass-overlay').classList.remove('show');
+    loadPage('grand_finale');
+}
+
 
 function openMapModal() {
   if (navigator.vibrate) navigator.vibrate(15);
