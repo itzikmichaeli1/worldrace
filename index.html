@@ -207,6 +207,9 @@
     /* סטייל לכפתור נכה (לפני סימון צ'קבוקס) */
     #bypass-confirm-btn:disabled { background: #555; color: #999; cursor: not-allowed; box-shadow: none; border-bottom: none; transform: none; }
 
+    /* סטייל למניעת ריבוי לחיצות על כפתור המצלמה */
+    #scanner-btn:disabled { background: #666; cursor: not-allowed; box-shadow: none; border-bottom: none; transform: none; filter: grayscale(50%); }
+
     /* לוח תוצאות מורחב */
     .finish-stats {
       background: rgba(0,0,0,0.6); border: 1px solid rgba(255,149,0,0.5); border-radius: 12px;
@@ -367,7 +370,7 @@
     
     <div class="finish-actions" id="finish-actions">
       <div id="scanner-btn-wrap" style="width: 100%;">
-         <button class="submit-btn" style="width: 100%; max-width: 350px;" onclick="startScanner()">📷 סרקו את כרטיס הניצחון</button>
+         <button id="scanner-btn" class="submit-btn" style="width: 100%; max-width: 350px;" onclick="startScanner()">📷 סרקו את כרטיס הניצחון</button>
          <div id="qr-reader"></div>
       </div>
       
@@ -801,11 +804,23 @@ function formatTime(ms) {
   return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
 }
 
-// ===== ניהול סורק ה-QR בצורה נקייה עם פונקציות ישירות =====
+// ===== ניהול סורק ה-QR עם מנעול והגנות =====
 let html5QrCode;
+let isCameraLoading = false;
+let isScanSuccessful = false;
 
 function startScanner() {
+    if (isCameraLoading || isScanSuccessful) return; // הגנה מלחיצות כפולות
+    
+    const btn = document.getElementById('scanner-btn');
+    if (btn) {
+        btn.innerHTML = 'פותח מצלמה... ⏳';
+        btn.disabled = true;
+    }
+    
+    isCameraLoading = true;
     if (navigator.vibrate) navigator.vibrate(15);
+    
     document.getElementById('qr-reader').style.display = 'block';
     document.getElementById('qr-reader').innerHTML = ''; 
     
@@ -819,7 +834,17 @@ function startScanner() {
         },
         onScanSuccess,
         onScanError
-    ).catch(err => {
+    ).then(() => {
+        isCameraLoading = false;
+        if (btn) {
+            btn.innerHTML = '📷 מצלמה פעילה (סרקו כעת)';
+        }
+    }).catch(err => {
+        isCameraLoading = false;
+        if (btn) {
+            btn.innerHTML = '📷 נסה שוב לסרוק';
+            btn.disabled = false;
+        }
         console.error("Camera error", err);
         alert("לא הצלחנו לגשת למצלמה האחורית. ודאו שנתתם אישור בדפדפן, או השתמשו בכפתור המחשב למטה.");
     });
@@ -827,16 +852,27 @@ function startScanner() {
 
 function stopScanner() {
     if (html5QrCode && html5QrCode.isScanning) {
-        html5QrCode.stop().then(() => {
+        return html5QrCode.stop().then(() => {
             html5QrCode.clear();
             document.getElementById('qr-reader').style.display = 'none';
         }).catch(err => console.error("Error stopping scanner", err));
     }
+    return Promise.resolve();
 }
 
 function onScanSuccess(decodedText, decodedResult) {
-    stopScanner(); 
-    loadPage('grand_finale');
+    if (isScanSuccessful) return; // מנעול לסריקה בודדת
+    isScanSuccessful = true;
+    
+    if (navigator.vibrate) navigator.vibrate([50, 50, 50]); // פידבק רטט חזק להצלחה
+    
+    stopScanner().then(() => {
+        loadPage('grand_finale');
+    }).catch(() => {
+        // במידה והכיבוי נכשל, לפחות נעלים אותו ונעבור
+        document.getElementById('qr-reader').style.display = 'none';
+        loadPage('grand_finale');
+    });
 }
 
 function onScanError(errorMessage) { /* שקט */ }
@@ -857,6 +893,15 @@ function loadPage(id) {
   if(musicBtnUi) musicBtnUi.innerHTML = '▶ הפעל מוזיקה';
   
   stopScanner(); 
+  
+  // איפוס מנעולי סריקה אם הגענו לעמוד הזה שוב
+  isScanSuccessful = false;
+  isCameraLoading = false;
+  const sBtn = document.getElementById('scanner-btn');
+  if (sBtn) {
+      sBtn.innerHTML = '📷 סרקו את כרטיס הניצחון';
+      sBtn.disabled = false;
+  }
   
   currentPage = id;
   const page  = PAGES[id];
@@ -972,16 +1017,15 @@ function loadPage(id) {
   } else if (page.type === 'finish') {
     document.getElementById('finish-box').style.display = '';
     
-    // מנגנון זיהוי סביבה חכם (מובייל או מחשב)
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     const scannerWrap = document.getElementById('scanner-btn-wrap');
     const pcBtn = document.getElementById('pc-bypass-btn');
     
     if(isMobile) {
         if(scannerWrap) scannerWrap.style.display = 'block';
-        if(pcBtn) pcBtn.style.display = 'none'; // מסתיר את כפתור המחשב בטלפונים
+        if(pcBtn) pcBtn.style.display = 'none'; 
     } else {
-        if(scannerWrap) scannerWrap.style.display = 'none'; // מסתיר את המצלמה במחשב
+        if(scannerWrap) scannerWrap.style.display = 'none'; 
         if(pcBtn) pcBtn.style.display = 'inline-block';
     }
 
@@ -995,7 +1039,7 @@ function loadPage(id) {
     let fastestStage = 'אין נתונים';
     
     for (const [stageId, ms] of Object.entries(stageTimes)) {
-      if (stageId === 'crossroads' || stageId === 'grand_finale') continue; // שמרנו את ה-finish!
+      if (stageId === 'crossroads' || stageId === 'grand_finale') continue; 
       totalMs += ms;
       if (ms > maxStageMs && TASK_NAMES[stageId]) {
         maxStageMs = ms;
@@ -1039,7 +1083,6 @@ function loadPage(id) {
   }
 }
 
-// פונקציות למודל העקיפה
 function showBypassModal() {
     if (navigator.vibrate) navigator.vibrate(15);
     document.getElementById('bypass-checkbox').checked = false;
