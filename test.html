@@ -59,14 +59,11 @@
       transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); position: relative; 
     }
     #global-progress-fill::after {
-      content: '✈️'; position: absolute; left: -10px; 
-      top: 8px; 
-      transform: scaleX(-1); 
+      content: '✈️'; position: absolute; left: -10px; top: 8px; transform: scaleX(-1); 
       font-size: 18px; line-height: 1; text-shadow: 0 2px 4px rgba(0,0,0,0.5); z-index: 10001;
     }
 
     #app { position: relative; z-index: 1; max-width: 740px; margin: 0 auto; padding: 54px 20px 100px; transition: filter 0.5s ease; }
-    
     .app-blurred { filter: blur(8px) grayscale(60%); pointer-events: none; user-select: none; }
 
     .suspense-mode .page-header, .suspense-mode .youtube-wrap, .suspense-mode .audio-riddle, .suspense-mode #piano-section, .suspense-mode .crossroads-wrap {
@@ -124,7 +121,7 @@
     .page-subtitle { color: #00c8be; font-size: 14px; font-weight: 700; margin-bottom: 12px; letter-spacing: 1px; }
     .title-divider { width: 70px; height: 3px; background: linear-gradient(90deg, rgba(255,140,0,0.9), rgba(0,210,190,0.7)); margin: 8px auto 18px; border-radius: 2px; }
     
-    /* אנימציית הניצחון */
+    /* אנימציית הניצחון קלה ומהירה ל-GPU */
     .million-title {
       font-size: clamp(40px, 9vw, 65px) !important;
       color: #ffd700 !important; 
@@ -133,10 +130,7 @@
       margin-bottom: 20px !important;
       will-change: transform;
     }
-    @keyframes elegantPulse {
-      from { transform: scale(1); }
-      to { transform: scale(1.05); }
-    }
+    @keyframes elegantPulse { from { transform: scale(1); } to { transform: scale(1.05); } }
 
     .page-desc { color: rgba(255,230,180,0.85); font-size: 15.5px; line-height: 2.1; white-space: pre-wrap; max-width: 560px; margin: 0 auto; min-height: 40px; }
     @keyframes slideUpFade { 0% { opacity: 0; transform: translateY(12px); } 100% { opacity: 1; transform: translateY(0); } }
@@ -217,6 +211,7 @@
 
     #bypass-confirm-btn:disabled { background: #555; color: #999; cursor: not-allowed; box-shadow: none; border-bottom: none; transform: none; }
 
+    /* לוח תוצאות מורחב */
     .finish-stats {
       background: rgba(0,0,0,0.6); border: 1px solid rgba(255,149,0,0.5); border-radius: 12px;
       padding: 24px; text-align: right; max-width: 450px; margin: 25px auto; box-shadow: inset 0 2px 15px rgba(0,0,0,0.8);
@@ -602,7 +597,7 @@ const PAGES = {
   },
   london: {
     step: 2, bg: "radial-gradient(ellipse at 25% 15%, #001122 0%, #08111a 40%, #000a11 100%)",
-    title: "כל הכבוד צוות!", mission: "ברוכים הבאים לאנגליה",
+    title: "כל הכבוד!", mission: "ברוכים הבאים לאנגליה",
     desc: "הגעתם ליעד הראשון שלכם במירוץ.\n\nפתחו את המעטפה השנייה.\n\nצפו בסרטון והזינו למטה את קוד הרכבת התחתית.",
     youtube: "tOnHapIZFi4", code: "bond", next: "crossroads", type: "code",
     hints: [
@@ -613,14 +608,14 @@ const PAGES = {
   },
   crossroads: {
     step: 3, bg: "radial-gradient(ellipse at 25% 15%, #1a001a 0%, #0d001a 40%, #050011 100%)",
-    title: "כל הכבוד צוות!", mission: "הגעתם לצומת",
+    title: "כל הכבוד!", mission: "הגעתם לצומת",
     desc: "במשימת צומת עליכם לבחור אחת מ-2 משימות.\n\nפתחו את המעטפה השלישית ובחרו: 'חבל על הזמן' או 'זמן להופעה'",
     youtube: null, type: "crossroads", choiceA: "time-first", choiceB: "show-first"
   },
   "time-first": {
     step: 4, bg: "radial-gradient(ellipse at 25% 15%, #1a001a 0%, #0d001a 40%, #050011 100%)",
-    title: "כל הכבוד!", mission: "בחרתם: חבל על הזמן",
-    desc: "בהצלחה!",
+    title: "כל הכבוד!", mission: "חבל על הזמן: חידת השעונים",
+    desc: "",
     youtube: "GE6oODAEQ-U", code: "435", next: "show-second", type: "code",
     hints: [
       "מה השעה בכל אחת מהמדינות? העזרו בלוח עם שמות המדינות והשעות כדי לכוון כל שעון לשעה הנכונה.",
@@ -630,8 +625,8 @@ const PAGES = {
   },
   "show-first": {
     step: 4, bg: "radial-gradient(ellipse at 25% 15%, #1a001a 0%, #0d001a 40%, #050011 100%)",
-    title: "כל הכבוד!", mission: "בחרתם: זמן להופעה", synthRiddle: true, piano: true,
-    desc: "בהצלחה צוות!",
+    title: "כל הכבוד!", mission: "זמן להופעה: חידת הפסנתר", synthRiddle: true, piano: true,
+    desc: "",
     youtube: "mnIEuzaG238", code: "4731", next: "time-second", type: "code",
     hints: [
       "האזינו לארבעת התווים. נסו לשחזר אותם על הפסנתר ותקבלו מיקום בתוך המטריצה של התמונות.\nשימו לב שהתמונות מייצגות שמות של להקות מפורסמות שהופיעו באולם.",
@@ -642,7 +637,7 @@ const PAGES = {
   "show-second": {
     step: 5, bg: "radial-gradient(ellipse at 25% 15%, #1a001a 0%, #0d001a 40%, #050011 100%)",
     title: "סיבוב פרסה!", mission: "עליכם לבצע: זמן להופעה", synthRiddle: true, piano: true,
-    desc: "כנראה שהמתחרים האחרים רואים בכם איום – קיבלתם סיבוב פרסה! כעת עליכם לבצע את משימת הצומת השנייה – 'זמן להופעה'! בהצלחה!",
+    desc: "",
     youtube: "mnIEuzaG238", code: "4731", next: "boarding", type: "code",
     hints: [
       "האזינו לארבעת התווים. נסו לשחזר אותם על הפסנתר ותקבלו מיקום בתוך המטריצה של התמונות.\nשימו לב שהתמונות מייצגות שמות של להקות מפורסמות שהופיעו באולם.",
@@ -663,7 +658,7 @@ const PAGES = {
   },
   boarding: {
     step: 6, bg: "radial-gradient(ellipse at 25% 15%, #001a22 0%, #000d1a 40%, #000511 100%)",
-    title: "כל הכבוד צוות!", mission: "משימת התיק",
+    title: "כל הכבוד!", mission: "משימת התיק",
     desc: "עברתם את שני הצדדים של הצומת, וכעת אתם יכולים לקבל את המעטפה עם הרמז הבא! פתחו את המעטפה הרביעית, והזינו כאן את קוד הטיסה ליעד הבא שלכם",
     youtube: null, code: "386", next: "zoo", type: "code",
     hints: [
@@ -674,7 +669,7 @@ const PAGES = {
   },
   zoo: {
     step: 7, bg: "radial-gradient(ellipse at 25% 15%, #002200 0%, #001100 40%, #000500 100%)",
-    title: "כל הכבוד צוות!", mission: "משימת גן החיות",
+    title: "כל הכבוד!", mission: "משימת גן החיות",
     desc: "פיתחו את המעטפה החמישית! על מנת לקבל את הרמז ליעד הבא, הזינו כאן את קוד משימת גן החיות",
     youtube: "SkKxiszzO9E", code: "5441", next: "museum", type: "code",
     hints: [
@@ -685,7 +680,7 @@ const PAGES = {
   },
   museum: {
     step: 8, bg: "radial-gradient(ellipse at 25% 15%, #220a00 0%, #110500 40%, #0a0200 100%)",
-    title: "כל הכבוד צוות!", mission: "משימת הפורטרטים",
+    title: "כל הכבוד!", mission: "משימת הפורטרטים",
     desc: "פיתחו את המעטפה השישית, והזינו למטה את קוד הפורטרטים",
     youtube: "xqGth1DhDd4", code: "235", next: "tajmahal", type: "code",
     hints: [
@@ -696,7 +691,7 @@ const PAGES = {
   },
   tajmahal: {
     step: 9, bg: "radial-gradient(ellipse at 25% 15%, #221100 0%, #110800 40%, #0a0500 100%)",
-    title: "כל הכבוד צוות!", mission: "זיהוי יעד",
+    title: "כל הכבוד!", mission: "זיהוי יעד",
     desc: "ממתינה לכם משימה נוספת כאן במוזיאון לאמנות. פיתחו את המעטפה השביעית. אם עמדתם במשימה, הזינו את <span style=\"color:#ff9500; font-weight:bold;\">שם המדינה</span> הבאה שעליכם להגיע אליה",
     youtube: null, code: "הודו", next: "airport", type: "code",
     hints: [
@@ -707,7 +702,7 @@ const PAGES = {
   },
   airport: {
     step: 10, bg: "radial-gradient(ellipse at 25% 15%, #000a22 0%, #000511 40%, #00020a 100%)",
-    title: "כל הכבוד צוות!", mission: "חידת ההילוכים",
+    title: "כל הכבוד!", mission: "חידת ההילוכים",
     desc: "היעד הבא שלכם הוא דרמסאלה, הודו! אך תחילה, הסיעו את עצמכם אל שדה התעופה, ופיתחו את המעטפה השמינית",
     youtube: "PwEocvwT9vo", code: "3254", next: "guru", type: "code",
     hints: [
@@ -718,7 +713,7 @@ const PAGES = {
   },
   guru: {
     step: 11, bg: "radial-gradient(ellipse at 25% 15%, #2a1100 0%, #150800 40%, #0a0400 100%)",
-    title: "כל הכבוד צוות!", mission: "הודו: דראמסלה",
+    title: "כל הכבוד!", mission: "הודו: דראמסלה",
     desc: "ברוכים הבאים לדראמסלה, הודו.\n\nנראה שאחת הקבוצות המתחרות ניסתה לחבל לכם בהתקדמות והרסה את ה-QR קוד שבמעטפה. למזלכם, הפקת המירוץ שמה לב לזה ודאגה להעלות את המסר מהגורו ישירות לכאן.\n\nצפו בסרטון והזינו כאן את קוד הגורו:",
     youtube: "jnxgqrVLbIg", code: "41", next: "market", type: "code",
     hints: [
@@ -729,7 +724,7 @@ const PAGES = {
   },
   market: {
     step: 12, bg: "radial-gradient(ellipse at 25% 15%, #220511 0%, #110208 40%, #0a0105 100%)",
-    title: "כל הכבוד צוות!", mission: "הודו: חידת השוק",
+    title: "כל הכבוד!", mission: "הודו: חידת השוק",
     desc: "פיתחו את המעטפה העשירית",
     youtube: "wef_7pKbPMg", code: "385", next: "finish", type: "code",
     hints: [
@@ -740,7 +735,7 @@ const PAGES = {
   },
   finish: {
     step: 13, bg: "radial-gradient(ellipse at 25% 15%, #2a2200 0%, #151100 40%, #0a0800 100%)",
-    title: "כל הכבוד צוות!", mission: "חזרתם לישראל: משימת הסיום",
+    title: "כל הכבוד!", mission: "חוזרים לישראל",
     desc: "עברתם את כל המדינות, והצלחתם בכל המשימות! הגיע הזמן לטוס חזרה לישראל! הצוות הראשון שיחצה את קו הגמר יזכה במיליון! פיתחו את המעטפה האחרונה, שם תחכה לכם משימת הסיום!",
     youtube: "_3-OT6sc12Y",
     type: "finish",
@@ -1161,7 +1156,7 @@ function loadPage(id) {
   const url = id === 'opening' ? location.pathname : `${location.pathname}?page=${id}`;
   history.pushState({ page: id }, '', url);
 
-  document.title = page.title.replace('צוות!', teamName ? `צוות ${teamName}!` : 'צוות!') + ' — פאזלס חדרי בריחה';
+  document.title = page.title + ' — פאזלס חדרי בריחה';
   
   const titleEl = document.getElementById('page-title');
   const subtitleEl = document.getElementById('page-mission-name');
@@ -1171,7 +1166,7 @@ function loadPage(id) {
       titleEl.innerHTML = `<div style="font-size:18px; color:#00c8be; margin-bottom:10px; text-shadow:none; letter-spacing:0;">עשיתם את זה, צוות ${teamName}!</div><div class="million-title">המיליון שלכם!</div>`;
       subtitleEl.style.display = 'none';
   } else {
-      titleEl.textContent = page.title.replace('צוות!', teamName ? `צוות ${teamName}!` : 'צוות!');
+      titleEl.textContent = page.title;
       titleEl.classList.remove('million-title');
       if(page.mission) {
           subtitleEl.style.display = 'block';
@@ -1342,7 +1337,7 @@ function loadPage(id) {
             const btn = document.getElementById('souvenir-start-btn');
             if (btn) {
                 btn.style.display = 'flex';
-                btn.style.animation = 'slideUpFade 1s ease-out forwards, gentleGoldPulse 2.5s infinite alternate, bounceGo 1s ease-in-out infinite alternate';
+                btn.style.animation = 'slideUpFade 1s ease-out forwards, gentleGoldPulse 2s infinite alternate, bounceGo 1s ease-in-out infinite alternate';
             }
         }, 3000);
     }
@@ -1468,9 +1463,8 @@ function openHintsModal() {
       const skipDiv = document.createElement('div');
       skipDiv.className = 'hint-item';
       skipDiv.innerHTML = `
-        <button class="hint-btn solution-btn" style="border-color: #00c8be; background: linear-gradient(180deg, #004d40, #002222); color: #00c8be;" onclick="showHintConfirm(this)">🚀 עקיפת סורק המצלמה</button>
+        <button class="hint-btn solution-btn" style="border-color: #00c8be; background: linear-gradient(180deg, #004d40, #002222); color: #00c8be;" onclick="showHintConfirm(this)">🚀 אם סריקת ה-QR לא עובדת - לחצו כאן</button>
         <div class="hint-confirm solution-confirm" style="border-color: #00c8be; background: #001a18;">
-          <p style="color:#00c8be;">סריקת ה-QR לא עובדת לכם? לחצו למטה כדי להפעיל את קוד הגיבוי ולעבור לעמוד הניצחון.</p>
           <div class="hint-confirm-btns">
             <button class="btn-yes" style="background: #00c8be; color: #000;" onclick="closeHintsModal(); showBypassModal();">העבר אותי לשלב הבא</button>
             <button class="btn-no" onclick="cancelHint(this)">ביטול</button>
