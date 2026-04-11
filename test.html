@@ -356,66 +356,66 @@
     <div id="page-mission-name" class="page-subtitle"></div>
     <div class="title-divider"></div>
     <p class="page-desc" id="page-desc"></p>
+  </div>
+
+  <div id="grand-finale-stats-container"></div>
+
+  <div class="youtube-wrap" id="youtube-wrap" style="display:none">
+    <iframe id="youtube-iframe" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
+  </div>
+
+  <div class="audio-riddle" id="audio-riddle" style="display:none">
+    <button class="audio-play-btn" id="riddle-play-btn" onclick="toggleRiddle()">▶</button>
+    <div class="audio-track">
+      <div class="audio-label">הקלטה מסווגת: פענחו את רצף התווים</div>
+      <div class="audio-progress-bar" id="riddle-progress-bar"><div class="audio-progress-fill" id="riddle-fill"></div></div>
+      <div class="audio-time" id="riddle-time">0:00 / 0:15</div>
+    </div>
+  </div>
+
+  <div id="piano-section" style="display:none; margin-bottom:24px; text-align:center;">
+    <div class="piano-instruction" id="piano-instruction">📱 סובבו את המסך ולחצו על התווים לנגינה 🎹</div>
+    <div class="piano-scroll-wrapper">
+      <div class="piano-chassis">
+        <div class="piano-felt"></div>
+        <div id="piano-keys" style="display:flex; position:relative; height:130px; justify-content:center; user-select:none;"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="portrait-instruction" style="display:none; text-align:center; color:#00c8be; text-shadow: 0 0 15px rgba(0,200,190,0.8); font-size: 18px; font-weight: 900; margin-bottom: 24px; animation: softGlow 3.5s infinite ease-in-out;">📱 החזירו את המסך למצב רגיל</div>
+
+  <div class="code-box" id="code-box">
+    <div class="code-section-label"><hr/><span>🔐 הזנת קוד</span><hr/></div>
+    <p class="code-instruction">הזינו את הקוד שקיבלתם</p>
+    <div class="code-input-wrap">
+      <div class="code-hint-arrow">▼</div>
+      <div class="code-glow-ring" id="glow-ring">
+        <input type="text" class="code-input" id="code-input" oninput="clearError(); playTypeSound()" onkeydown="if(event.key==='Enter')submitCode()" onfocus="document.getElementById('glow-ring').classList.add('focused')" onblur="document.getElementById('glow-ring').classList.remove('focused')"/>
+      </div>
+      <button class="submit-btn" id="main-submit-btn" onclick="submitCode()">המשך לשלב הבא «</button>
+    </div>
+    <div class="error-msg" id="error-msg">✗ קוד שגוי — נסו שוב!</div>
+  </div>
+
+  <div class="crossroads-wrap" id="crossroads-box" style="display:none">
+    <div class="crossroads-title">בחרו משימה אחת מבין השתיים:</div>
+    <div class="choice-btns">
+      <button class="choice-btn" onclick="playClick();goChoice('A')"><img class="choice-img" src="time.jpg" alt="חבל על הזמן"/></button>
+      <button class="choice-btn" onclick="playClick();goChoice('B')"><img class="choice-img" src="show-time.jpg" alt="זמן להופעה"/></button>
+    </div>
+  </div>
+
+  <div class="finish-wrap" id="finish-box" style="display:none">
+    <div class="finish-trophy">🏆</div>
     
-    <div id="grand-finale-stats-container"></div>
-
-    <div class="youtube-wrap" id="youtube-wrap" style="display:none">
-      <iframe id="youtube-iframe" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
-    </div>
-
-    <div class="audio-riddle" id="audio-riddle" style="display:none">
-      <button class="audio-play-btn" id="riddle-play-btn" onclick="toggleRiddle()">▶</button>
-      <div class="audio-track">
-        <div class="audio-label">הקלטה מסווגת: פענחו את רצף התווים</div>
-        <div class="audio-progress-bar" id="riddle-progress-bar"><div class="audio-progress-fill" id="riddle-fill"></div></div>
-        <div class="audio-time" id="riddle-time">0:00 / 0:15</div>
+    <div class="finish-actions" id="finish-actions">
+      <div id="scanner-btn-wrap" style="width: 100%;">
+         <button id="scanner-btn" class="submit-btn" style="width: 100%; max-width: 350px;" onclick="startScanner()">📷 סרקו את כרטיס הניצחון</button>
+         <div id="qr-reader"></div>
       </div>
-    </div>
-
-    <div id="piano-section" style="display:none; margin-bottom:24px; text-align:center;">
-      <div class="piano-instruction" id="piano-instruction">📱 סובבו את המסך ולחצו על התווים לנגינה 🎹</div>
-      <div class="piano-scroll-wrapper">
-        <div class="piano-chassis">
-          <div class="piano-felt"></div>
-          <div id="piano-keys" style="display:flex; position:relative; height:130px; justify-content:center; user-select:none;"></div>
-        </div>
-      </div>
-    </div>
-
-    <div id="portrait-instruction" style="display:none; text-align:center; color:#00c8be; text-shadow: 0 0 15px rgba(0,200,190,0.8); font-size: 18px; font-weight: 900; margin-bottom: 24px; animation: softGlow 3.5s infinite ease-in-out;">📱 החזירו את המסך למצב רגיל</div>
-
-    <div class="code-box" id="code-box">
-      <div class="code-section-label"><hr/><span>🔐 הזנת קוד</span><hr/></div>
-      <p class="code-instruction">הזינו את הקוד שקיבלתם</p>
-      <div class="code-input-wrap">
-        <div class="code-hint-arrow">▼</div>
-        <div class="code-glow-ring" id="glow-ring">
-          <input type="text" class="code-input" id="code-input" oninput="clearError(); playTypeSound()" onkeydown="if(event.key==='Enter')submitCode()" onfocus="document.getElementById('glow-ring').classList.add('focused')" onblur="document.getElementById('glow-ring').classList.remove('focused')"/>
-        </div>
-        <button class="submit-btn" id="main-submit-btn" onclick="submitCode()">המשך לשלב הבא «</button>
-      </div>
-      <div class="error-msg" id="error-msg">✗ קוד שגוי — נסו שוב!</div>
-    </div>
-
-    <div class="crossroads-wrap" id="crossroads-box" style="display:none">
-      <div class="crossroads-title">בחרו משימה אחת מבין השתיים:</div>
-      <div class="choice-btns">
-        <button class="choice-btn" onclick="playClick();goChoice('A')"><img class="choice-img" src="time.jpg" alt="חבל על הזמן"/></button>
-        <button class="choice-btn" onclick="playClick();goChoice('B')"><img class="choice-img" src="show-time.jpg" alt="זמן להופעה"/></button>
-      </div>
-    </div>
-
-    <div class="finish-wrap" id="finish-box" style="display:none">
-      <div class="finish-trophy">🏆</div>
       
-      <div class="finish-actions" id="finish-actions">
-        <div id="scanner-btn-wrap" style="width: 100%;">
-           <button id="scanner-btn" class="submit-btn" style="width: 100%; max-width: 350px;" onclick="startScanner()">📷 סרקו את כרטיס הניצחון</button>
-           <div id="qr-reader"></div>
-        </div>
-        
-        <button id="pc-bypass-btn" class="hint-btn" style="width: auto; padding: 10px 20px; font-size: 14px; background: transparent; border: 1px solid rgba(255,255,255,0.2); box-shadow: none;" onclick="showBypassModal()">⚠️ משחקים ממחשב ללא מצלמה? לחצו כאן</button>
-      </div>
+      <button id="pc-bypass-btn" class="hint-btn" style="width: auto; padding: 10px 20px; font-size: 14px; background: transparent; border: 1px solid rgba(255,255,255,0.2); box-shadow: none;" onclick="showBypassModal()">⚠️ משחקים ממחשב ללא מצלמה? לחצו כאן</button>
     </div>
   </div>
 </div>
@@ -797,7 +797,8 @@ const musicTracks = {
   'tajmahal': 'Mozart-Symphony-40.mp3',
   'airport': 'Robbie-Williams-Supreme.mp3',
   'market': 'Girls-Like-You-Indian-Version.mp3',
-  'finish': 'ilanit-el-haderech.mp3'
+  'finish': 'ilanit-el-haderech.mp3',
+  'grand_finale': 'ilanit-el-haderech.mp3'
 };
 
 function openMusicModal() {
@@ -1048,38 +1049,69 @@ function captureSouvenir() {
   
   const video = document.getElementById('selfie-video');
   const canvas = document.createElement('canvas');
-  // FoV תיקון: משתמשים ברזולוציית המצלמה המקורית
+  
   canvas.width = video.videoWidth;
   canvas.height = video.videoHeight;
   const ctx = canvas.getContext('2d');
   
   ctx.translate(canvas.width, 0);
   ctx.scale(-1, 1);
-  ctx.drawImage(video, 0, 0);
-  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+  ctx.setTransform(1, 0, 0, 1, 0, 0); 
 
-  // מסגרת זהב וטקסט
-  const grad = ctx.createLinearGradient(0,0,canvas.width,canvas.height);
-  grad.addColorStop(0,'#ffd700'); grad.addColorStop(1,'#ff8c00');
-  ctx.lineWidth = canvas.width * 0.04; ctx.strokeStyle = grad;
-  ctx.strokeRect(ctx.lineWidth/2, ctx.lineWidth/2, canvas.width - ctx.lineWidth, canvas.height - ctx.lineWidth);
+  const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+  gradient.addColorStop(0, '#ffd700');
+  gradient.addColorStop(0.5, '#ff8c00');
+  gradient.addColorStop(1, '#ffd700');
+  
+  const outerBorder = canvas.width * 0.04; 
+  const innerBorder = outerBorder * 0.15; 
+  
+  ctx.lineWidth = outerBorder;
+  ctx.strokeStyle = gradient;
+  ctx.strokeRect(outerBorder/2, outerBorder/2, canvas.width - outerBorder, canvas.height - outerBorder);
+  ctx.lineWidth = innerBorder;
+  ctx.strokeStyle = 'white';
+  ctx.strokeRect(outerBorder, outerBorder, canvas.width - outerBorder*2, canvas.height - outerBorder*2);
 
-  ctx.textAlign = 'center'; ctx.fillStyle = 'white'; ctx.shadowBlur = 10; ctx.shadowColor = 'black';
-  ctx.font = `bold ${canvas.height * 0.05}px Rubik`;
+  ctx.textAlign = 'center';
+  ctx.shadowColor = 'rgba(0,0,0,0.8)';
+  ctx.shadowBlur = 10;
+  
+  ctx.fillStyle = '#ffffff';
+  ctx.font = `bold ${canvas.height * 0.04}px Rubik, sans-serif`;
+  ctx.fillText("המירוץ העולמי", canvas.width/2, canvas.height * 0.08);
+  ctx.fillStyle = '#ff9500';
+  ctx.font = `bold ${canvas.height * 0.025}px Rubik, sans-serif`;
+  ctx.fillText("פאזלס - חדרי בריחה", canvas.width/2, canvas.height * 0.115);
+
+  ctx.fillStyle = '#ffd700';
+  ctx.font = `bold ${canvas.height * 0.05}px Rubik, sans-serif`;
   ctx.fillText(selectedSouvenirPhrase, canvas.width/2, canvas.height * 0.85);
-  ctx.font = `bold ${canvas.height * 0.03}px Rubik`;
-  ctx.fillText(`צוות ${teamName} | ${formatTime(currentTotalTimeMs)}`, canvas.width/2, canvas.height * 0.92);
+  
+  ctx.fillStyle = '#ffffff';
+  ctx.font = `${canvas.height * 0.035}px Rubik, sans-serif`;
+  ctx.fillText(teamName ? `צוות ${teamName}` : "צוות אלופים", canvas.width/2, canvas.height * 0.90);
+  
+  ctx.fillStyle = '#00c8be';
+  ctx.font = `${canvas.height * 0.025}px Rubik, sans-serif`;
+  ctx.fillText("זמן: " + formatTime(currentTotalTimeMs), canvas.width/2, canvas.height * 0.94);
 
-  const data = canvas.toDataURL('image/jpeg', 0.9);
-  document.getElementById('preview-image').src = data;
-  document.getElementById('download-btn').href = data;
+  const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+  document.getElementById('preview-image').src = dataUrl;
+  document.getElementById('download-btn').href = dataUrl;
+  
   document.getElementById('souvenir-camera-modal').classList.remove('show');
   document.getElementById('souvenir-preview-modal').classList.add('show');
 }
 
 function retakeSelfie() {
+    if (navigator.vibrate) navigator.vibrate(10);
     document.getElementById('souvenir-preview-modal').classList.remove('show');
     document.getElementById('souvenir-camera-modal').classList.add('show');
+    const capBtn = document.getElementById('capture-selfie-btn');
+    capBtn.disabled = false;
+    capBtn.innerHTML = '📷 צלמו אותנו!';
 }
 
 // --- מעבר עם אנימציית טיסה ---
@@ -1132,6 +1164,35 @@ function loadPage(id) {
   if (id === 'grand_finale') {
       titleEl.innerHTML = `<div style="font-size:18px; color:#00c8be; margin-bottom:10px; text-shadow:none; letter-spacing:0;">עשיתם את זה, צוות ${teamName}!</div><div class="million-title">המיליון שלכם!</div>`;
       subtitleEl.style.display = 'none';
+      
+      // אוטופליי מוזיקת סיום עם השהייה ופייד-אין
+      setTimeout(() => {
+          const track = musicTracks['grand_finale'];
+          if (!bgMusic.src.endsWith(track)) {
+              bgMusic.src = track;
+          }
+          bgMusic.volume = 0;
+          let playPromise = bgMusic.play();
+          if (playPromise !== undefined) {
+              playPromise.then(() => {
+                  isMusicPlaying = true;
+                  if(musicBtnUi) musicBtnUi.innerHTML = '⏸ השהה מוזיקה';
+                  
+                  const targetVolume = parseFloat(document.getElementById('volume-slider').value) || 0.2;
+                  let vol = 0;
+                  const fade = setInterval(() => {
+                      vol += 0.02;
+                      if(vol >= targetVolume) {
+                          bgMusic.volume = targetVolume;
+                          clearInterval(fade);
+                      } else {
+                          bgMusic.volume = vol;
+                      }
+                  }, 100);
+              }).catch(e => console.log("Autoplay blocked by browser:", e));
+          }
+      }, 2500); // מחכים לקונפטי וצלילי הניצחון
+
   } else {
       titleEl.textContent = page.title;
       titleEl.classList.remove('million-title');
@@ -1376,7 +1437,7 @@ function openHintsModal() {
       skipDiv.className = 'hint-item';
       skipDiv.innerHTML = `
         <button class="hint-btn solution-btn" style="border-color: #00c8be; background: linear-gradient(180deg, #004d40, #002222); color: #00c8be;" onclick="showHintConfirm(this)">🚀 אם סריקת ה-QR לא עובדת - לחצו כאן</button>
-        <div class="hint-confirm solution-confirm" style="border-color: #00c8be; background: #001a18; padding-top: 25px;">
+        <div class="hint-confirm solution-confirm" style="border-color: #00c8be; background: #001a18;">
           <div class="hint-confirm-btns">
             <button class="btn-yes" style="background: #00c8be; color: #000;" onclick="closeHintsModal(); showBypassModal();">העבר אותי לשלב הבא</button>
             <button class="btn-no" onclick="cancelHint(this)">ביטול</button>
