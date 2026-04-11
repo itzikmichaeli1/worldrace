@@ -324,13 +324,38 @@
     #preview-image { width: 100%; border-radius: 10px; border: 2px solid #ffd700; margin-bottom: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
     .download-btn { display: block; background: #00c8be; color: #000; font-weight: bold; font-size: 20px; text-align: center; text-decoration: none; padding: 15px; border-radius: 8px; font-family: inherit; }
 
-    /* ===== שדרוגי פארודיה (טיסה) ===== */
-    #flight-overlay { display: none; position: fixed; inset: 0; z-index: 5000; background: #000a14; align-items: center; justify-content: center; flex-direction: column; color: #fff; text-align: center; }
-    #flight-overlay.show { display: flex; animation: fadeInOutFlight 2.5s forwards; }
-    @keyframes fadeInOutFlight { 0%{opacity:0;} 15%{opacity:1;} 85%{opacity:1;} 100%{opacity:0;} }
-    .flight-path { width: 85%; max-width: 500px; height: 4px; border-bottom: 4px dashed #ff9500; position: relative; margin-top: 40px; }
-    .flight-plane { position: absolute; top: -35px; left: 0; font-size: 50px; transform: scaleX(-1); animation: flyPlane 2.5s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
-    @keyframes flyPlane { 0%{left:0%; transform:scaleX(-1) translateY(0);} 25%{transform:scaleX(-1) translateY(-15px);} 50%{transform:scaleX(-1) translateY(5px);} 75%{transform:scaleX(-1) translateY(-15px);} 100%{left:100%; transform:scaleX(-1) translateY(0);} }
+    /* ===== שדרוגי פארודיה (טיסות ונסיעות ב-3D) ===== */
+    #transit-overlay { display: none; position: fixed; inset: 0; z-index: 5000; background: #000a14; align-items: center; justify-content: center; flex-direction: column; color: #fff; text-align: center; }
+    #transit-overlay.show { display: flex; animation: fadeInOutTransit 2.5s forwards; }
+    @keyframes fadeInOutTransit { 0%{opacity:0;} 15%{opacity:1;} 85%{opacity:1;} 100%{opacity:0;} }
+    
+    .transit-path { width: 85%; max-width: 500px; height: 4px; border-bottom: 4px dashed #ff9500; position: relative; margin-top: 40px; perspective: 1000px; }
+    
+    .transit-icon { position: absolute; top: -35px; left: 0; font-size: 50px; transform-style: preserve-3d; }
+    
+    /* תלת-מימד למטוס */
+    .transit-icon.flight { animation: flyPlane3D 2.5s cubic-bezier(0.4, 0, 0.2, 1) forwards; filter: drop-shadow(0px 20px 5px rgba(0,0,0,0.4)); }
+    @keyframes flyPlane3D {
+        0% { left: 0%; transform: scaleX(-1) translateY(0) rotateZ(0deg) rotateX(20deg); }
+        25% { transform: scaleX(-1) translateY(-25px) rotateZ(15deg) rotateX(40deg); filter: drop-shadow(-10px 40px 10px rgba(0,0,0,0.2));}
+        50% { transform: scaleX(-1) translateY(-10px) rotateZ(5deg) rotateX(30deg); filter: drop-shadow(-5px 30px 8px rgba(0,0,0,0.3));}
+        75% { transform: scaleX(-1) translateY(-30px) rotateZ(20deg) rotateX(45deg); filter: drop-shadow(-15px 50px 15px rgba(0,0,0,0.1));}
+        100% { left: 100%; transform: scaleX(-1) translateY(0) rotateZ(0deg) rotateX(20deg); filter: drop-shadow(0px 20px 5px rgba(0,0,0,0.4)); }
+    }
+
+    /* תלת-מימד לרכב */
+    .transit-icon.drive { animation: driveCar3D 2.5s cubic-bezier(0.4, 0, 0.2, 1) forwards; filter: drop-shadow(0px 10px 3px rgba(0,0,0,0.6)); top: -45px; font-size: 55px;}
+    @keyframes driveCar3D {
+        0% { left: 0%; transform: scaleX(-1) translateY(0) rotateY(-15deg); }
+        10% { transform: scaleX(-1) translateY(-5px) rotateY(-15deg) rotateZ(3deg); }
+        20% { transform: scaleX(-1) translateY(0) rotateY(-15deg) rotateZ(0deg); }
+        30% { transform: scaleX(-1) translateY(-8px) rotateY(-15deg) rotateZ(-2deg); }
+        40% { transform: scaleX(-1) translateY(0) rotateY(-15deg) rotateZ(0deg); }
+        50% { transform: scaleX(-1) translateY(-5px) rotateY(-15deg) rotateZ(3deg); }
+        60% { transform: scaleX(-1) translateY(0) rotateY(-15deg) rotateZ(0deg); }
+        80% { transform: scaleX(-1) translateY(-10px) rotateY(-15deg) rotateZ(-3deg); }
+        100% { left: 100%; transform: scaleX(-1) translateY(0) rotateY(-15deg) rotateZ(0deg); }
+    }
 
   </style>
 </head>
@@ -342,10 +367,10 @@
 
 <button id="floating-map-btn" onclick="openMapModal()" title="הדרכון שלכם">🛂 הדרכון שלכם</button>
 
-<div id="flight-overlay">
-  <h2 id="flight-destination-text" style="color:#ffd700; font-family:'Rubik', sans-serif; font-size:32px; font-weight:900; text-shadow:0 0 15px rgba(255,215,0,0.5);">טסים ליעד הבא...</h2>
-  <div class="flight-path">
-     <div class="flight-plane">✈️</div>
+<div id="transit-overlay">
+  <h2 id="transit-destination-text" style="color:#ffd700; font-family:'Rubik', sans-serif; font-size:32px; font-weight:900; text-shadow:0 0 15px rgba(255,215,0,0.5);">טסים ליעד הבא...</h2>
+  <div class="transit-path">
+     <div id="transit-icon" class="transit-icon flight">✈️</div>
   </div>
 </div>
 
@@ -772,11 +797,18 @@ const PAGES = {
   }
 };
 
-const flightRoutes = {
-    'london': 'טסים לאנגליה... 🇬🇧',
-    'zoo': 'טסים לארצות הברית... 🇺🇸',
-    'guru': 'טסים להודו... 🇮🇳',
-    'grand_finale': 'טסים חזרה הביתה... ✈️'
+// הגדרת סוג המעבר (טיסה או נסיעה) וטקסט
+const transitRoutes = {
+    'london': { type: 'flight', text: 'טסים לאנגליה... 🇬🇧' },
+    'crossroads': { type: 'drive', text: 'נוסעים לנקודת הציון... 🚗' },
+    'boarding': { type: 'drive', text: 'נוסעים לשדה התעופה... 🚗' },
+    'zoo': { type: 'flight', text: 'טסים לארצות הברית... 🇺🇸' },
+    'museum': { type: 'drive', text: 'נוסעים למוזיאון הפורטרטים... 🚗' },
+    'tajmahal': { type: 'flight', text: 'טסים להודו... 🇮🇳' },
+    'airport': { type: 'drive', text: 'נוסעים לשדה התעופה... 🚗' },
+    'guru': { type: 'flight', text: 'טסים לדרמסאלה... ✈️' },
+    'market': { type: 'drive', text: 'נוסעים לשוק המקומי... 🚗' },
+    'grand_finale': { type: 'flight', text: 'טסים חזרה הביתה... ✈️' }
 };
 
 let currentPage = null;
@@ -924,6 +956,34 @@ function playFlightSound() {
         gain.gain.linearRampToValueAtTime(0, ctx.currentTime + 2.5);
         noise.connect(filter); filter.connect(gain); gain.connect(ctx.destination);
         noise.start();
+    } catch(e){}
+}
+
+function playDriveSound() {
+    try {
+        const ctx = getAC();
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        o.type = 'sawtooth';
+        o.frequency.setValueAtTime(40, ctx.currentTime);
+        o.frequency.linearRampToValueAtTime(100, ctx.currentTime + 1.0);
+        o.frequency.linearRampToValueAtTime(120, ctx.currentTime + 2.0);
+        o.frequency.linearRampToValueAtTime(60, ctx.currentTime + 2.5);
+        
+        const filter = ctx.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.value = 200;
+        
+        g.gain.setValueAtTime(0, ctx.currentTime);
+        g.gain.linearRampToValueAtTime(0.4, ctx.currentTime + 0.3);
+        g.gain.linearRampToValueAtTime(0.4, ctx.currentTime + 2.0);
+        g.gain.linearRampToValueAtTime(0, ctx.currentTime + 2.5);
+        
+        o.connect(filter);
+        filter.connect(g);
+        g.connect(ctx.destination);
+        o.start();
+        o.stop(ctx.currentTime + 2.5);
     } catch(e){}
 }
 
@@ -1114,14 +1174,38 @@ function retakeSelfie() {
     capBtn.innerHTML = '📷 צלמו אותנו!';
 }
 
-// --- מעבר עם אנימציית טיסה ---
+function saveTeamName() {
+    const inp = document.getElementById('team-name-input');
+    const val = inp.value.trim();
+    if (val.length > 0) {
+        teamName = val;
+        localStorage.setItem('puzzleTeamName', teamName);
+        document.getElementById('team-name-modal').classList.remove('show');
+        document.getElementById('app').classList.remove('app-blurred');
+        loadPage(currentPage || 'opening');
+    }
+}
+
+// --- מעבר חכם בין דפים (טיסה או נסיעה) ---
 function transitionToPage(nextId) {
-    if (!document.body.classList.contains('a11y-no-animations') && flightRoutes[nextId]) {
-        document.getElementById('flight-destination-text').innerText = flightRoutes[nextId];
-        document.getElementById('flight-overlay').classList.add('show');
-        playFlightSound();
+    const route = transitRoutes[nextId];
+    if (!document.body.classList.contains('a11y-no-animations') && route) {
+        document.getElementById('transit-destination-text').innerText = route.text;
+        
+        const iconEl = document.getElementById('transit-icon');
+        iconEl.innerText = route.type === 'flight' ? '✈️' : '🚗';
+        iconEl.className = 'transit-icon ' + route.type;
+        
+        document.getElementById('transit-overlay').classList.add('show');
+        
+        if (route.type === 'flight') {
+            playFlightSound();
+        } else {
+            playDriveSound();
+        }
+        
         setTimeout(() => {
-            document.getElementById('flight-overlay').classList.remove('show');
+            document.getElementById('transit-overlay').classList.remove('show');
             loadPage(nextId);
         }, 2500);
     } else {
@@ -1165,7 +1249,6 @@ function loadPage(id) {
       titleEl.innerHTML = `<div style="font-size:18px; color:#00c8be; margin-bottom:10px; text-shadow:none; letter-spacing:0;">עשיתם את זה, צוות ${teamName}!</div><div class="million-title">המיליון שלכם!</div>`;
       subtitleEl.style.display = 'none';
       
-      // אוטופליי מוזיקת סיום עם השהייה ופייד-אין
       setTimeout(() => {
           const track = musicTracks['grand_finale'];
           if (!bgMusic.src.endsWith(track)) {
@@ -1191,7 +1274,7 @@ function loadPage(id) {
                   }, 100);
               }).catch(e => console.log("Autoplay blocked by browser:", e));
           }
-      }, 2500); // מחכים לקונפטי וצלילי הניצחון
+      }, 2500); 
 
   } else {
       titleEl.textContent = page.title;
@@ -1364,7 +1447,6 @@ function executeBypass() {
     transitionToPage('grand_finale');
 }
 
-
 function openMapModal() {
   if (navigator.vibrate) navigator.vibrate(15);
   playHintOpen(); 
@@ -1437,7 +1519,7 @@ function openHintsModal() {
       skipDiv.className = 'hint-item';
       skipDiv.innerHTML = `
         <button class="hint-btn solution-btn" style="border-color: #00c8be; background: linear-gradient(180deg, #004d40, #002222); color: #00c8be;" onclick="showHintConfirm(this)">🚀 אם סריקת ה-QR לא עובדת - לחצו כאן</button>
-        <div class="hint-confirm solution-confirm" style="border-color: #00c8be; background: #001a18;">
+        <div class="hint-confirm solution-confirm" style="border-color: #00c8be; background: #001a18; padding-top: 25px;">
           <div class="hint-confirm-btns">
             <button class="btn-yes" style="background: #00c8be; color: #000;" onclick="closeHintsModal(); showBypassModal();">העבר אותי לשלב הבא</button>
             <button class="btn-no" onclick="cancelHint(this)">ביטול</button>
