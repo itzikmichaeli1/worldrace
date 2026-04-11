@@ -323,6 +323,30 @@
     
     #preview-image { width: 100%; border-radius: 10px; border: 2px solid #ffd700; margin-bottom: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
     .download-btn { display: block; background: #00c8be; color: #000; font-weight: bold; font-size: 20px; text-align: center; text-decoration: none; padding: 15px; border-radius: 8px; font-family: inherit; }
+
+    /* ===== שדרוגי פארודיה (טיסה ומעטפה) ===== */
+    #flight-overlay { display: none; position: fixed; inset: 0; z-index: 5000; background: #000a14; align-items: center; justify-content: center; flex-direction: column; color: #fff; text-align: center; }
+    #flight-overlay.show { display: flex; animation: fadeInOutFlight 2.5s forwards; }
+    @keyframes fadeInOutFlight { 0%{opacity:0;} 15%{opacity:1;} 85%{opacity:1;} 100%{opacity:0;} }
+    .flight-path { width: 85%; max-width: 500px; height: 4px; border-bottom: 4px dashed #ff9500; position: relative; margin-top: 40px; }
+    .flight-plane { position: absolute; top: -35px; left: 0; font-size: 50px; transform: scaleX(-1); animation: flyPlane 2.5s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+    @keyframes flyPlane { 0%{left:0%; transform:scaleX(-1) translateY(0);} 25%{transform:scaleX(-1) translateY(-15px);} 50%{transform:scaleX(-1) translateY(5px);} 75%{transform:scaleX(-1) translateY(-15px);} 100%{left:100%; transform:scaleX(-1) translateY(0);} }
+
+    #envelope-wrapper { position: absolute; inset: 0; z-index: 50; display: none; align-items: center; justify-content: center; cursor: pointer; perspective: 1000px; padding: 20px; background: rgba(0,0,0,0.4); border-radius: 16px;}
+    .env-part { position: absolute; width: 90%; max-width: 350px; height: 220px; background: linear-gradient(135deg, #f1c40f, #f39c12); border: 2px solid #d35400; box-shadow: 0 15px 35px rgba(0,0,0,0.6); transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.5s ease 0.2s; }
+    .env-top { clip-path: polygon(0 0, 100% 0, 100% 50%, 50% 70%, 0 50%); transform-origin: top; }
+    .env-bottom { clip-path: polygon(0 50%, 50% 70%, 100% 50%, 100% 100%, 0 100%); transform-origin: bottom; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 20px;}
+    .env-seal { position: absolute; width: 70px; height: 70px; background: #c0392b; border-radius: 50%; top: 50%; left: 50%; transform: translate(-50%, -50%); border: 3px solid #922b21; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 35px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); z-index: 2; transition: opacity 0.3s; animation: gentlePulse 2s infinite;}
+    .env-text { position: absolute; top: 15%; width: 100%; text-align: center; color: #fff; font-size: 24px; font-weight: 900; z-index: 3; text-shadow: 0 2px 5px rgba(0,0,0,0.8); pointer-events: none;}
+    
+    #envelope-wrapper.torn .env-top { transform: translateY(-80px) rotateX(25deg); opacity: 0; }
+    #envelope-wrapper.torn .env-bottom { transform: translateY(80px) rotateX(-25deg); opacity: 0; }
+    #envelope-wrapper.torn .env-seal { opacity: 0; transform: translate(-50%, -50%) scale(1.5); }
+    #envelope-wrapper.torn { pointer-events: none; background: transparent; }
+
+    #task-content-area { opacity: 1; transition: opacity 0.6s ease; width: 100%; }
+    .content-hidden { opacity: 0 !important; pointer-events: none !important; }
+
   </style>
 </head>
 <body>
@@ -333,75 +357,91 @@
 
 <button id="floating-map-btn" onclick="openMapModal()" title="הדרכון שלכם">🛂 הדרכון שלכם</button>
 
+<div id="flight-overlay">
+  <h2 id="flight-destination-text" style="color:#ffd700; font-family:'Rubik', sans-serif; font-size:32px; font-weight:900; text-shadow:0 0 15px rgba(255,215,0,0.5);">טסים ליעד הבא...</h2>
+  <div class="flight-path">
+     <div class="flight-plane">✈️</div>
+  </div>
+</div>
+
 <div id="app" class="swipe-transition">
   <div class="page-header">
     <div class="site-label">פאזלס חדרי בריחה</div>
     <h1 class="page-title" id="page-title"></h1>
     <div id="page-mission-name" class="page-subtitle"></div>
     <div class="title-divider"></div>
-    <p class="page-desc" id="page-desc"></p>
-  </div>
-
-  <div id="grand-finale-stats-container"></div>
-
-  <div class="youtube-wrap" id="youtube-wrap" style="display:none">
-    <iframe id="youtube-iframe" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
-  </div>
-
-  <div class="audio-riddle" id="audio-riddle" style="display:none">
-    <button class="audio-play-btn" id="riddle-play-btn" onclick="toggleRiddle()">▶</button>
-    <div class="audio-track">
-      <div class="audio-label">הקלטה מסווגת: פענחו את רצף התווים</div>
-      <div class="audio-progress-bar" id="riddle-progress-bar"><div class="audio-progress-fill" id="riddle-fill"></div></div>
-      <div class="audio-time" id="riddle-time">0:00 / 0:15</div>
-    </div>
-  </div>
-
-  <div id="piano-section" style="display:none; margin-bottom:24px; text-align:center;">
-    <div class="piano-instruction" id="piano-instruction">📱 סובבו את המסך ולחצו על התווים לנגינה 🎹</div>
-    <div class="piano-scroll-wrapper">
-      <div class="piano-chassis">
-        <div class="piano-felt"></div>
-        <div id="piano-keys" style="display:flex; position:relative; height:130px; justify-content:center; user-select:none;"></div>
-      </div>
-    </div>
-  </div>
-
-  <div id="portrait-instruction" style="display:none; text-align:center; color:#00c8be; text-shadow: 0 0 15px rgba(0,200,190,0.8); font-size: 18px; font-weight: 900; margin-bottom: 24px; animation: softGlow 3.5s infinite ease-in-out;">📱 החזירו את המסך למצב רגיל</div>
-
-  <div class="code-box" id="code-box">
-    <div class="code-section-label"><hr/><span>🔐 הזנת קוד</span><hr/></div>
-    <p class="code-instruction">הזינו את הקוד שקיבלתם</p>
-    <div class="code-input-wrap">
-      <div class="code-hint-arrow">▼</div>
-      <div class="code-glow-ring" id="glow-ring">
-        <input type="text" class="code-input" id="code-input" oninput="clearError(); playTypeSound()" onkeydown="if(event.key==='Enter')submitCode()" onfocus="document.getElementById('glow-ring').classList.add('focused')" onblur="document.getElementById('glow-ring').classList.remove('focused')"/>
-      </div>
-      <button class="submit-btn" id="main-submit-btn" onclick="submitCode()">המשך לשלב הבא «</button>
-    </div>
-    <div class="error-msg" id="error-msg">✗ קוד שגוי — נסו שוב!</div>
-  </div>
-
-  <div class="crossroads-wrap" id="crossroads-box" style="display:none">
-    <div class="crossroads-title">בחרו משימה אחת מבין השתיים:</div>
-    <div class="choice-btns">
-      <button class="choice-btn" onclick="playClick();goChoice('A')"><img class="choice-img" src="time.jpg" alt="חבל על הזמן"/></button>
-      <button class="choice-btn" onclick="playClick();goChoice('B')"><img class="choice-img" src="show-time.jpg" alt="זמן להופעה"/></button>
-    </div>
-  </div>
-
-  <div class="finish-wrap" id="finish-box" style="display:none">
-    <div class="finish-trophy">🏆</div>
     
-    <div class="finish-actions" id="finish-actions">
-      <div id="scanner-btn-wrap" style="width: 100%;">
-         <button id="scanner-btn" class="submit-btn" style="width: 100%; max-width: 350px;" onclick="startScanner()">📷 סרקו את כרטיס הניצחון</button>
-         <div id="qr-reader"></div>
-      </div>
-      
-      <button id="pc-bypass-btn" class="hint-btn" style="width: auto; padding: 10px 20px; font-size: 14px; background: transparent; border: 1px solid rgba(255,255,255,0.2); box-shadow: none;" onclick="showBypassModal()">⚠️ משחקים ממחשב ללא מצלמה? לחצו כאן</button>
+    <div id="envelope-wrapper" onclick="openEnvelope()">
+        <div class="env-part env-top"></div>
+        <div class="env-part env-bottom"></div>
+        <div class="env-seal">✉️</div>
+        <div class="env-text">סימן דרך<br><span style="font-size:16px; font-weight:normal; color:#ffd700;">לחצו לפתיחה</span></div>
     </div>
-  </div>
+
+    <div id="task-content-area">
+      <p class="page-desc" id="page-desc"></p>
+      
+      <div id="grand-finale-stats-container"></div>
+
+      <div class="youtube-wrap" id="youtube-wrap" style="display:none">
+        <iframe id="youtube-iframe" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
+      </div>
+
+      <div class="audio-riddle" id="audio-riddle" style="display:none">
+        <button class="audio-play-btn" id="riddle-play-btn" onclick="toggleRiddle()">▶</button>
+        <div class="audio-track">
+          <div class="audio-label">הקלטה מסווגת: פענחו את רצף התווים</div>
+          <div class="audio-progress-bar" id="riddle-progress-bar"><div class="audio-progress-fill" id="riddle-fill"></div></div>
+          <div class="audio-time" id="riddle-time">0:00 / 0:15</div>
+        </div>
+      </div>
+
+      <div id="piano-section" style="display:none; margin-bottom:24px; text-align:center;">
+        <div class="piano-instruction" id="piano-instruction">📱 סובבו את המסך ולחצו על התווים לנגינה 🎹</div>
+        <div class="piano-scroll-wrapper">
+          <div class="piano-chassis">
+            <div class="piano-felt"></div>
+            <div id="piano-keys" style="display:flex; position:relative; height:130px; justify-content:center; user-select:none;"></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="portrait-instruction" style="display:none; text-align:center; color:#00c8be; text-shadow: 0 0 15px rgba(0,200,190,0.8); font-size: 18px; font-weight: 900; margin-bottom: 24px; animation: softGlow 3.5s infinite ease-in-out;">📱 החזירו את המסך למצב רגיל</div>
+
+      <div class="code-box" id="code-box">
+        <div class="code-section-label"><hr/><span>🔐 הזנת קוד</span><hr/></div>
+        <p class="code-instruction">הזינו את הקוד שקיבלתם</p>
+        <div class="code-input-wrap">
+          <div class="code-hint-arrow">▼</div>
+          <div class="code-glow-ring" id="glow-ring">
+            <input type="text" class="code-input" id="code-input" oninput="clearError(); playTypeSound()" onkeydown="if(event.key==='Enter')submitCode()" onfocus="document.getElementById('glow-ring').classList.add('focused')" onblur="document.getElementById('glow-ring').classList.remove('focused')"/>
+          </div>
+          <button class="submit-btn" id="main-submit-btn" onclick="submitCode()">המשך לשלב הבא «</button>
+        </div>
+        <div class="error-msg" id="error-msg">✗ קוד שגוי — נסו שוב!</div>
+      </div>
+
+      <div class="crossroads-wrap" id="crossroads-box" style="display:none">
+        <div class="crossroads-title">בחרו משימה אחת מבין השתיים:</div>
+        <div class="choice-btns">
+          <button class="choice-btn" onclick="playClick();goChoice('A')"><img class="choice-img" src="time.jpg" alt="חבל על הזמן"/></button>
+          <button class="choice-btn" onclick="playClick();goChoice('B')"><img class="choice-img" src="show-time.jpg" alt="זמן להופעה"/></button>
+        </div>
+      </div>
+
+      <div class="finish-wrap" id="finish-box" style="display:none">
+        <div class="finish-trophy">🏆</div>
+        
+        <div class="finish-actions" id="finish-actions">
+          <div id="scanner-btn-wrap" style="width: 100%;">
+             <button id="scanner-btn" class="submit-btn" style="width: 100%; max-width: 350px;" onclick="startScanner()">📷 סרקו את כרטיס הניצחון</button>
+             <div id="qr-reader"></div>
+          </div>
+          
+          <button id="pc-bypass-btn" class="hint-btn" style="width: auto; padding: 10px 20px; font-size: 14px; background: transparent; border: 1px solid rgba(255,255,255,0.2); box-shadow: none;" onclick="showBypassModal()">⚠️ משחקים ממחשב ללא מצלמה? לחצו כאן</button>
+        </div>
+      </div>
+    </div> </div>
 </div>
 
 <button id="floating-music-btn" onclick="openMusicModal()" title="מוזיקת רקע">🎵</button>
@@ -777,6 +817,13 @@ const musicTracks = {
   'finish': 'ilanit-el-haderech.mp3'
 };
 
+const flightRoutes = {
+    'london': 'טסים לאנגליה... 🇬🇧',
+    'zoo': 'טסים לארצות הברית... 🇺🇸',
+    'tajmahal': 'טסים להודו... 🇮🇳',
+    'finish': 'טסים חזרה לישראל... 🇮🇱'
+};
+
 function openMusicModal() {
   if (navigator.vibrate) navigator.vibrate(15);
   playHintOpen();
@@ -880,7 +927,50 @@ function formatTime(ms) {
   return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
 }
 
-// ===== ניהול סורק ה-QR עם מנעול והגנות =====
+// ===== סאונד מעטפה וטיסה =====
+function playRipSound() {
+    try {
+        const ctx = getAC();
+        const bufferSize = ctx.sampleRate * 0.3; 
+        const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+        const noise = ctx.createBufferSource();
+        noise.buffer = buffer;
+        const filter = ctx.createBiquadFilter();
+        filter.type = 'highpass'; filter.frequency.value = 1000;
+        const gain = ctx.createGain();
+        gain.gain.setValueAtTime(0.6, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.25);
+        noise.connect(filter); filter.connect(gain); gain.connect(ctx.destination);
+        noise.start();
+    } catch(e){}
+}
+
+function playFlightSound() {
+    try {
+        const ctx = getAC();
+        const bufferSize = ctx.sampleRate * 2.5;
+        const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+        const noise = ctx.createBufferSource();
+        noise.buffer = buffer;
+        const filter = ctx.createBiquadFilter();
+        filter.type = 'bandpass'; filter.Q.value = 1;
+        filter.frequency.setValueAtTime(300, ctx.currentTime);
+        filter.frequency.exponentialRampToValueAtTime(1500, ctx.currentTime + 1.2);
+        filter.frequency.exponentialRampToValueAtTime(300, ctx.currentTime + 2.5);
+        const gain = ctx.createGain();
+        gain.gain.setValueAtTime(0, ctx.currentTime);
+        gain.gain.linearRampToValueAtTime(0.5, ctx.currentTime + 0.5);
+        gain.gain.linearRampToValueAtTime(0, ctx.currentTime + 2.5);
+        noise.connect(filter); filter.connect(gain); gain.connect(ctx.destination);
+        noise.start();
+    } catch(e){}
+}
+
+// ===== ניהול סורק ה-QR =====
 let html5QrCode;
 let isCameraLoading = false;
 let isScanSuccessful = false;
@@ -901,7 +991,6 @@ function startScanner() {
     qrReader.style.display = 'block';
     qrReader.innerHTML = ''; 
     
-    // גלילה אוטומטית חלקה למצלמה שנדלקה, מושהית כדי לתת למצלמה להיפתח
     setTimeout(() => {
         qrReader.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }, 400);
@@ -910,24 +999,15 @@ function startScanner() {
     
     html5QrCode.start(
         { facingMode: "environment" }, 
-        {
-            fps: 10,
-            qrbox: { width: 250, height: 250 }
-        },
+        { fps: 10, qrbox: { width: 250, height: 250 } },
         onScanSuccess,
         onScanError
     ).then(() => {
         isCameraLoading = false;
-        if (btn) {
-            btn.innerHTML = '📷 מצלמה פעילה (סרקו כעת)';
-        }
+        if (btn) btn.innerHTML = '📷 מצלמה פעילה (סרקו כעת)';
     }).catch(err => {
         isCameraLoading = false;
-        if (btn) {
-            btn.innerHTML = '📷 נסה שוב לסרוק';
-            btn.disabled = false;
-        }
-        console.error("Camera error", err);
+        if (btn) { btn.innerHTML = '📷 נסה שוב לסרוק'; btn.disabled = false; }
         alert("לא הצלחנו לגשת למצלמה האחורית. ודאו שנתתם אישור בדפדפן, או השתמשו בכפתור המחשב למטה.");
     });
 }
@@ -945,27 +1025,14 @@ function stopScanner() {
 function onScanSuccess(decodedText, decodedResult) {
     if (isScanSuccessful) return; 
     isScanSuccessful = true;
-    
     if (navigator.vibrate) navigator.vibrate([50, 50, 50]); 
-    
-    stopScanner().then(() => {
-        loadPage('grand_finale');
-    }).catch(() => {
-        document.getElementById('qr-reader').style.display = 'none';
-        loadPage('grand_finale');
-    });
+    stopScanner().then(() => { transitionToPage('grand_finale'); }).catch(() => { document.getElementById('qr-reader').style.display = 'none'; transitionToPage('grand_finale'); });
 }
 
 function onScanError(errorMessage) { /* שקט */ }
 
-window.addEventListener('beforeunload', () => {
-    if (html5QrCode && html5QrCode.isScanning) html5QrCode.stop();
-    closeSouvenirModals();
-});
-window.addEventListener('pagehide', () => {
-    if (html5QrCode && html5QrCode.isScanning) html5QrCode.stop();
-    closeSouvenirModals();
-});
+window.addEventListener('beforeunload', () => { if (html5QrCode && html5QrCode.isScanning) html5QrCode.stop(); closeSouvenirModals(); });
+window.addEventListener('pagehide', () => { if (html5QrCode && html5QrCode.isScanning) html5QrCode.stop(); closeSouvenirModals(); });
 
 // ===== מערכת סלפי הניצחון =====
 let selectedSouvenirPhrase = "";
@@ -974,53 +1041,37 @@ let isCameraStarting = false;
 
 function startSouvenirFlow() {
   if (navigator.vibrate) navigator.vibrate(15);
-  
-  // איפוס הכפתורים
   document.querySelectorAll('.phrase-option').forEach(el => {
       el.classList.remove('disabled');
-      if (el.hasAttribute('data-original-text')) {
-          el.innerHTML = el.getAttribute('data-original-text');
-      }
+      if (el.hasAttribute('data-original-text')) el.innerHTML = el.getAttribute('data-original-text');
   });
   isCameraStarting = false;
-  
   document.getElementById('souvenir-phrase-modal').classList.add('show');
 }
 
 function closeSouvenirModals() {
   document.querySelectorAll('.modal-overlay').forEach(el => el.classList.remove('show'));
-  if (selfieStream) {
-    selfieStream.getTracks().forEach(track => track.stop());
-    selfieStream = null;
-  }
+  if (selfieStream) { selfieStream.getTracks().forEach(track => track.stop()); selfieStream = null; }
   isCameraStarting = false;
 }
 
 function startCameraWithPhrase(phrase, btnElement) {
   if (isCameraStarting) return; 
   isCameraStarting = true;
-  
   if (navigator.vibrate) navigator.vibrate(10);
   selectedSouvenirPhrase = phrase;
   
-  if (!btnElement.hasAttribute('data-original-text')) {
-      btnElement.setAttribute('data-original-text', btnElement.innerHTML);
-  }
+  if (!btnElement.hasAttribute('data-original-text')) btnElement.setAttribute('data-original-text', btnElement.innerHTML);
   btnElement.innerHTML = 'פותח מצלמה... ⏳';
   btnElement.classList.add('disabled');
-  
-  // חסימת שאר האפשרויות
   document.querySelectorAll('.phrase-option').forEach(el => el.classList.add('disabled'));
   
   navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: false })
     .then(stream => {
       selfieStream = stream;
-      const video = document.getElementById('selfie-video');
-      video.srcObject = stream;
-      
+      document.getElementById('selfie-video').srcObject = stream;
       const capBtn = document.getElementById('capture-selfie-btn');
       if(capBtn) { capBtn.disabled = false; capBtn.innerHTML = '📷 צלמו אותנו!'; }
-      
       document.getElementById('souvenir-phrase-modal').classList.remove('show');
       document.getElementById('souvenir-camera-modal').classList.add('show');
     })
@@ -1037,67 +1088,44 @@ function captureSouvenir() {
   if (capBtn.disabled) return;
   capBtn.disabled = true;
   capBtn.innerHTML = 'מעבד תמונה... ⏳';
-
   if (navigator.vibrate) navigator.vibrate(20);
+  
   const video = document.getElementById('selfie-video');
   const canvas = document.createElement('canvas');
-  
-  // תיקון שדה הראייה: שימוש במידות המקוריות של הוידאו
-  canvas.width = video.videoWidth;
-  canvas.height = video.videoHeight;
+  canvas.width = video.videoWidth; canvas.height = video.videoHeight;
   const ctx = canvas.getContext('2d');
 
-  // ציור הוידאו על הקנבס (הפוך כי זה סלפי)
-  ctx.translate(canvas.width, 0);
-  ctx.scale(-1, 1);
+  ctx.translate(canvas.width, 0); ctx.scale(-1, 1);
   ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
   ctx.setTransform(1, 0, 0, 1, 0, 0); 
 
-  // מסגרת זהב יחסית לגודל המסך המצולם
   const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-  gradient.addColorStop(0, '#ffd700');
-  gradient.addColorStop(0.5, '#ff8c00');
-  gradient.addColorStop(1, '#ffd700');
+  gradient.addColorStop(0, '#ffd700'); gradient.addColorStop(0.5, '#ff8c00'); gradient.addColorStop(1, '#ffd700');
+  const outerBorder = canvas.width * 0.04; 
+  const innerBorder = outerBorder * 0.15; 
   
-  const outerBorder = canvas.width * 0.04; // 4% מרוחב המסך
-  const innerBorder = outerBorder * 0.15; // 15% מהעובי החיצוני
-  
-  ctx.lineWidth = outerBorder;
-  ctx.strokeStyle = gradient;
+  ctx.lineWidth = outerBorder; ctx.strokeStyle = gradient;
   ctx.strokeRect(outerBorder/2, outerBorder/2, canvas.width - outerBorder, canvas.height - outerBorder);
-  ctx.lineWidth = innerBorder;
-  ctx.strokeStyle = 'white';
+  ctx.lineWidth = innerBorder; ctx.strokeStyle = 'white';
   ctx.strokeRect(outerBorder, outerBorder, canvas.width - outerBorder*2, canvas.height - outerBorder*2);
 
-  // הוספת טקסטים יחסיים לגודל הקנבס
-  ctx.textAlign = 'center';
-  ctx.shadowColor = 'rgba(0,0,0,0.8)';
-  ctx.shadowBlur = 10;
-  
-  ctx.fillStyle = '#ffffff';
-  ctx.font = `bold ${canvas.height * 0.04}px Rubik, sans-serif`;
+  ctx.textAlign = 'center'; ctx.shadowColor = 'rgba(0,0,0,0.8)'; ctx.shadowBlur = 10;
+  ctx.fillStyle = '#ffffff'; ctx.font = `bold ${canvas.height * 0.04}px Rubik, sans-serif`;
   ctx.fillText("המירוץ העולמי", canvas.width/2, canvas.height * 0.08);
-  ctx.fillStyle = '#ff9500';
-  ctx.font = `bold ${canvas.height * 0.025}px Rubik, sans-serif`;
+  ctx.fillStyle = '#ff9500'; ctx.font = `bold ${canvas.height * 0.025}px Rubik, sans-serif`;
   ctx.fillText("פאזלס - חדרי בריחה", canvas.width/2, canvas.height * 0.115);
 
-  ctx.fillStyle = '#ffd700';
-  ctx.font = `bold ${canvas.height * 0.05}px Rubik, sans-serif`;
+  ctx.fillStyle = '#ffd700'; ctx.font = `bold ${canvas.height * 0.05}px Rubik, sans-serif`;
   ctx.fillText(selectedSouvenirPhrase, canvas.width/2, canvas.height * 0.85);
-  
-  ctx.fillStyle = '#ffffff';
-  ctx.font = `${canvas.height * 0.035}px Rubik, sans-serif`;
+  ctx.fillStyle = '#ffffff'; ctx.font = `${canvas.height * 0.035}px Rubik, sans-serif`;
   ctx.fillText(teamName ? `צוות ${teamName}` : "צוות אלופים", canvas.width/2, canvas.height * 0.90);
-  
-  ctx.fillStyle = '#00c8be';
-  ctx.font = `${canvas.height * 0.025}px Rubik, sans-serif`;
+  ctx.fillStyle = '#00c8be'; ctx.font = `${canvas.height * 0.025}px Rubik, sans-serif`;
   ctx.fillText("זמן: " + formatTime(currentTotalTimeMs), canvas.width/2, canvas.height * 0.94);
 
   const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
   document.getElementById('preview-image').src = dataUrl;
   document.getElementById('download-btn').href = dataUrl;
   
-  // מעבר חלק לתצוגה המקדימה (הזרם נשאר פתוח לטובת retake)
   document.getElementById('souvenir-camera-modal').classList.remove('show');
   document.getElementById('souvenir-preview-modal').classList.add('show');
 }
@@ -1107,8 +1135,7 @@ function retakeSelfie() {
     document.getElementById('souvenir-preview-modal').classList.remove('show');
     document.getElementById('souvenir-camera-modal').classList.add('show');
     const capBtn = document.getElementById('capture-selfie-btn');
-    capBtn.disabled = false;
-    capBtn.innerHTML = '📷 צלמו אותנו!';
+    capBtn.disabled = false; capBtn.innerHTML = '📷 צלמו אותנו!';
 }
 
 function saveTeamName() {
@@ -1123,28 +1150,49 @@ function saveTeamName() {
     }
 }
 
+// מעבר עם אנימציית טיסה
+function transitionToPage(nextId) {
+    if (!document.body.classList.contains('a11y-no-animations') && flightRoutes[nextId]) {
+        document.getElementById('flight-destination-text').innerText = flightRoutes[nextId];
+        document.getElementById('flight-overlay').classList.add('show');
+        playFlightSound();
+        setTimeout(() => {
+            document.getElementById('flight-overlay').classList.remove('show');
+            loadPage(nextId);
+        }, 2500);
+    } else {
+        loadPage(nextId);
+    }
+}
+
+// פתיחת מעטפת
+function openEnvelope() {
+    if (navigator.vibrate) navigator.vibrate(15);
+    playRipSound();
+    const env = document.getElementById('envelope-wrapper');
+    env.classList.add('torn');
+    setTimeout(() => {
+        env.style.display = 'none';
+        document.getElementById('task-content-area').classList.remove('content-hidden');
+    }, 500);
+}
+
 function loadPage(id) {
   saveCurrentStageTime();
-  
   bgMusic.pause();
   isMusicPlaying = false;
   const musicBtnUi = document.getElementById('music-toggle-btn');
   if(musicBtnUi) musicBtnUi.innerHTML = '▶ הפעל מוזיקה';
-  
   stopScanner(); 
   
   isScanSuccessful = false;
   isCameraLoading = false;
   const sBtn = document.getElementById('scanner-btn');
-  if (sBtn) {
-      sBtn.innerHTML = '📷 סרקו את כרטיס הניצחון';
-      sBtn.disabled = false;
-  }
+  if (sBtn) { sBtn.innerHTML = '📷 סרקו את כרטיס הניצחון'; sBtn.disabled = false; }
   
   currentPage = id;
   const page  = PAGES[id];
   if (!page) return;
-
   currentStageStartTime = Date.now();
 
   const step = page.step || 1;
@@ -1160,8 +1208,19 @@ function loadPage(id) {
   
   const titleEl = document.getElementById('page-title');
   const subtitleEl = document.getElementById('page-mission-name');
+  const contentArea = document.getElementById('task-content-area');
+  const envWrapper = document.getElementById('envelope-wrapper');
   
-  // אם אנחנו בעמוד הסיום - הפנייה האישית תהיה בכותרת, השאר יהיה נקי
+  // אם לא עמוד פתיחה ולא עמוד גמר, נציג מעטפה (אלא אם הנגישות מבטלת אנימציות)
+  if (id !== 'opening' && id !== 'grand_finale' && !document.body.classList.contains('a11y-no-animations')) {
+      envWrapper.style.display = 'flex';
+      envWrapper.classList.remove('torn');
+      contentArea.classList.add('content-hidden');
+  } else {
+      envWrapper.style.display = 'none';
+      contentArea.classList.remove('content-hidden');
+  }
+  
   if (id === 'grand_finale') {
       titleEl.innerHTML = `<div style="font-size:18px; color:#00c8be; margin-bottom:10px; text-shadow:none; letter-spacing:0;">עשיתם את זה, צוות ${teamName}!</div><div class="million-title">המיליון שלכם!</div>`;
       subtitleEl.style.display = 'none';
@@ -1207,9 +1266,7 @@ function loadPage(id) {
   if (page.hints || page.solution) {
     hintBtn.style.display = 'flex';
     if(!document.body.classList.contains('a11y-no-animations')) {
-      idleHintTimer = setTimeout(() => {
-        hintBtn.classList.add('needs-hint');
-      }, 5 * 60 * 1000); 
+      idleHintTimer = setTimeout(() => { hintBtn.classList.add('needs-hint'); }, 5 * 60 * 1000); 
     }
   } else {
     hintBtn.style.display = 'none';
@@ -1222,13 +1279,10 @@ function loadPage(id) {
     document.getElementById('riddle-fill').style.width = '0%';
     document.getElementById('riddle-time').textContent = '0:00 / 0:15';
     clearInterval(riddleInterval);
-    riddlePlaying = false;
-    riddleElapsed = 0;
-    notesPlayed = [false, false, false, false];
+    riddlePlaying = false; riddleElapsed = 0; notesPlayed = [false, false, false, false];
   } else {
     ar.style.display = 'none';
-    clearInterval(riddleInterval);
-    riddlePlaying = false;
+    clearInterval(riddleInterval); riddlePlaying = false;
   }
 
   const mapBtn = document.getElementById('floating-map-btn');
@@ -1247,23 +1301,18 @@ function loadPage(id) {
 
   document.getElementById('piano-section').style.display = page.piano ? '' : 'none';
   
-  // הסתרת הודעת סיבוב הטלפון לשחקני מחשב
-  const pInst = document.querySelector('.piano-instruction');
+  const pInst = document.getElementById('piano-instruction');
   if (pInst) pInst.style.display = isMobileDevice ? 'block' : 'none';
   
-  // הצגה או הסתרה של הודעת "החזרת הטלפון" בעמודים ספציפיים
   const portInst = document.getElementById('portrait-instruction');
   if (portInst) {
-      if ((id === 'boarding' || id === 'time-second') && isMobileDevice) {
-          portInst.style.display = 'block';
-      } else {
-          portInst.style.display = 'none';
-      }
+      if ((id === 'boarding' || id === 'time-second') && isMobileDevice) portInst.style.display = 'block';
+      else portInst.style.display = 'none';
   }
   
-  document.getElementById('code-box').style.display       = 'none';
+  document.getElementById('code-box').style.display = 'none';
   document.getElementById('crossroads-box').style.display = 'none';
-  document.getElementById('finish-box').style.display     = 'none';
+  document.getElementById('finish-box').style.display = 'none';
 
   const statsContainer = document.getElementById('grand-finale-stats-container');
   statsContainer.innerHTML = ''; 
@@ -1277,10 +1326,8 @@ function loadPage(id) {
     document.getElementById('crossroads-box').style.display = '';
   } else if (page.type === 'finish') {
     document.getElementById('finish-box').style.display = '';
-    
     const scannerWrap = document.getElementById('scanner-btn-wrap');
     const pcBtn = document.getElementById('pc-bypass-btn');
-    
     if(isMobileDevice) {
         if(scannerWrap) scannerWrap.style.display = 'block';
         if(pcBtn) pcBtn.style.display = 'none'; 
@@ -1288,30 +1335,17 @@ function loadPage(id) {
         if(scannerWrap) scannerWrap.style.display = 'none'; 
         if(pcBtn) pcBtn.style.display = 'inline-block';
     }
-
   } else if (page.type === 'finale_hidden') {
     playVictoryEffects();
-    
-    let totalMs = 0;
-    let maxStageMs = 0;
-    let minStageMs = Infinity;
-    let hardestStage = 'אין נתונים';
-    let fastestStage = 'אין נתונים';
-    
+    let totalMs = 0; let maxStageMs = 0; let minStageMs = Infinity; let hardestStage = 'אין נתונים'; let fastestStage = 'אין נתונים';
     for (const [stageId, ms] of Object.entries(stageTimes)) {
       if (stageId === 'crossroads' || stageId === 'grand_finale') continue; 
       totalMs += ms;
-      if (ms > maxStageMs && TASK_NAMES[stageId]) {
-        maxStageMs = ms;
-        hardestStage = TASK_NAMES[stageId];
-      }
-      if (ms > 0 && ms < minStageMs && TASK_NAMES[stageId]) {
-        minStageMs = ms;
-        fastestStage = TASK_NAMES[stageId];
-      }
+      if (ms > maxStageMs && TASK_NAMES[stageId]) { maxStageMs = ms; hardestStage = TASK_NAMES[stageId]; }
+      if (ms > 0 && ms < minStageMs && TASK_NAMES[stageId]) { minStageMs = ms; fastestStage = TASK_NAMES[stageId]; }
     }
     if (minStageMs === Infinity) minStageMs = 0;
-    currentTotalTimeMs = totalMs; // שמירה לטובת ציור המסגרת
+    currentTotalTimeMs = totalMs; 
     
     let html = `
       <div class="finish-stats" style="display:block; animation: slideUpFade 1s ease-out forwards;">
@@ -1323,22 +1357,13 @@ function loadPage(id) {
         <div class="stat-row">🤦‍♂️ קודים שגויים שהוזנו: <span>${wrongCodes}</span></div>
       </div>
     `;
-    
-    // הזרקת כפתור הסלפי רק לשחקני סלולר
-    if (isMobileDevice) {
-        html += `<button id="souvenir-start-btn" class="souvenir-btn-gold" style="display:none;" onclick="startSouvenirFlow()">📸 צלמו סלפי חגיגי עם הצ'ק!</button>`;
-    }
-    
+    if (isMobileDevice) { html += `<button id="souvenir-start-btn" class="souvenir-btn-gold" style="display:none;" onclick="startSouvenirFlow()">📸 צלמו סלפי חגיגי עם הצ'ק!</button>`; }
     statsContainer.innerHTML = html;
     
-    // הצגת הכפתור באיחור קל
     if (isMobileDevice) {
         setTimeout(() => {
             const btn = document.getElementById('souvenir-start-btn');
-            if (btn) {
-                btn.style.display = 'flex';
-                btn.style.animation = 'slideUpFade 1s ease-out forwards, gentleGoldPulse 2s infinite alternate, bounceGo 1s ease-in-out infinite alternate';
-            }
+            if (btn) { btn.style.display = 'flex'; btn.style.animation = 'slideUpFade 1s ease-out forwards, gentleGoldPulse 2.5s infinite alternate, bounceGo 1s ease-in-out infinite alternate'; }
         }, 3000);
     }
   }
@@ -1351,13 +1376,10 @@ function loadPage(id) {
   } else {
       descEl.style.display = 'block';
       descEl.innerHTML = page.desc;
-      descEl.style.opacity = 1; 
       if(!document.body.classList.contains('a11y-no-animations')) {
         descEl.style.animation = 'none';
         void descEl.offsetWidth; 
-        setTimeout(() => {
-          descEl.style.animation = 'slideUpFade 0.8s ease-out forwards';
-        }, 10);
+        setTimeout(() => { descEl.style.animation = 'slideUpFade 0.8s ease-out forwards'; }, 10);
       }
   }
 }
@@ -1370,37 +1392,26 @@ function showBypassModal() {
 }
 function executeBypass() {
     document.getElementById('bypass-overlay').classList.remove('show');
-    loadPage('grand_finale');
+    transitionToPage('grand_finale');
 }
 
 
 function openMapModal() {
   if (navigator.vibrate) navigator.vibrate(15);
   playHintOpen(); 
-  
   const mapBtns = document.querySelectorAll('.map-btn');
   let stepCounter = 1;
-  
   mapBtns.forEach(btn => {
     const targetPageId = btn.getAttribute('data-page');
     const targetStep = PAGES[targetPageId].step;
-    
-    if (!btn.hasAttribute('data-original-text')) {
-      btn.setAttribute('data-original-text', btn.innerHTML);
-    }
-    
+    if (!btn.hasAttribute('data-original-text')) btn.setAttribute('data-original-text', btn.innerHTML);
     if (targetStep > maxStep) {
-      btn.classList.add('locked');
-      btn.onclick = null;
-      btn.innerHTML = `🔒 יעד מסווג (${stepCounter})`;
+      btn.classList.add('locked'); btn.onclick = null; btn.innerHTML = `🔒 יעד מסווג (${stepCounter})`;
     } else {
-      btn.classList.remove('locked');
-      btn.onclick = () => jumpTo(targetPageId);
-      btn.innerHTML = btn.getAttribute('data-original-text');
+      btn.classList.remove('locked'); btn.onclick = () => jumpTo(targetPageId); btn.innerHTML = btn.getAttribute('data-original-text');
     }
     stepCounter++;
   });
-
   document.getElementById('map-overlay').classList.add('show');
 }
 
@@ -1410,23 +1421,17 @@ function closeMapModal() {
   document.getElementById('map-overlay').classList.remove('show');
 }
 function jumpTo(pageId) {
-  closeMapModal();
-  loadPage(pageId);
+  closeMapModal(); loadPage(pageId);
 }
 
 function promptResetGame() {
-  if (confirm("פעולה זו תמחק את ההתקדמות שלכם ותתחיל משחק חדש. בטוחים?")) {
-    resetGame();
-  }
+  if (confirm("פעולה זו תמחק את ההתקדמות שלכם ותתחיל משחק חדש. בטוחים?")) resetGame();
 }
 
 function resetGame() {
-  localStorage.removeItem('puzzleMaxStep');
-  localStorage.removeItem('puzzleHintsUsed');
-  localStorage.removeItem('puzzleSolutionsUsed');
-  localStorage.removeItem('puzzleWrongCodes');
-  localStorage.removeItem('puzzleStageTimes');
-  localStorage.removeItem('puzzleTeamName');
+  localStorage.removeItem('puzzleMaxStep'); localStorage.removeItem('puzzleHintsUsed');
+  localStorage.removeItem('puzzleSolutionsUsed'); localStorage.removeItem('puzzleWrongCodes');
+  localStorage.removeItem('puzzleStageTimes'); localStorage.removeItem('puzzleTeamName');
   location.href = location.pathname; 
 }
 
@@ -1458,13 +1463,12 @@ function openHintsModal() {
     container.appendChild(createHintElement(`פיתרון`, page.solution, true));
   }
   
-  // הוספת "מעבר לעמוד הניצחון" כפיתרון אחרון אם נמצאים בעמוד הסיום
   if (currentPage === 'finish') {
       const skipDiv = document.createElement('div');
       skipDiv.className = 'hint-item';
       skipDiv.innerHTML = `
         <button class="hint-btn solution-btn" style="border-color: #00c8be; background: linear-gradient(180deg, #004d40, #002222); color: #00c8be;" onclick="showHintConfirm(this)">🚀 אם סריקת ה-QR לא עובדת - לחצו כאן</button>
-        <div class="hint-confirm solution-confirm" style="border-color: #00c8be; background: #001a18;">
+        <div class="hint-confirm solution-confirm" style="border-color: #00c8be; background: #001a18; padding-top: 25px;">
           <div class="hint-confirm-btns">
             <button class="btn-yes" style="background: #00c8be; color: #000;" onclick="closeHintsModal(); showBypassModal();">העבר אותי לשלב הבא</button>
             <button class="btn-no" onclick="cancelHint(this)">ביטול</button>
@@ -1522,19 +1526,15 @@ function createHintElement(title, text, isSolution) {
 function showHintConfirm(btn) {
   if (navigator.vibrate) navigator.vibrate(15);
   playHintClick();
-
   const allItems = document.querySelectorAll('#hints-container .hint-item');
   allItems.forEach(item => {
     const tBtn = item.querySelector('.hint-btn');
     const cDiv = item.querySelector('.hint-confirm');
     const xDiv = item.querySelector('.hint-text');
     if (tBtn !== btn) {
-      tBtn.style.display = 'block';
-      cDiv.style.display = 'none';
-      xDiv.style.display = 'none';
+      tBtn.style.display = 'block'; cDiv.style.display = 'none'; xDiv.style.display = 'none';
     }
   });
-
   btn.style.display = 'none';
   btn.nextElementSibling.style.display = 'block';
 }
@@ -1543,38 +1543,24 @@ function cancelHint(btn) {
   if (navigator.vibrate) navigator.vibrate(10);
   playHintClose();
   const confirmDiv = btn.closest('.hint-confirm');
-  confirmDiv.style.display = 'none';
-  confirmDiv.previousElementSibling.style.display = 'block';
+  confirmDiv.style.display = 'none'; confirmDiv.previousElementSibling.style.display = 'block';
 }
 
 function revealHint(btn) {
   if (navigator.vibrate) navigator.vibrate(25);
   playHintReveal();
-  
   const confirmDiv = btn.closest('.hint-confirm');
-  
   if (confirmDiv.classList.contains('solution-confirm')) {
-      solutionsUsed++;
-      localStorage.setItem('puzzleSolutionsUsed', solutionsUsed);
+      solutionsUsed++; localStorage.setItem('puzzleSolutionsUsed', solutionsUsed);
   } else {
-      smallHintsUsed++;
-      localStorage.setItem('puzzleHintsUsed', smallHintsUsed);
+      smallHintsUsed++; localStorage.setItem('puzzleHintsUsed', smallHintsUsed);
   }
-
   const allItems = document.querySelectorAll('#hints-container .hint-item');
   allItems.forEach(item => {
-    const tBtn = item.querySelector('.hint-btn');
-    const cDiv = item.querySelector('.hint-confirm');
-    const xDiv = item.querySelector('.hint-text');
-    if (cDiv !== confirmDiv) {
-      tBtn.style.display = 'block';
-      cDiv.style.display = 'none';
-      xDiv.style.display = 'none';
-    }
+    const tBtn = item.querySelector('.hint-btn'); const cDiv = item.querySelector('.hint-confirm'); const xDiv = item.querySelector('.hint-text');
+    if (cDiv !== confirmDiv) { tBtn.style.display = 'block'; cDiv.style.display = 'none'; xDiv.style.display = 'none'; }
   });
-
-  confirmDiv.style.display = 'none';
-  confirmDiv.nextElementSibling.style.display = 'block';
+  confirmDiv.style.display = 'none'; confirmDiv.nextElementSibling.style.display = 'block';
 }
 
 const AudioCtx = window.AudioContext || window.webkitAudioContext;
@@ -1593,43 +1579,19 @@ function playError() {
 function playStampSound() {
   if (navigator.vibrate) navigator.vibrate([100, 200, 300]); 
   try { 
-    const ctx = getAC();
-    const now = ctx.currentTime;
-    
-    const freqs = [261.63, 329.63, 392.00, 493.88, 587.33]; 
-
+    const ctx = getAC(); const now = ctx.currentTime; const freqs = [261.63, 329.63, 392.00, 493.88, 587.33]; 
     freqs.forEach((freq, i) => {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = i % 2 === 0 ? 'triangle' : 'sine'; 
-      osc.frequency.value = freq;
-
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-
-      gain.gain.setValueAtTime(0, now);
-      gain.gain.linearRampToValueAtTime(0.3 / freqs.length, now + 0.2); 
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 4.0); 
-
-      osc.start(now);
-      osc.stop(now + 4.5);
+      const osc = ctx.createOscillator(); const gain = ctx.createGain();
+      osc.type = i % 2 === 0 ? 'triangle' : 'sine'; osc.frequency.value = freq;
+      osc.connect(gain); gain.connect(ctx.destination);
+      gain.gain.setValueAtTime(0, now); gain.gain.linearRampToValueAtTime(0.3 / freqs.length, now + 0.2); gain.gain.exponentialRampToValueAtTime(0.001, now + 4.0); 
+      osc.start(now); osc.stop(now + 4.5);
     });
-
-    const bassOsc = ctx.createOscillator();
-    const bassGain = ctx.createGain();
-    bassOsc.type = 'sine';
-    bassOsc.frequency.setValueAtTime(100, now);
-    bassOsc.frequency.exponentialRampToValueAtTime(30, now + 1.5);
-    bassOsc.connect(bassGain);
-    bassGain.connect(ctx.destination);
-    
-    bassGain.gain.setValueAtTime(0, now);
-    bassGain.gain.linearRampToValueAtTime(0.5, now + 0.3);
-    bassGain.gain.exponentialRampToValueAtTime(0.001, now + 3.0);
-    
-    bassOsc.start(now);
-    bassOsc.stop(now + 3.5);
-
+    const bassOsc = ctx.createOscillator(); const bassGain = ctx.createGain();
+    bassOsc.type = 'sine'; bassOsc.frequency.setValueAtTime(100, now); bassOsc.frequency.exponentialRampToValueAtTime(30, now + 1.5);
+    bassOsc.connect(bassGain); bassGain.connect(ctx.destination);
+    bassGain.gain.setValueAtTime(0, now); bassGain.gain.linearRampToValueAtTime(0.5, now + 0.3); bassGain.gain.exponentialRampToValueAtTime(0.001, now + 3.0);
+    bassOsc.start(now); bassOsc.stop(now + 3.5);
   } catch(e){}
 }
 
@@ -1637,22 +1599,16 @@ function playVictoryEffects() {
   if (document.body.classList.contains('a11y-no-animations')) return;
   if (navigator.vibrate) navigator.vibrate([100, 50, 100, 50, 200]);
   for(let i=0; i<80; i++){
-      let conf = document.createElement('div');
-      conf.className = 'confetti';
-      conf.style.left = Math.random() * 100 + 'vw';
-      conf.style.backgroundColor = ['#ff9500', '#00c8be', '#ffcc00', '#ff4444', '#ffffff'][Math.floor(Math.random()*5)];
-      conf.style.animationDelay = (Math.random() * 2) + 's';
-      document.body.appendChild(conf);
+      let conf = document.createElement('div'); conf.className = 'confetti';
+      conf.style.left = Math.random() * 100 + 'vw'; conf.style.backgroundColor = ['#ff9500', '#00c8be', '#ffcc00', '#ff4444', '#ffffff'][Math.floor(Math.random()*5)];
+      conf.style.animationDelay = (Math.random() * 2) + 's'; document.body.appendChild(conf);
       setTimeout(()=>conf.remove(), 4500);
   }
   try {
     const c = getAC();
     [523.25, 659.25, 783.99, 1046.50, 1318.51].forEach((f, i) => {
-      const o = c.createOscillator(), g = c.createGain();
-      o.connect(g); g.connect(c.destination);
-      o.frequency.value = f;
-      g.gain.setValueAtTime(0.15, c.currentTime + i*0.12);
-      g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + i*0.12 + 0.6);
+      const o = c.createOscillator(), g = c.createGain(); o.connect(g); g.connect(c.destination);
+      o.frequency.value = f; g.gain.setValueAtTime(0.15, c.currentTime + i*0.12); g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + i*0.12 + 0.6);
       o.start(c.currentTime + i*0.12); o.stop(c.currentTime + i*0.12 + 0.6);
     });
   } catch(e){}
@@ -1663,321 +1619,131 @@ let isVerifying = false;
 function submitCode() {
   if (window.isVerifying) return;
   window.isVerifying = true;
-
   playClick();
   const page = PAGES[currentPage];
   const val  = document.getElementById('code-input').value.trim().toUpperCase();
   const btn = document.getElementById('main-submit-btn'); 
   
-  btn.innerHTML = 'מאמת נתונים... ⏳';
-  btn.classList.add('verifying-state');
+  btn.innerHTML = 'מאמת נתונים... ⏳'; btn.classList.add('verifying-state');
   document.getElementById('app').classList.add('suspense-mode'); 
   
   setTimeout(() => {
-    btn.innerHTML = 'המשך לשלב הבא «';
-    btn.classList.remove('verifying-state');
+    btn.innerHTML = 'המשך לשלב הבא «'; btn.classList.remove('verifying-state');
     document.getElementById('app').classList.remove('suspense-mode'); 
     
     if (val === page.code.toUpperCase()) {
       playStampSound();
       const box = document.getElementById('code-box');
-      
-      const randomRot = Math.floor(Math.random() * 40) - 20; 
-      box.style.setProperty('--stamp-rot', randomRot + 'deg');
-      
+      box.style.setProperty('--stamp-rot', (Math.floor(Math.random() * 40) - 20) + 'deg');
       if(!document.body.classList.contains('a11y-no-animations')) {
         box.classList.add('stamp-approved');
         setTimeout(() => { 
-          box.classList.remove('stamp-approved');
-          pendingNext = page.next;
-          window.isVerifying = false;
-          loadPage(pendingNext); 
+          box.classList.remove('stamp-approved'); window.isVerifying = false; transitionToPage(page.next); 
         }, 2000); 
-      } else {
-        pendingNext = page.next;
-        window.isVerifying = false;
-        loadPage(pendingNext);
-      }
+      } else { window.isVerifying = false; transitionToPage(page.next); }
     } else {
-      playError();
-      
-      wrongCodes++;
-      localStorage.setItem('puzzleWrongCodes', wrongCodes);
-
+      playError(); wrongCodes++; localStorage.setItem('puzzleWrongCodes', wrongCodes);
       const inp = document.getElementById('code-input');
       if(!document.body.classList.contains('a11y-no-animations')) {
-        inp.classList.add('error', 'shaking');
-        setTimeout(() => {
-            inp.classList.remove('shaking');
-            window.isVerifying = false;
-        }, 600);
-      } else {
-        inp.classList.add('error');
-        window.isVerifying = false;
-      }
+        inp.classList.add('error', 'shaking'); setTimeout(() => { inp.classList.remove('shaking'); window.isVerifying = false; }, 600);
+      } else { inp.classList.add('error'); window.isVerifying = false; }
       document.getElementById('error-msg').style.display = 'block';
     }
   }, 1000); 
 }
 
-function clearError() {
-  document.getElementById('code-input').classList.remove('error');
-  document.getElementById('error-msg').style.display = 'none';
-}
+function clearError() { document.getElementById('code-input').classList.remove('error'); document.getElementById('error-msg').style.display = 'none'; }
+function goChoice(choice) { transitionToPage(choice === 'A' ? PAGES[currentPage].choiceA : PAGES[currentPage].choiceB); }
 
-function goChoice(choice) {
-  const page = PAGES[currentPage];
-  loadPage(choice === 'A' ? page.choiceA : page.choiceB);
-}
-
-let riddlePlaying = false;
-let riddleInterval = null;
-let riddleElapsed = 0; 
-let riddleStartTime = 0;
-let notesPlayed = [false, false, false, false];
-const RIDDLE_NOTES = [123.47, 130.81, 174.61, 146.83]; 
-
+let riddlePlaying = false; let riddleInterval = null; let riddleElapsed = 0; let riddleStartTime = 0; let notesPlayed = [false, false, false, false]; const RIDDLE_NOTES = [123.47, 130.81, 174.61, 146.83]; 
 function toggleRiddle() {
   if (navigator.vibrate) navigator.vibrate(15);
-  const btn = document.getElementById('riddle-play-btn');
-  const fill = document.getElementById('riddle-fill');
-  const timeDisplay = document.getElementById('riddle-time');
-
+  const btn = document.getElementById('riddle-play-btn'); const fill = document.getElementById('riddle-fill'); const timeDisplay = document.getElementById('riddle-time');
   if (getAC().state === 'suspended') getAC().resume();
-
-  const duration = 15000; 
-  const noteInterval = 3750;
+  const duration = 15000; const noteInterval = 3750;
 
   if (riddlePlaying) {
-    riddlePlaying = false;
-    clearInterval(riddleInterval);
-    btn.innerHTML = '&#9654;'; 
-    const secs = Math.floor(riddleElapsed / 1000);
-    timeDisplay.textContent = `0:${String(secs).padStart(2, '0')} / 0:15 (מושהה)`;
-    return;
+    riddlePlaying = false; clearInterval(riddleInterval); btn.innerHTML = '&#9654;'; 
+    timeDisplay.textContent = `0:${String(Math.floor(riddleElapsed / 1000)).padStart(2, '0')} / 0:15 (מושהה)`; return;
   }
-
-  riddlePlaying = true;
-  btn.innerHTML = '&#10086;'; 
-  timeDisplay.textContent = 'מנגן... נא להקשיב היטב';
-  
-  riddleStartTime = Date.now() - riddleElapsed;
+  riddlePlaying = true; btn.innerHTML = '&#10086;'; timeDisplay.textContent = 'מנגן... נא להקשיב היטב'; riddleStartTime = Date.now() - riddleElapsed;
 
   riddleInterval = setInterval(() => {
     riddleElapsed = Date.now() - riddleStartTime;
-
     if (riddleElapsed >= duration) {
-       clearInterval(riddleInterval);
-       riddlePlaying = false;
-       riddleElapsed = 0;
-       notesPlayed = [false, false, false, false];
-       fill.style.width = '100%';
-       btn.innerHTML = '&#9654;';
-       timeDisplay.textContent = 'הסתיים. רוצים לשמוע שוב?';
-       setTimeout(() => { if(!riddlePlaying) fill.style.width = '0%'; }, 2000);
-       return;
+       clearInterval(riddleInterval); riddlePlaying = false; riddleElapsed = 0; notesPlayed = [false, false, false, false]; fill.style.width = '100%';
+       btn.innerHTML = '&#9654;'; timeDisplay.textContent = 'הסתיים. רוצים לשמוע שוב?';
+       setTimeout(() => { if(!riddlePlaying) fill.style.width = '0%'; }, 2000); return;
     }
-
     fill.style.width = (riddleElapsed / duration * 100) + '%';
-    const secs = Math.floor(riddleElapsed / 1000);
-    timeDisplay.textContent = `0:${String(secs).padStart(2, '0')} / 0:15`;
-
-    RIDDLE_NOTES.forEach((freq, index) => {
-      if (!notesPlayed[index] && riddleElapsed > index * noteInterval) {
-        notesPlayed[index] = true;
-        playPianoNote(freq, null, null, true); 
-      }
-    });
+    timeDisplay.textContent = `0:${String(Math.floor(riddleElapsed / 1000)).padStart(2, '0')} / 0:15`;
+    RIDDLE_NOTES.forEach((freq, index) => { if (!notesPlayed[index] && riddleElapsed > index * noteInterval) { notesPlayed[index] = true; playPianoNote(freq, null, null, true); } });
   }, 50);
 }
 
-const pBar = document.getElementById('riddle-progress-bar');
-let isDraggingBar = false;
-
+const pBar = document.getElementById('riddle-progress-bar'); let isDraggingBar = false;
 function handleSeek(e) {
-  const rect = pBar.getBoundingClientRect();
-  let clientX = e.clientX;
-  if(e.touches && e.touches.length > 0) clientX = e.touches[0].clientX;
-  if(clientX === undefined) return;
-  
-  let p = (rect.right - clientX) / rect.width;
-  p = Math.max(0, Math.min(1, p));
-  
-  riddleElapsed = p * 15000;
-  riddleStartTime = Date.now() - riddleElapsed;
-  
-  notesPlayed = RIDDLE_NOTES.map((freq, i) => riddleElapsed > i * 3750);
-  
+  const rect = pBar.getBoundingClientRect(); let clientX = e.clientX; if(e.touches && e.touches.length > 0) clientX = e.touches[0].clientX; if(clientX === undefined) return;
+  let p = Math.max(0, Math.min(1, (rect.right - clientX) / rect.width));
+  riddleElapsed = p * 15000; riddleStartTime = Date.now() - riddleElapsed; notesPlayed = RIDDLE_NOTES.map((freq, i) => riddleElapsed > i * 3750);
   document.getElementById('riddle-fill').style.width = (p * 100) + '%';
-  const secs = Math.floor(riddleElapsed / 1000);
-  const timeDisplay = document.getElementById('riddle-time');
-  
-  if (riddlePlaying) {
-    timeDisplay.textContent = `0:${String(secs).padStart(2, '0')} / 0:15`;
-  } else {
-    timeDisplay.textContent = `0:${String(secs).padStart(2, '0')} / 0:15 (מושהה)`;
-  }
+  document.getElementById('riddle-time').textContent = `0:${String(Math.floor(riddleElapsed / 1000)).padStart(2, '0')} / 0:15` + (riddlePlaying ? '' : ' (מושהה)');
 }
-
-pBar.addEventListener('mousedown', e => { isDraggingBar = true; handleSeek(e); });
-window.addEventListener('mousemove', e => { if(isDraggingBar) handleSeek(e); });
-window.addEventListener('mouseup', () => { isDraggingBar = false; });
-pBar.addEventListener('touchstart', e => { isDraggingBar = true; handleSeek(e); }, {passive:true});
-window.addEventListener('touchmove', e => { if(isDraggingBar) handleSeek(e); }, {passive:true});
-window.addEventListener('touchend', () => { isDraggingBar = false; });
+pBar.addEventListener('mousedown', e => { isDraggingBar = true; handleSeek(e); }); window.addEventListener('mousemove', e => { if(isDraggingBar) handleSeek(e); }); window.addEventListener('mouseup', () => { isDraggingBar = false; });
+pBar.addEventListener('touchstart', e => { isDraggingBar = true; handleSeek(e); }, {passive:true}); window.addEventListener('touchmove', e => { if(isDraggingBar) handleSeek(e); }, {passive:true}); window.addEventListener('touchend', () => { isDraggingBar = false; });
 
 (function() {
   const c = document.getElementById('stars');
   for (let i = 0; i < 90; i++) {
-    const d = document.createElement('div');
-    d.className = 'star';
-    const sz = Math.random() > 0.8 ? 2.5 : 1.5;
-    const op = (0.2 + Math.random() * 0.7).toFixed(2);
-    const dur = (2 + Math.random() * 4).toFixed(1);
-    const delay = (Math.random() * 6).toFixed(1);
-    d.style.cssText = `width:${sz}px;height:${sz}px;background:rgba(255,210,140,${op});left:${(Math.random()*100).toFixed(1)}%;top:${(Math.random()*100).toFixed(1)}%;animation-duration:${dur}s;animation-delay:${delay}s`;
+    const d = document.createElement('div'); d.className = 'star';
+    const sz = Math.random() > 0.8 ? 2.5 : 1.5; const op = (0.2 + Math.random() * 0.7).toFixed(2);
+    d.style.cssText = `width:${sz}px;height:${sz}px;background:rgba(255,210,140,${op});left:${(Math.random()*100).toFixed(1)}%;top:${(Math.random()*100).toFixed(1)}%;animation-duration:${(2+Math.random()*4).toFixed(1)}s;animation-delay:${(Math.random()*6).toFixed(1)}s`;
     c.appendChild(d);
   }
 })();
 
 (function(){
-  const NOTES = [
-    {n:'C2', f:65.41,  b:false}, {n:'C#2',f:69.30,  b:true}, {n:'D2', f:73.42,  b:false}, {n:'D#2',f:77.78,  b:true}, 
-    {n:'E2', f:82.41,  b:false}, {n:'F2', f:87.31,  b:false}, {n:'F#2',f:92.50,  b:true}, {n:'G2', f:98.00,  b:false}, 
-    {n:'G#2',f:103.83, b:true}, {n:'A2', f:110.00, b:false}, {n:'A#2',f:116.54, b:true}, {n:'B2', f:123.47, b:false}, 
-    {n:'C3', f:130.81, b:false}, {n:'C#3',f:138.59, b:true}, {n:'D3', f:146.83, b:false}, {n:'D#3',f:155.56, b:true}, 
-    {n:'E3', f:164.81, b:false}, {n:'F3', f:174.61, b:false}, {n:'F#3',f:185.00, b:true}, {n:'G3', f:196.00, b:false}, 
-    {n:'G#3',f:207.65, b:true}, {n:'A3', f:220.00, b:false}, {n:'A#3',f:233.08, b:true}, {n:'B3', f:246.94, b:false}, 
-    {n:'C4', f:261.63, b:false}, {n:'C#4',f:277.18, b:true}, {n:'D4', f:293.66, b:false}
-  ];
-
-  const container = document.getElementById('piano-keys');
-  if(!container) return;
-
-  const whites = NOTES.filter(n=>!n.b);
-  const ww = 42;
-  const bw = 26;
-  const totalW = ww * whites.length;
-  container.style.width = (totalW + 10) + 'px';
-  container.style.height = '140px';
-  container.style.position = 'relative';
-  container.style.margin = '0 auto';
-  container.style.perspective = '400px'; 
-
+  const NOTES = [ {n:'C2', f:65.41, b:false}, {n:'C#2',f:69.30, b:true}, {n:'D2', f:73.42, b:false}, {n:'D#2',f:77.78, b:true}, {n:'E2', f:82.41, b:false}, {n:'F2', f:87.31, b:false}, {n:'F#2',f:92.50, b:true}, {n:'G2', f:98.00, b:false}, {n:'G#2',f:103.83, b:true}, {n:'A2', f:110.00, b:false}, {n:'A#2',f:116.54, b:true}, {n:'B2', f:123.47, b:false}, {n:'C3', f:130.81, b:false}, {n:'C#3',f:138.59, b:true}, {n:'D3', f:146.83, b:false}, {n:'D#3',f:155.56, b:true}, {n:'E3', f:164.81, b:false}, {n:'F3', f:174.61, b:false}, {n:'F#3',f:185.00, b:true}, {n:'G3', f:196.00, b:false}, {n:'G#3',f:207.65, b:true}, {n:'A3', f:220.00, b:false}, {n:'A#3',f:233.08, b:true}, {n:'B3', f:246.94, b:false}, {n:'C4', f:261.63, b:false}, {n:'C#4',f:277.18, b:true}, {n:'D4', f:293.66, b:false} ];
+  const container = document.getElementById('piano-keys'); if(!container) return;
+  const whites = NOTES.filter(n=>!n.b); const ww = 42; const bw = 26;
+  container.style.width = (ww * whites.length + 10) + 'px'; container.style.height = '140px'; container.style.position = 'relative'; container.style.margin = '0 auto'; container.style.perspective = '400px'; 
   whites.forEach((note, i) => {
-    const key = document.createElement('div');
-    key.className = 'piano-key-visual';
-    key.dataset.freq = note.f;
-    key.dataset.isBlack = 'false';
-    key.style.cssText = [
-      'position:absolute', 'left:' + (i * ww + 5) + 'px', 'top:0', 'width:' + (ww - 2) + 'px', 'height:130px',
-      'background:linear-gradient(to bottom, #ffffff 0%, #f0f0f0 100%)', 'border:1px solid #999', 'border-radius:0 0 5px 5px',
-      'cursor:pointer', 'z-index:1', 'box-sizing:border-box',
-      'box-shadow:inset 0 1px 0 #fff, inset 0 -5px 0 #c0c0c0, 0 5px 6px rgba(0,0,0,0.3)',
-      'transition: transform 0.05s, box-shadow 0.05s, background 0.05s', 'transform-origin: top',
-      'touch-action: manipulation'
-    ].join(';');
-    key.addEventListener('mousedown', () => playPianoNote(note.f, key, false));
-    key.addEventListener('touchstart', e => { e.preventDefault(); playPianoNote(note.f, key, false); }, {passive:false});
-    container.appendChild(key);
+    const key = document.createElement('div'); key.className = 'piano-key-visual'; key.dataset.freq = note.f; key.dataset.isBlack = 'false';
+    key.style.cssText = `position:absolute;left:${i*ww+5}px;top:0;width:${ww-2}px;height:130px;background:linear-gradient(to bottom, #ffffff 0%, #f0f0f0 100%);border:1px solid #999;border-radius:0 0 5px 5px;cursor:pointer;z-index:1;box-sizing:border-box;box-shadow:inset 0 1px 0 #fff, inset 0 -5px 0 #c0c0c0, 0 5px 6px rgba(0,0,0,0.3);transition: transform 0.05s, box-shadow 0.05s, background 0.05s;transform-origin: top;touch-action: manipulation`;
+    key.addEventListener('mousedown', () => playPianoNote(note.f, key, false)); key.addEventListener('touchstart', e => { e.preventDefault(); playPianoNote(note.f, key, false); }, {passive:false}); container.appendChild(key);
   });
-
   let wi = 0;
   NOTES.forEach((note) => {
     if(!note.b){ wi++; return; }
-    const key = document.createElement('div');
-    key.className = 'piano-key-visual';
-    key.dataset.freq = note.f;
-    key.dataset.isBlack = 'true';
-    const leftPos = (wi - 1) * ww + Math.round(ww * 0.64) + 5;
-    key.style.cssText = [
-      'position:absolute', 'left:' + leftPos + 'px', 'top:0', 'width:' + bw + 'px', 'height:82px',
-      'background:linear-gradient(to bottom, #333333 0%, #000000 100%)', 'border:1px solid #000', 'border-radius:0 0 4px 4px',
-      'cursor:pointer', 'z-index:2', 'box-sizing:border-box',
-      'box-shadow:inset 0 1px 0 #555, inset 0 -6px 0 #111, 3px 6px 8px rgba(0,0,0,0.7)',
-      'transition: transform 0.05s, box-shadow 0.05s', 'transform-origin: top',
-      'touch-action: manipulation'
-    ].join(';');
-    key.addEventListener('mousedown', () => playPianoNote(note.f, key, true));
-    key.addEventListener('touchstart', e => { e.preventDefault(); playPianoNote(note.f, key, true); }, {passive:false});
-    container.appendChild(key);
+    const key = document.createElement('div'); key.className = 'piano-key-visual'; key.dataset.freq = note.f; key.dataset.isBlack = 'true';
+    key.style.cssText = `position:absolute;left:${(wi-1)*ww+Math.round(ww*0.64)+5}px;top:0;width:${bw}px;height:82px;background:linear-gradient(to bottom, #333333 0%, #000000 100%);border:1px solid #000;border-radius:0 0 4px 4px;cursor:pointer;z-index:2;box-sizing:border-box;box-shadow:inset 0 1px 0 #555, inset 0 -6px 0 #111, 3px 6px 8px rgba(0,0,0,0.7);transition: transform 0.05s, box-shadow 0.05s;transform-origin: top;touch-action: manipulation`;
+    key.addEventListener('mousedown', () => playPianoNote(note.f, key, true)); key.addEventListener('touchstart', e => { e.preventDefault(); playPianoNote(note.f, key, true); }, {passive:false}); container.appendChild(key);
   });
 })();
 
 function playPianoNote(freq, keyEl, isBlack, fromRiddle = false) {
   if (!fromRiddle && navigator.vibrate) navigator.vibrate(15);
   try {
-    const ctx = getAC();
-    if(ctx.state === 'suspended') ctx.resume();
-    const now = ctx.currentTime;
-    const dur = 2.5; 
-
-    const comp = ctx.createDynamicsCompressor();
-    comp.threshold.value = -18;
-    comp.knee.value = 8;
-    comp.ratio.value = 3;
-    comp.attack.value = 0.002;
-    comp.release.value = 0.2;
-    comp.connect(ctx.destination);
-
-    const master = ctx.createGain();
-    master.connect(comp);
-
-    master.gain.setValueAtTime(0, now);
-    master.gain.linearRampToValueAtTime(0.8, now + 0.005);
-    master.gain.exponentialRampToValueAtTime(0.3, now + 0.3); 
-    master.gain.exponentialRampToValueAtTime(0.01, now + 2.0); 
-
-    const o1 = ctx.createOscillator();
-    o1.type = 'triangle';
-    o1.frequency.value = freq;
-    const g1 = ctx.createGain(); g1.gain.value = 1.0;
-    o1.connect(g1); g1.connect(master);
-
-    const o2 = ctx.createOscillator();
-    o2.type = 'sine';
-    o2.frequency.value = freq * 2;
-    const g2 = ctx.createGain();
-    g2.gain.setValueAtTime(0.5, now);
-    g2.gain.exponentialRampToValueAtTime(0.001, now + 1.0);
-    o2.connect(g2); g2.connect(master);
-
-    const o3 = ctx.createOscillator();
-    o3.type = 'sine';
-    o3.frequency.value = freq * 3;
-    const g3 = ctx.createGain();
-    g3.gain.setValueAtTime(0.2, now);
-    g3.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
-    o3.connect(g3); g3.connect(master);
-
+    const ctx = getAC(); if(ctx.state === 'suspended') ctx.resume();
+    const now = ctx.currentTime; const dur = 2.5; 
+    const comp = ctx.createDynamicsCompressor(); comp.threshold.value = -18; comp.knee.value = 8; comp.ratio.value = 3; comp.attack.value = 0.002; comp.release.value = 0.2; comp.connect(ctx.destination);
+    const master = ctx.createGain(); master.connect(comp);
+    master.gain.setValueAtTime(0, now); master.gain.linearRampToValueAtTime(0.8, now + 0.005); master.gain.exponentialRampToValueAtTime(0.3, now + 0.3); master.gain.exponentialRampToValueAtTime(0.01, now + 2.0); 
+    const o1 = ctx.createOscillator(); o1.type = 'triangle'; o1.frequency.value = freq; const g1 = ctx.createGain(); g1.gain.value = 1.0; o1.connect(g1); g1.connect(master);
+    const o2 = ctx.createOscillator(); o2.type = 'sine'; o2.frequency.value = freq * 2; const g2 = ctx.createGain(); g2.gain.setValueAtTime(0.5, now); g2.gain.exponentialRampToValueAtTime(0.001, now + 1.0); o2.connect(g2); g2.connect(master);
+    const o3 = ctx.createOscillator(); o3.type = 'sine'; o3.frequency.value = freq * 3; const g3 = ctx.createGain(); g3.gain.setValueAtTime(0.2, now); g3.gain.exponentialRampToValueAtTime(0.001, now + 0.6); o3.connect(g3); g3.connect(master);
     [o1,o2,o3].forEach(o => { o.start(now); o.stop(now + dur); });
   } catch(e) {}
-
   if (fromRiddle) return;
-
-  if(!keyEl) {
-    keyEl = document.querySelector(`.piano-key-visual[data-freq="${freq}"]`);
-    if(keyEl) isBlack = keyEl.dataset.isBlack === 'true';
-  }
-
+  if(!keyEl) { keyEl = document.querySelector(`.piano-key-visual[data-freq="${freq}"]`); if(keyEl) isBlack = keyEl.dataset.isBlack === 'true'; }
   if(!keyEl || document.body.classList.contains('a11y-no-animations')) return;
 
   if(isBlack){
-    keyEl.style.transform = 'translateY(4px) rotateX(3deg)';
-    keyEl.style.boxShadow = 'inset 0 1px 0 #555, inset 0 -2px 0 #111, 1px 2px 3px rgba(0,0,0,0.7)';
-    setTimeout(() => {
-      keyEl.style.transform = 'translateY(0) rotateX(0)';
-      keyEl.style.boxShadow = 'inset 0 1px 0 #555, inset 0 -6px 0 #111, 3px 6px 8px rgba(0,0,0,0.7)';
-    }, 150);
+    keyEl.style.transform = 'translateY(4px) rotateX(3deg)'; keyEl.style.boxShadow = 'inset 0 1px 0 #555, inset 0 -2px 0 #111, 1px 2px 3px rgba(0,0,0,0.7)';
+    setTimeout(() => { keyEl.style.transform = 'translateY(0) rotateX(0)'; keyEl.style.boxShadow = 'inset 0 1px 0 #555, inset 0 -6px 0 #111, 3px 6px 8px rgba(0,0,0,0.7)'; }, 150);
   } else {
-    keyEl.style.transform = 'translateY(4px) rotateX(2deg)';
-    keyEl.style.boxShadow = 'inset 0 1px 0 #fff, inset 0 -1px 0 #c0c0c0, 0 2px 3px rgba(0,0,0,0.4)';
-    keyEl.style.background = 'linear-gradient(to bottom, #e5e5e5 0%, #d4d4d4 100%)';
-    setTimeout(() => {
-      keyEl.style.transform = 'translateY(0) rotateX(0)';
-      keyEl.style.boxShadow = 'inset 0 1px 0 #fff, inset 0 -5px 0 #c0c0c0, 0 5px 6px rgba(0,0,0,0.3)';
-      keyEl.style.background = 'linear-gradient(to bottom, #ffffff 0%, #f0f0f0 100%)';
-    }, 150);
+    keyEl.style.transform = 'translateY(4px) rotateX(2deg)'; keyEl.style.boxShadow = 'inset 0 1px 0 #fff, inset 0 -1px 0 #c0c0c0, 0 2px 3px rgba(0,0,0,0.4)'; keyEl.style.background = 'linear-gradient(to bottom, #e5e5e5 0%, #d4d4d4 100%)';
+    setTimeout(() => { keyEl.style.transform = 'translateY(0) rotateX(0)'; keyEl.style.boxShadow = 'inset 0 1px 0 #fff, inset 0 -5px 0 #c0c0c0, 0 5px 6px rgba(0,0,0,0.3)'; keyEl.style.background = 'linear-gradient(to bottom, #ffffff 0%, #f0f0f0 100%)'; }, 150);
   }
 }
 
@@ -1988,10 +1754,7 @@ window.addEventListener('load', () => {
     }
 });
 
-window.onpopstate = e => {
-  const id = (e.state && e.state.page) ? e.state.page : 'opening';
-  loadPage(id);
-};
+window.onpopstate = e => { loadPage((e.state && e.state.page) ? e.state.page : 'opening'); };
 
 initA11y();
 loadPage(getPageId());
