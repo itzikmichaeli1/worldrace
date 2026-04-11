@@ -593,7 +593,7 @@
   </div>
 </div>
 
-<audio id="bg-music" loop></audio>
+<audio id="bg-music"></audio>
 
 <script>
 // זיהוי גלובלי של מובייל (עבור המצלמה וההודעות)
@@ -1254,6 +1254,7 @@ function loadPage(id) {
           if (!bgMusic.src.endsWith(track)) {
               bgMusic.src = track;
           }
+          bgMusic.loop = false; // ביטול הלופ לעמוד הסיום
           bgMusic.volume = 0;
           let playPromise = bgMusic.play();
           if (playPromise !== undefined) {
@@ -1285,6 +1286,7 @@ function loadPage(id) {
       } else {
           subtitleEl.style.display = 'none';
       }
+      bgMusic.loop = true; // החזרת הלופ לשאר השלבים
   }
   
   const glowOpacity = (step / 13) * 0.15;
