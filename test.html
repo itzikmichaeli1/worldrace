@@ -324,28 +324,13 @@
     #preview-image { width: 100%; border-radius: 10px; border: 2px solid #ffd700; margin-bottom: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
     .download-btn { display: block; background: #00c8be; color: #000; font-weight: bold; font-size: 20px; text-align: center; text-decoration: none; padding: 15px; border-radius: 8px; font-family: inherit; }
 
-    /* ===== שדרוגי פארודיה (טיסה ומעטפה) ===== */
+    /* ===== שדרוגי פארודיה (טיסה) ===== */
     #flight-overlay { display: none; position: fixed; inset: 0; z-index: 5000; background: #000a14; align-items: center; justify-content: center; flex-direction: column; color: #fff; text-align: center; }
     #flight-overlay.show { display: flex; animation: fadeInOutFlight 2.5s forwards; }
     @keyframes fadeInOutFlight { 0%{opacity:0;} 15%{opacity:1;} 85%{opacity:1;} 100%{opacity:0;} }
     .flight-path { width: 85%; max-width: 500px; height: 4px; border-bottom: 4px dashed #ff9500; position: relative; margin-top: 40px; }
     .flight-plane { position: absolute; top: -35px; left: 0; font-size: 50px; transform: scaleX(-1); animation: flyPlane 2.5s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
     @keyframes flyPlane { 0%{left:0%; transform:scaleX(-1) translateY(0);} 25%{transform:scaleX(-1) translateY(-15px);} 50%{transform:scaleX(-1) translateY(5px);} 75%{transform:scaleX(-1) translateY(-15px);} 100%{left:100%; transform:scaleX(-1) translateY(0);} }
-
-    #envelope-wrapper { position: absolute; inset: 0; z-index: 50; display: none; align-items: center; justify-content: center; cursor: pointer; perspective: 1000px; padding: 20px; background: rgba(0,0,0,0.4); border-radius: 16px;}
-    .env-part { position: absolute; width: 90%; max-width: 350px; height: 220px; background: linear-gradient(135deg, #f1c40f, #f39c12); border: 2px solid #d35400; box-shadow: 0 15px 35px rgba(0,0,0,0.6); transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.5s ease 0.2s; }
-    .env-top { clip-path: polygon(0 0, 100% 0, 100% 50%, 50% 70%, 0 50%); transform-origin: top; }
-    .env-bottom { clip-path: polygon(0 50%, 50% 70%, 100% 50%, 100% 100%, 0 100%); transform-origin: bottom; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 20px;}
-    .env-seal { position: absolute; width: 70px; height: 70px; background: #c0392b; border-radius: 50%; top: 50%; left: 50%; transform: translate(-50%, -50%); border: 3px solid #922b21; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 35px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); z-index: 2; transition: opacity 0.3s; animation: gentlePulse 2s infinite;}
-    .env-text { position: absolute; top: 15%; width: 100%; text-align: center; color: #fff; font-size: 24px; font-weight: 900; z-index: 3; text-shadow: 0 2px 5px rgba(0,0,0,0.8); pointer-events: none;}
-    
-    #envelope-wrapper.torn .env-top { transform: translateY(-80px) rotateX(25deg); opacity: 0; }
-    #envelope-wrapper.torn .env-bottom { transform: translateY(80px) rotateX(-25deg); opacity: 0; }
-    #envelope-wrapper.torn .env-seal { opacity: 0; transform: translate(-50%, -50%) scale(1.5); }
-    #envelope-wrapper.torn { pointer-events: none; background: transparent; }
-
-    #task-content-area { opacity: 1; transition: opacity 0.6s ease; width: 100%; }
-    .content-hidden { opacity: 0 !important; pointer-events: none !important; }
 
   </style>
 </head>
@@ -370,78 +355,69 @@
     <h1 class="page-title" id="page-title"></h1>
     <div id="page-mission-name" class="page-subtitle"></div>
     <div class="title-divider"></div>
+    <p class="page-desc" id="page-desc"></p>
     
-    <div id="envelope-wrapper" onclick="openEnvelope()">
-        <div class="env-part env-top"></div>
-        <div class="env-part env-bottom"></div>
-        <div class="env-seal">✉️</div>
-        <div class="env-text">סימן דרך<br><span style="font-size:16px; font-weight:normal; color:#ffd700;">לחצו לפתיחה</span></div>
+    <div id="grand-finale-stats-container"></div>
+
+    <div class="youtube-wrap" id="youtube-wrap" style="display:none">
+      <iframe id="youtube-iframe" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
     </div>
 
-    <div id="task-content-area">
-      <p class="page-desc" id="page-desc"></p>
+    <div class="audio-riddle" id="audio-riddle" style="display:none">
+      <button class="audio-play-btn" id="riddle-play-btn" onclick="toggleRiddle()">▶</button>
+      <div class="audio-track">
+        <div class="audio-label">הקלטה מסווגת: פענחו את רצף התווים</div>
+        <div class="audio-progress-bar" id="riddle-progress-bar"><div class="audio-progress-fill" id="riddle-fill"></div></div>
+        <div class="audio-time" id="riddle-time">0:00 / 0:15</div>
+      </div>
+    </div>
+
+    <div id="piano-section" style="display:none; margin-bottom:24px; text-align:center;">
+      <div class="piano-instruction" id="piano-instruction">📱 סובבו את המסך ולחצו על התווים לנגינה 🎹</div>
+      <div class="piano-scroll-wrapper">
+        <div class="piano-chassis">
+          <div class="piano-felt"></div>
+          <div id="piano-keys" style="display:flex; position:relative; height:130px; justify-content:center; user-select:none;"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="portrait-instruction" style="display:none; text-align:center; color:#00c8be; text-shadow: 0 0 15px rgba(0,200,190,0.8); font-size: 18px; font-weight: 900; margin-bottom: 24px; animation: softGlow 3.5s infinite ease-in-out;">📱 החזירו את המסך למצב רגיל</div>
+
+    <div class="code-box" id="code-box">
+      <div class="code-section-label"><hr/><span>🔐 הזנת קוד</span><hr/></div>
+      <p class="code-instruction">הזינו את הקוד שקיבלתם</p>
+      <div class="code-input-wrap">
+        <div class="code-hint-arrow">▼</div>
+        <div class="code-glow-ring" id="glow-ring">
+          <input type="text" class="code-input" id="code-input" oninput="clearError(); playTypeSound()" onkeydown="if(event.key==='Enter')submitCode()" onfocus="document.getElementById('glow-ring').classList.add('focused')" onblur="document.getElementById('glow-ring').classList.remove('focused')"/>
+        </div>
+        <button class="submit-btn" id="main-submit-btn" onclick="submitCode()">המשך לשלב הבא «</button>
+      </div>
+      <div class="error-msg" id="error-msg">✗ קוד שגוי — נסו שוב!</div>
+    </div>
+
+    <div class="crossroads-wrap" id="crossroads-box" style="display:none">
+      <div class="crossroads-title">בחרו משימה אחת מבין השתיים:</div>
+      <div class="choice-btns">
+        <button class="choice-btn" onclick="playClick();goChoice('A')"><img class="choice-img" src="time.jpg" alt="חבל על הזמן"/></button>
+        <button class="choice-btn" onclick="playClick();goChoice('B')"><img class="choice-img" src="show-time.jpg" alt="זמן להופעה"/></button>
+      </div>
+    </div>
+
+    <div class="finish-wrap" id="finish-box" style="display:none">
+      <div class="finish-trophy">🏆</div>
       
-      <div id="grand-finale-stats-container"></div>
-
-      <div class="youtube-wrap" id="youtube-wrap" style="display:none">
-        <iframe id="youtube-iframe" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
-      </div>
-
-      <div class="audio-riddle" id="audio-riddle" style="display:none">
-        <button class="audio-play-btn" id="riddle-play-btn" onclick="toggleRiddle()">▶</button>
-        <div class="audio-track">
-          <div class="audio-label">הקלטה מסווגת: פענחו את רצף התווים</div>
-          <div class="audio-progress-bar" id="riddle-progress-bar"><div class="audio-progress-fill" id="riddle-fill"></div></div>
-          <div class="audio-time" id="riddle-time">0:00 / 0:15</div>
+      <div class="finish-actions" id="finish-actions">
+        <div id="scanner-btn-wrap" style="width: 100%;">
+           <button id="scanner-btn" class="submit-btn" style="width: 100%; max-width: 350px;" onclick="startScanner()">📷 סרקו את כרטיס הניצחון</button>
+           <div id="qr-reader"></div>
         </div>
-      </div>
-
-      <div id="piano-section" style="display:none; margin-bottom:24px; text-align:center;">
-        <div class="piano-instruction" id="piano-instruction">📱 סובבו את המסך ולחצו על התווים לנגינה 🎹</div>
-        <div class="piano-scroll-wrapper">
-          <div class="piano-chassis">
-            <div class="piano-felt"></div>
-            <div id="piano-keys" style="display:flex; position:relative; height:130px; justify-content:center; user-select:none;"></div>
-          </div>
-        </div>
-      </div>
-
-      <div id="portrait-instruction" style="display:none; text-align:center; color:#00c8be; text-shadow: 0 0 15px rgba(0,200,190,0.8); font-size: 18px; font-weight: 900; margin-bottom: 24px; animation: softGlow 3.5s infinite ease-in-out;">📱 החזירו את המסך למצב רגיל</div>
-
-      <div class="code-box" id="code-box">
-        <div class="code-section-label"><hr/><span>🔐 הזנת קוד</span><hr/></div>
-        <p class="code-instruction">הזינו את הקוד שקיבלתם</p>
-        <div class="code-input-wrap">
-          <div class="code-hint-arrow">▼</div>
-          <div class="code-glow-ring" id="glow-ring">
-            <input type="text" class="code-input" id="code-input" oninput="clearError(); playTypeSound()" onkeydown="if(event.key==='Enter')submitCode()" onfocus="document.getElementById('glow-ring').classList.add('focused')" onblur="document.getElementById('glow-ring').classList.remove('focused')"/>
-          </div>
-          <button class="submit-btn" id="main-submit-btn" onclick="submitCode()">המשך לשלב הבא «</button>
-        </div>
-        <div class="error-msg" id="error-msg">✗ קוד שגוי — נסו שוב!</div>
-      </div>
-
-      <div class="crossroads-wrap" id="crossroads-box" style="display:none">
-        <div class="crossroads-title">בחרו משימה אחת מבין השתיים:</div>
-        <div class="choice-btns">
-          <button class="choice-btn" onclick="playClick();goChoice('A')"><img class="choice-img" src="time.jpg" alt="חבל על הזמן"/></button>
-          <button class="choice-btn" onclick="playClick();goChoice('B')"><img class="choice-img" src="show-time.jpg" alt="זמן להופעה"/></button>
-        </div>
-      </div>
-
-      <div class="finish-wrap" id="finish-box" style="display:none">
-        <div class="finish-trophy">🏆</div>
         
-        <div class="finish-actions" id="finish-actions">
-          <div id="scanner-btn-wrap" style="width: 100%;">
-             <button id="scanner-btn" class="submit-btn" style="width: 100%; max-width: 350px;" onclick="startScanner()">📷 סרקו את כרטיס הניצחון</button>
-             <div id="qr-reader"></div>
-          </div>
-          
-          <button id="pc-bypass-btn" class="hint-btn" style="width: auto; padding: 10px 20px; font-size: 14px; background: transparent; border: 1px solid rgba(255,255,255,0.2); box-shadow: none;" onclick="showBypassModal()">⚠️ משחקים ממחשב ללא מצלמה? לחצו כאן</button>
-        </div>
+        <button id="pc-bypass-btn" class="hint-btn" style="width: auto; padding: 10px 20px; font-size: 14px; background: transparent; border: 1px solid rgba(255,255,255,0.2); box-shadow: none;" onclick="showBypassModal()">⚠️ משחקים ממחשב ללא מצלמה? לחצו כאן</button>
       </div>
-    </div> </div>
+    </div>
+  </div>
 </div>
 
 <button id="floating-music-btn" onclick="openMusicModal()" title="מוזיקת רקע">🎵</button>
@@ -796,6 +772,13 @@ const PAGES = {
   }
 };
 
+const flightRoutes = {
+    'london': 'טסים לאנגליה... 🇬🇧',
+    'zoo': 'טסים לארצות הברית... 🇺🇸',
+    'guru': 'טסים להודו... 🇮🇳',
+    'grand_finale': 'טסים חזרה הביתה... ✈️'
+};
+
 let currentPage = null;
 let pendingNext  = null;
 let idleHintTimer = null; 
@@ -815,13 +798,6 @@ const musicTracks = {
   'airport': 'Robbie-Williams-Supreme.mp3',
   'market': 'Girls-Like-You-Indian-Version.mp3',
   'finish': 'ilanit-el-haderech.mp3'
-};
-
-const flightRoutes = {
-    'london': 'טסים לאנגליה... 🇬🇧',
-    'zoo': 'טסים לארצות הברית... 🇺🇸',
-    'tajmahal': 'טסים להודו... 🇮🇳',
-    'finish': 'טסים חזרה לישראל... 🇮🇱'
 };
 
 function openMusicModal() {
@@ -925,26 +901,6 @@ function formatTime(ms) {
   const m = Math.floor(totalSeconds / 60);
   const s = totalSeconds % 60;
   return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-}
-
-// ===== סאונד מעטפה וטיסה =====
-function playRipSound() {
-    try {
-        const ctx = getAC();
-        const bufferSize = ctx.sampleRate * 0.3; 
-        const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-        const data = buffer.getChannelData(0);
-        for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
-        const noise = ctx.createBufferSource();
-        noise.buffer = buffer;
-        const filter = ctx.createBiquadFilter();
-        filter.type = 'highpass'; filter.frequency.value = 1000;
-        const gain = ctx.createGain();
-        gain.gain.setValueAtTime(0.6, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.25);
-        noise.connect(filter); filter.connect(gain); gain.connect(ctx.destination);
-        noise.start();
-    } catch(e){}
 }
 
 function playFlightSound() {
@@ -1092,65 +1048,41 @@ function captureSouvenir() {
   
   const video = document.getElementById('selfie-video');
   const canvas = document.createElement('canvas');
-  canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+  // FoV תיקון: משתמשים ברזולוציית המצלמה המקורית
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
   const ctx = canvas.getContext('2d');
-
-  ctx.translate(canvas.width, 0); ctx.scale(-1, 1);
-  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-  ctx.setTransform(1, 0, 0, 1, 0, 0); 
-
-  const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-  gradient.addColorStop(0, '#ffd700'); gradient.addColorStop(0.5, '#ff8c00'); gradient.addColorStop(1, '#ffd700');
-  const outerBorder = canvas.width * 0.04; 
-  const innerBorder = outerBorder * 0.15; 
   
-  ctx.lineWidth = outerBorder; ctx.strokeStyle = gradient;
-  ctx.strokeRect(outerBorder/2, outerBorder/2, canvas.width - outerBorder, canvas.height - outerBorder);
-  ctx.lineWidth = innerBorder; ctx.strokeStyle = 'white';
-  ctx.strokeRect(outerBorder, outerBorder, canvas.width - outerBorder*2, canvas.height - outerBorder*2);
+  ctx.translate(canvas.width, 0);
+  ctx.scale(-1, 1);
+  ctx.drawImage(video, 0, 0);
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
 
-  ctx.textAlign = 'center'; ctx.shadowColor = 'rgba(0,0,0,0.8)'; ctx.shadowBlur = 10;
-  ctx.fillStyle = '#ffffff'; ctx.font = `bold ${canvas.height * 0.04}px Rubik, sans-serif`;
-  ctx.fillText("המירוץ העולמי", canvas.width/2, canvas.height * 0.08);
-  ctx.fillStyle = '#ff9500'; ctx.font = `bold ${canvas.height * 0.025}px Rubik, sans-serif`;
-  ctx.fillText("פאזלס - חדרי בריחה", canvas.width/2, canvas.height * 0.115);
+  // מסגרת זהב וטקסט
+  const grad = ctx.createLinearGradient(0,0,canvas.width,canvas.height);
+  grad.addColorStop(0,'#ffd700'); grad.addColorStop(1,'#ff8c00');
+  ctx.lineWidth = canvas.width * 0.04; ctx.strokeStyle = grad;
+  ctx.strokeRect(ctx.lineWidth/2, ctx.lineWidth/2, canvas.width - ctx.lineWidth, canvas.height - ctx.lineWidth);
 
-  ctx.fillStyle = '#ffd700'; ctx.font = `bold ${canvas.height * 0.05}px Rubik, sans-serif`;
+  ctx.textAlign = 'center'; ctx.fillStyle = 'white'; ctx.shadowBlur = 10; ctx.shadowColor = 'black';
+  ctx.font = `bold ${canvas.height * 0.05}px Rubik`;
   ctx.fillText(selectedSouvenirPhrase, canvas.width/2, canvas.height * 0.85);
-  ctx.fillStyle = '#ffffff'; ctx.font = `${canvas.height * 0.035}px Rubik, sans-serif`;
-  ctx.fillText(teamName ? `צוות ${teamName}` : "צוות אלופים", canvas.width/2, canvas.height * 0.90);
-  ctx.fillStyle = '#00c8be'; ctx.font = `${canvas.height * 0.025}px Rubik, sans-serif`;
-  ctx.fillText("זמן: " + formatTime(currentTotalTimeMs), canvas.width/2, canvas.height * 0.94);
+  ctx.font = `bold ${canvas.height * 0.03}px Rubik`;
+  ctx.fillText(`צוות ${teamName} | ${formatTime(currentTotalTimeMs)}`, canvas.width/2, canvas.height * 0.92);
 
-  const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
-  document.getElementById('preview-image').src = dataUrl;
-  document.getElementById('download-btn').href = dataUrl;
-  
+  const data = canvas.toDataURL('image/jpeg', 0.9);
+  document.getElementById('preview-image').src = data;
+  document.getElementById('download-btn').href = data;
   document.getElementById('souvenir-camera-modal').classList.remove('show');
   document.getElementById('souvenir-preview-modal').classList.add('show');
 }
 
 function retakeSelfie() {
-    if (navigator.vibrate) navigator.vibrate(10);
     document.getElementById('souvenir-preview-modal').classList.remove('show');
     document.getElementById('souvenir-camera-modal').classList.add('show');
-    const capBtn = document.getElementById('capture-selfie-btn');
-    capBtn.disabled = false; capBtn.innerHTML = '📷 צלמו אותנו!';
 }
 
-function saveTeamName() {
-    const inp = document.getElementById('team-name-input');
-    const val = inp.value.trim();
-    if (val.length > 0) {
-        teamName = val;
-        localStorage.setItem('puzzleTeamName', teamName);
-        document.getElementById('team-name-modal').classList.remove('show');
-        document.getElementById('app').classList.remove('app-blurred');
-        loadPage(currentPage || 'opening');
-    }
-}
-
-// מעבר עם אנימציית טיסה
+// --- מעבר עם אנימציית טיסה ---
 function transitionToPage(nextId) {
     if (!document.body.classList.contains('a11y-no-animations') && flightRoutes[nextId]) {
         document.getElementById('flight-destination-text').innerText = flightRoutes[nextId];
@@ -1163,18 +1095,6 @@ function transitionToPage(nextId) {
     } else {
         loadPage(nextId);
     }
-}
-
-// פתיחת מעטפת
-function openEnvelope() {
-    if (navigator.vibrate) navigator.vibrate(15);
-    playRipSound();
-    const env = document.getElementById('envelope-wrapper');
-    env.classList.add('torn');
-    setTimeout(() => {
-        env.style.display = 'none';
-        document.getElementById('task-content-area').classList.remove('content-hidden');
-    }, 500);
 }
 
 function loadPage(id) {
@@ -1208,18 +1128,6 @@ function loadPage(id) {
   
   const titleEl = document.getElementById('page-title');
   const subtitleEl = document.getElementById('page-mission-name');
-  const contentArea = document.getElementById('task-content-area');
-  const envWrapper = document.getElementById('envelope-wrapper');
-  
-  // אם לא עמוד פתיחה ולא עמוד גמר, נציג מעטפה (אלא אם הנגישות מבטלת אנימציות)
-  if (id !== 'opening' && id !== 'grand_finale' && !document.body.classList.contains('a11y-no-animations')) {
-      envWrapper.style.display = 'flex';
-      envWrapper.classList.remove('torn');
-      contentArea.classList.add('content-hidden');
-  } else {
-      envWrapper.style.display = 'none';
-      contentArea.classList.remove('content-hidden');
-  }
   
   if (id === 'grand_finale') {
       titleEl.innerHTML = `<div style="font-size:18px; color:#00c8be; margin-bottom:10px; text-shadow:none; letter-spacing:0;">עשיתם את זה, צוות ${teamName}!</div><div class="million-title">המיליון שלכם!</div>`;
