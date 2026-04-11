@@ -65,7 +65,9 @@
       font-size: 18px; line-height: 1; text-shadow: 0 2px 4px rgba(0,0,0,0.5); z-index: 10001;
     }
 
-    #app { position: relative; z-index: 1; max-width: 740px; margin: 0 auto; padding: 54px 20px 100px; }
+    #app { position: relative; z-index: 1; max-width: 740px; margin: 0 auto; padding: 54px 20px 100px; transition: filter 0.5s ease; }
+    
+    .app-blurred { filter: blur(8px) grayscale(60%); pointer-events: none; user-select: none; }
 
     .suspense-mode .page-header, .suspense-mode .youtube-wrap, .suspense-mode .audio-riddle, .suspense-mode #piano-section, .suspense-mode .crossroads-wrap {
       opacity: 0.3; filter: grayscale(50%) blur(1px); transition: all 0.5s ease; pointer-events: none;
@@ -121,7 +123,7 @@
     .page-title { color: #ffe0a0; font-size: clamp(22px, 5vw, 34px); font-weight: 800; line-height: 1.3; margin-bottom: 8px; transition: all 0.3s ease; }
     .title-divider { width: 70px; height: 3px; background: linear-gradient(90deg, rgba(255,140,0,0.9), rgba(0,210,190,0.7)); margin: 16px auto 18px; border-radius: 2px; }
     
-    /* אנימציית הניצחון קלה ומהירה ל-GPU */
+    /* אנימציית הניצחון */
     .million-title {
       font-size: clamp(40px, 9vw, 65px) !important;
       color: #ffd700 !important; 
@@ -185,7 +187,8 @@
       font-family: inherit; font-weight: 800; letter-spacing: 1px; width: 260px; text-shadow: 0 1px 3px rgba(0,0,0,0.4); box-shadow: 0 6px 0 #6a2800, 0 8px 16px rgba(0,0,0,0.35); transition: all 0.12s;
     }
     .submit-btn:hover { filter: brightness(1.1); }
-    .submit-btn:active { transform: translateY(5px); box-shadow: 0 1px 0 #6a2800, 0 2px 6px rgba(0,0,0,0.3); border-bottom-width: 1px; }
+    .submit-btn:disabled { background: #666; cursor: not-allowed; box-shadow: none; border-bottom: none; transform: none; filter: grayscale(50%); color: #aaa;}
+    .submit-btn:active:not(:disabled) { transform: translateY(5px); box-shadow: 0 1px 0 #6a2800, 0 2px 6px rgba(0,0,0,0.3); border-bottom-width: 1px; }
     
     .verifying-state { animation: pulseVerify 0.5s infinite ease-in-out; pointer-events: none; }
     @keyframes pulseVerify {
@@ -207,17 +210,11 @@
     .finish-wrap { text-align: center; padding: 20px; }
     .finish-trophy { font-size: 80px; margin-bottom: 20px; animation: popIn 1s cubic-bezier(0.34,1.56,0.64,1); }
     
-    /* סורק ה-QR החדש */
     #qr-reader { width: 100%; max-width: 350px; margin: 20px auto; display: none; border: 2px solid rgba(0,200,190,0.6); border-radius: 12px; overflow: hidden; background: #000; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
     .finish-actions { display: flex; flex-direction: column; align-items: center; gap: 15px; margin-top: 20px; }
 
-    /* סטייל לכפתור נכה (לפני סימון צ'קבוקס) */
     #bypass-confirm-btn:disabled { background: #555; color: #999; cursor: not-allowed; box-shadow: none; border-bottom: none; transform: none; }
 
-    /* סטייל למניעת ריבוי לחיצות על כפתור המצלמה */
-    #scanner-btn:disabled { background: #666; cursor: not-allowed; box-shadow: none; border-bottom: none; transform: none; filter: grayscale(50%); }
-
-    /* לוח תוצאות מורחב */
     .finish-stats {
       background: rgba(0,0,0,0.6); border: 1px solid rgba(255,149,0,0.5); border-radius: 12px;
       padding: 24px; text-align: right; max-width: 450px; margin: 25px auto; box-shadow: inset 0 2px 15px rgba(0,0,0,0.8);
@@ -236,12 +233,6 @@
     .audio-progress-bar { height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; position: relative; cursor: pointer; box-shadow: inset 0 1px 2px rgba(0,0,0,0.3); touch-action: manipulation; }
     .audio-progress-fill { position: absolute; right: 0; top: 0; height: 100%; background: #5aaeee; border-radius: 4px; width: 0%; pointer-events: none; box-shadow: 0 0 5px rgba(90,174,238,0.5); }
     .audio-time { font-size: 11px; color: rgba(255,255,255,0.4); margin-top: 5px; text-align: center; }
-
-    /* ===== אנימציות עזר ===== */
-    @keyframes shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-10px)} 40%{transform:translateX(10px)} 60%{transform:translateX(-6px)} 80%{transform:translateX(6px)} }
-    .shaking { animation: shake 0.55s ease; }
-    @keyframes twinkle { 0%,100%{opacity:.25;transform:scale(1)} 50%{opacity:1;transform:scale(1.5)} }
-    @keyframes popIn { 0%{transform:scale(.75);opacity:0} 100%{transform:scale(1);opacity:1} }
 
     /* ===== פסנתר ===== */
     .piano-scroll-wrapper { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; padding: 10px 0; direction: ltr; position: relative; z-index: 2; }
@@ -283,7 +274,6 @@
     .hint-text { display: none; background: rgba(255,255,255,0.05); padding: 16px; border-radius: 8px; font-size: 15px; line-height: 1.6; border-right: 4px solid #ff9500; color: #eee; white-space: pre-wrap; margin-top: 8px; }
     .hint-text.solution-text { border-right-color: #ff4444; font-weight: bold; color: #ffcccc; }
 
-    /* רשת הדרכון */
     .map-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
     .map-btn { background: #221100; border: 1px solid #00c8be; color: #ffe8c0; padding: 10px; border-radius: 8px; font-family: inherit; font-size: 13.5px; cursor: pointer; transition: 0.2s; font-weight: bold; text-align: right;}
     .map-btn:hover { background: #00c8be; color: #000; }
@@ -292,14 +282,12 @@
     .map-btn.locked:hover { background: #111; color: #555; transform: none; }
     @media (max-width: 400px) { .map-grid { grid-template-columns: 1fr; } }
 
-    /* תפריט מוזיקה */
     .music-controls { display: flex; flex-direction: column; gap: 15px; align-items: center; margin-top: 10px; }
     .track-name-display { color: #ffcca0; font-size: 15px; font-weight: bold; text-align: center; background: rgba(255,255,255,0.05); padding: 8px; border-radius: 6px; width: 100%; border: 1px solid rgba(255,149,0,0.2); }
     .volume-slider { width: 100%; direction: ltr; cursor: pointer; }
     .music-toggle-btn { background: linear-gradient(180deg, #ff9500 0%, #d96000 100%); color: #fff; border: 1px solid #ff9500; padding: 12px 30px; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; font-family: inherit; width: 100%; text-shadow: 0 1px 2px rgba(0,0,0,0.5); box-shadow: 0 4px 6px rgba(0,0,0,0.3); transition: 0.2s;}
     .music-toggle-btn:hover { filter: brightness(1.1); transform: translateY(-2px); }
 
-    /* תפריט נגישות */
     .a11y-toggle-row { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; margin-bottom: 10px; }
     .a11y-toggle-label { font-size: 16px; font-weight: bold; }
     .switch { position: relative; display: inline-block; width: 50px; height: 26px; }
@@ -309,17 +297,17 @@
     input:checked + .slider { background-color: #005a9c; }
     input:checked + .slider:before { transform: translateX(24px); }
 
-    /* ===== תוספות עבור הסלפי הממוסגר ===== */
+    /* ===== סלפי הממוסגר ===== */
     .souvenir-btn-gold {
       background: linear-gradient(135deg, #bf8517 0%, #e6b941 50%, #bf8517 100%);
       border: 2px solid #fff; border-radius: 12px; color: #110800; font-weight: 900; font-size: 20px;
       padding: 20px 24px; cursor: pointer; width: 100%; max-width: 380px; margin: 50px auto 20px;
       box-shadow: 0 6px 20px rgba(230, 185, 65, 0.4); display: flex; align-items: center; justify-content: center; gap: 10px;
-      animation: gentleGoldPulse 2.5s infinite alternate; transition: transform 0.2s; font-family: inherit;
+      animation: gentleGoldPulse 2s infinite alternate, bounceGo 1s ease-in-out infinite alternate; transition: transform 0.2s; font-family: inherit;
     }
-    .souvenir-btn-gold:hover { transform: scale(1.03); }
+    .souvenir-btn-gold:hover { filter: brightness(1.1); }
     .souvenir-btn-gold:disabled { background: #666; color: #aaa; cursor: not-allowed; animation: none; transform: none; box-shadow: none; border-color: #999; }
-    @keyframes gentleGoldPulse { 0% { box-shadow: 0 0 15px rgba(230, 185, 65, 0.3); } 100% { box-shadow: 0 0 30px rgba(230, 185, 65, 0.7); } }
+    @keyframes gentleGoldPulse { 0% { box-shadow: 0 0 15px rgba(230, 185, 65, 0.3); } 100% { box-shadow: 0 0 35px rgba(255, 215, 0, 0.9); } }
 
     .phrase-option { background: rgba(255,149,0,0.1); border: 1px solid #ff9500; color: #fff; padding: 12px; border-radius: 8px; margin-bottom: 10px; cursor: pointer; text-align: center; font-size: 18px; font-weight: bold; transition: 0.2s; }
     .phrase-option:hover { background: #ff9500; color: #000; }
@@ -375,7 +363,7 @@
     </div>
   </div>
 
-  <div id="portrait-instruction" style="display:none; text-align:center; color:#00c8be; text-shadow: 0 0 15px rgba(0,200,190,0.8); font-size: 22px; font-weight: 900; margin-bottom: 24px; animation: bounceDown 1.5s ease-in-out infinite;">📱 החזירו את המסך למצב רגיל</div>
+  <div id="portrait-instruction" style="display:none; text-align:center; color:#00c8be; text-shadow: 0 0 15px rgba(0,200,190,0.8); font-size: 26px; font-weight: 900; margin-bottom: 30px; animation: gentlePulse 2s infinite, bounceDown 1.5s ease-in-out infinite;">📱 החזירו את המסך למצב רגיל</div>
 
   <div class="code-box" id="code-box">
     <div class="code-section-label"><hr/><span>🔐 הזנת קוד</span><hr/></div>
@@ -415,6 +403,16 @@
 <button id="floating-music-btn" onclick="openMusicModal()" title="מוזיקת רקע">🎵</button>
 <button id="floating-hint-btn" onclick="openHintsModal()" title="רמזים">💡</button>
 <button id="floating-a11y-btn" onclick="openA11yModal()" title="הגדרות ונגישות">♿</button>
+
+<div id="team-name-modal" class="modal-overlay" style="z-index: 3000; background: rgba(0,0,0,0.95);">
+  <div class="modal-card" style="text-align: center; border: 2px solid #00c8be; box-shadow: 0 0 40px rgba(0, 200, 190, 0.5);">
+    <h2 class="modal-title" style="font-size: 28px; color: #fff; margin-bottom: 10px;">המירוץ העולמי עומד להתחיל! 🌍</h2>
+    <p style="font-size: 16px; color: #00c8be; margin-bottom: 20px;">ההרשמה לעונה החדשה נפתחה.</p>
+    <p style="font-size: 18px; color: #ffd700; margin-bottom: 15px; font-weight: bold;">ביחרו שם לצוות שלכם:</p>
+    <input type="text" id="team-name-input" style="width: 100%; padding: 12px; border-radius: 8px; border: 2px solid #ff9500; background: #221100; color: #fff; font-size: 20px; text-align: center; margin-bottom: 20px;" placeholder="לדוגמה: האלופים..." oninput="document.getElementById('start-race-btn').disabled = this.value.trim().length === 0;" onkeydown="if(event.key==='Enter' && this.value.trim().length > 0) saveTeamName()">
+    <button id="start-race-btn" class="submit-btn" style="width: 100%; margin: 0; padding: 15px; font-size: 20px;" disabled onclick="saveTeamName()">התחילו את המירוץ! 🚀</button>
+  </div>
+</div>
 
 <div id="souvenir-phrase-modal" class="modal-overlay">
   <div class="modal-card">
@@ -556,6 +554,8 @@
 // זיהוי גלובלי של מובייל (עבור המצלמה וההודעות)
 const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
+let teamName = localStorage.getItem('puzzleTeamName') || '';
+
 // ================================================================
 //  מילון השמות הרשמי לסטטיסטיקות הניצחון
 // ================================================================
@@ -594,7 +594,7 @@ const PAGES = {
   london: {
     step: 2, bg: "radial-gradient(ellipse at 25% 15%, #001122 0%, #08111a 40%, #000a11 100%)",
     title: "ברוכים הבאים לאנגליה!",
-    desc: "כל הכבוד! הגעתם ליעד הראשון שלכם במירוץ.\n\nפתחו את המעטפה השנייה.\n\nצפו בסרטון והזינו למטה את קוד הרכבת התחתית.",
+    desc: "כל הכבוד צוות!\nהגעתם ליעד הראשון שלכם במירוץ.\n\nפתחו את המעטפה השנייה.\n\nצפו בסרטון והזינו למטה את קוד הרכבת התחתית.",
     youtube: "tOnHapIZFi4", code: "bond", next: "crossroads", type: "code",
     hints: [
       "שמות התחנות בסימן הדרך מחוקות, אך יש רק דרך אחת שבה ניתן לעבור במסלול המתואר. נסו להבין מה היא הדרך הזו, ולקבל קוד ממשהו שמודגש בשמות התחנות.",
@@ -604,7 +604,7 @@ const PAGES = {
   },
   crossroads: {
     step: 3, bg: "radial-gradient(ellipse at 25% 15%, #1a001a 0%, #0d001a 40%, #050011 100%)",
-    title: "כל הכבוד! הגעתם ליעד!",
+    title: "כל הכבוד צוות!",
     desc: "במשימת צומת עליכם לבחור אחת מ-2 משימות.\n\nפתחו את המעטפה השלישית ובחרו: 'חבל על הזמן' או 'זמן להופעה'",
     youtube: null, type: "crossroads", choiceA: "time-first", choiceB: "show-first"
   },
@@ -622,7 +622,7 @@ const PAGES = {
   "show-first": {
     step: 4, bg: "radial-gradient(ellipse at 25% 15%, #1a001a 0%, #0d001a 40%, #050011 100%)",
     title: "זמן להופעה", synthRiddle: true, piano: true,
-    desc: "במשימת הצומת בחרתם\nב'זמן להופעה' בהצלחה!",
+    desc: "במשימת הצומת בחרתם\nב'זמן להופעה' בהצלחה צוות!",
     youtube: "mnIEuzaG238", code: "4731", next: "time-second", type: "code",
     hints: [
       "האזינו לארבעת התווים. נסו לשחזר אותם על הפסנתר ותקבלו מיקום בתוך המטריצה של התמונות.\nשימו לב שהתמונות מייצגות שמות של להקות מפורסמות שהופיעו באולם.",
@@ -654,7 +654,7 @@ const PAGES = {
   },
   boarding: {
     step: 6, bg: "radial-gradient(ellipse at 25% 15%, #001a22 0%, #000d1a 40%, #000511 100%)",
-    title: "כל הכבוד!",
+    title: "כל הכבוד צוות!",
     desc: "עברתם את שני הצדדים של הצומת, וכעת אתם יכולים לקבל את המעטפה עם הרמז הבא! פתחו את המעטפה הרביעית, והזינו כאן את קוד הטיסה ליעד הבא שלכם",
     youtube: null, code: "386", next: "zoo", type: "code",
     hints: [
@@ -665,7 +665,7 @@ const PAGES = {
   },
   zoo: {
     step: 7, bg: "radial-gradient(ellipse at 25% 15%, #002200 0%, #001100 40%, #000500 100%)",
-    title: "כל הכבוד!",
+    title: "כל הכבוד צוות!",
     desc: "פיתחו את המעטפה החמישית! על מנת לקבל את הרמז ליעד הבא, הזינו כאן את קוד משימת גן החיות",
     youtube: "SkKxiszzO9E", code: "5441", next: "museum", type: "code",
     hints: [
@@ -676,7 +676,7 @@ const PAGES = {
   },
   museum: {
     step: 8, bg: "radial-gradient(ellipse at 25% 15%, #220a00 0%, #110500 40%, #0a0200 100%)",
-    title: "כל הכבוד!",
+    title: "כל הכבוד צוות!",
     desc: "פיתחו את המעטפה השישית, והזינו למטה את קוד הפורטרטים",
     youtube: "xqGth1DhDd4", code: "235", next: "tajmahal", type: "code",
     hints: [
@@ -709,7 +709,7 @@ const PAGES = {
   },
   guru: {
     step: 11, bg: "radial-gradient(ellipse at 25% 15%, #2a1100 0%, #150800 40%, #0a0400 100%)",
-    title: "כל הכבוד!",
+    title: "כל הכבוד צוות!",
     desc: "ברוכים הבאים לדראמסלה, הודו.\n\nנראה שאחת הקבוצות המתחרות ניסתה לחבל לכם בהתקדמות והרסה את ה-QR קוד שבמעטפה. למזלכם, הפקת המירוץ שמה לב לזה ודאגה להעלות את המסר מהגורו ישירות לכאן.\n\nצפו בסרטון והזינו כאן את קוד הגורו:",
     youtube: "jnxgqrVLbIg", code: "41", next: "market", type: "code",
     hints: [
@@ -720,7 +720,7 @@ const PAGES = {
   },
   market: {
     step: 12, bg: "radial-gradient(ellipse at 25% 15%, #220511 0%, #110208 40%, #0a0105 100%)",
-    title: "כל הכבוד!",
+    title: "כל הכבוד צוות!",
     desc: "פיתחו את המעטפה העשירית",
     youtube: "wef_7pKbPMg", code: "385", next: "finish", type: "code",
     hints: [
@@ -893,8 +893,12 @@ function startScanner() {
     isCameraLoading = true;
     if (navigator.vibrate) navigator.vibrate(15);
     
-    document.getElementById('qr-reader').style.display = 'block';
-    document.getElementById('qr-reader').innerHTML = ''; 
+    const qrReader = document.getElementById('qr-reader');
+    qrReader.style.display = 'block';
+    qrReader.innerHTML = ''; 
+    
+    // גלילה אוטומטית חלקה למצלמה שנדלקה
+    qrReader.scrollIntoView({ behavior: 'smooth', block: 'center' });
     
     html5QrCode = new Html5Qrcode("qr-reader");
     
@@ -1076,12 +1080,16 @@ function captureSouvenir() {
   ctx.fillText("פאזלס - חדרי בריחה", canvas.width/2, 180);
 
   ctx.fillStyle = '#ffd700';
-  ctx.font = 'bold 90px Rubik, sans-serif';
-  ctx.fillText(selectedSouvenirPhrase, canvas.width/2, canvas.height - 150);
+  ctx.font = 'bold 80px Rubik, sans-serif';
+  ctx.fillText(selectedSouvenirPhrase, canvas.width/2, canvas.height - 220);
   
   ctx.fillStyle = '#ffffff';
-  ctx.font = '50px Rubik, sans-serif';
-  ctx.fillText("זמן הניצחון: " + formatTime(currentTotalTimeMs), canvas.width/2, canvas.height - 70);
+  ctx.font = '60px Rubik, sans-serif';
+  ctx.fillText(teamName ? `צוות ${teamName}` : "צוות אלופים", canvas.width/2, canvas.height - 130);
+  
+  ctx.fillStyle = '#00c8be';
+  ctx.font = '45px Rubik, sans-serif';
+  ctx.fillText("זמן: " + formatTime(currentTotalTimeMs), canvas.width/2, canvas.height - 60);
 
   const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
   document.getElementById('preview-image').src = dataUrl;
@@ -1101,6 +1109,17 @@ function retakeSelfie() {
     capBtn.innerHTML = '📷 צלמו אותנו!';
 }
 
+function saveTeamName() {
+    const inp = document.getElementById('team-name-input');
+    const val = inp.value.trim();
+    if (val.length > 0) {
+        teamName = val;
+        localStorage.setItem('puzzleTeamName', teamName);
+        document.getElementById('team-name-modal').classList.remove('show');
+        document.getElementById('app').classList.remove('app-blurred');
+        loadPage(currentPage || 'opening');
+    }
+}
 
 function loadPage(id) {
   saveCurrentStageTime();
@@ -1135,10 +1154,10 @@ function loadPage(id) {
   const url = id === 'opening' ? location.pathname : `${location.pathname}?page=${id}`;
   history.pushState({ page: id }, '', url);
 
-  document.title = page.title + ' — פאזלס חדרי בריחה';
+  document.title = page.title.replace('צוות!', teamName ? `צוות ${teamName}!` : 'צוות!') + ' — פאזלס חדרי בריחה';
   
   const titleEl = document.getElementById('page-title');
-  titleEl.textContent = page.title;
+  titleEl.textContent = page.title.replace('צוות!', teamName ? `צוות ${teamName}!` : 'צוות!');
   
   if (id === 'grand_finale') {
       titleEl.classList.add('million-title');
@@ -1307,7 +1326,7 @@ function loadPage(id) {
             const btn = document.getElementById('souvenir-start-btn');
             if (btn) {
                 btn.style.display = 'flex';
-                btn.style.animation = 'slideUpFade 1s ease-out forwards, gentleGoldPulse 2.5s infinite alternate';
+                btn.style.animation = 'slideUpFade 1s ease-out forwards, gentleGoldPulse 2.5s infinite alternate, bounceGo 1s ease-in-out infinite alternate';
             }
         }, 3000);
     }
@@ -1320,7 +1339,7 @@ function loadPage(id) {
       descEl.style.display = 'none';
   } else {
       descEl.style.display = 'block';
-      descEl.innerHTML = page.desc;
+      descEl.innerHTML = page.desc.replace(/צוות!/g, teamName ? `צוות ${teamName}!` : 'צוות!');
       descEl.style.opacity = 1; 
       if(!document.body.classList.contains('a11y-no-animations')) {
         descEl.style.animation = 'none';
@@ -1396,6 +1415,7 @@ function resetGame() {
   localStorage.removeItem('puzzleSolutionsUsed');
   localStorage.removeItem('puzzleWrongCodes');
   localStorage.removeItem('puzzleStageTimes');
+  localStorage.removeItem('puzzleTeamName');
   location.href = location.pathname; 
 }
 
@@ -1932,6 +1952,13 @@ function playPianoNote(freq, keyEl, isBlack, fromRiddle = false) {
     }, 150);
   }
 }
+
+window.addEventListener('load', () => {
+    if (!teamName) {
+        document.getElementById('app').classList.add('app-blurred');
+        document.getElementById('team-name-modal').classList.add('show');
+    }
+});
 
 window.onpopstate = e => {
   const id = (e.state && e.state.page) ? e.state.page : 'opening';
